@@ -1,16 +1,16 @@
 <?php
     class Match_ {
         //Definition des variables
-        private int $id;
-        private String $dateRencontre;
-        private String $heure;
-        private String $nomEquipeAdverse;
-        private String $lieu;
-        private String $resultat;
+        private int $idMatch;
+        private string $dateRencontre;
+        private string $heure;
+        private string $nomEquipeAdverse;
+        private string $lieu;
+        private string $resultat;
 
         //Definition du contructeur
-        public function __construct(int $id, String $dateRencontre, String $heure, String $nomEquipeAdverse, String $lieu, String $resultat) {
-            $this->id = $id;
+        public function __construct(int $idMatch, string $dateRencontre, string $heure, string $nomEquipeAdverse, string $lieu, string $resultat) {
+            $this->idMatch = $idMatch;
             $this->dateRencontre = $dateRencontre;
             $this->heure = $heure;
             $this->nomEquipeAdverse = $nomEquipeAdverse;
@@ -19,48 +19,48 @@
         }
 
         //Getters
-        public function getId(): int{
-            return $this->id;
+        public function getIdMatch(): int{
+            return $this->idMatch;
         }
 
-        public function getDateRencontre(): String{
+        public function getDateRencontre(): string{
             return $this->dateRencontre;
         }
 
-        public function getHeure(): String{
+        public function getHeure(): string{
             return $this->heure;
         }
 
-        public function getNomEquipeAdverse(): String{
+        public function getNomEquipeAdverse(): string{
             return $this->nomEquipeAdverse;
         }
 
-        public function getLieu(): String{
+        public function getLieu(): string{
             return $this->lieu;
         }
 
-        public function getResultat(): String{
+        public function getResultat(): string{
             return $this->resultat;
         }
 
         //Setters
-        public function setDateRencontre(String $date): void{
+        public function setDateRencontre(string $date): void{
             $this->dateRencontre = $date;
         }
 
-        public function setHeure(String $time): void{
+        public function setHeure(string $time): void{
             $this->heure = $time;
         }
 
-        public function setNomEquipeAdverse(String $nom): void{
+        public function setNomEquipeAdverse(string $nom): void{
             $this->nomEquipeAdverse = $nom;
         }
 
-        public function setLieu(String $lieu): void{
+        public function setLieu(string $lieu): void{
             $this->lieu = $lieu;
         }
 
-        public function setResultat(String $resultat): void{
+        public function setResultat(string $resultat): void{
             $this->resultat = $resultat;
         }
     }
