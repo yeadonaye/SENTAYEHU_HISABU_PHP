@@ -25,7 +25,7 @@ class ParticiperDao implements ModeleDao{
         //plus tard
     }
 
-    public function delete(object $obj):bool{
+    public function delete(int $id):bool{
         //plus tard
     }
 }
