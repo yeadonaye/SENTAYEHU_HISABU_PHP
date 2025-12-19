@@ -2,13 +2,13 @@
     class Commentaire {
         private int $idCommentaire;
         private string $description;
-        private string $date;
+        private string $date_;
         private int $idJoueur;
 
-        public function __construct(int $idCommentaire, string $description, string $date, int $idJoueur) {
+        public function __construct(int $idCommentaire, string $description, string $date_, int $idJoueur) {
             $this->idCommentaire = $idCommentaire;
             $this->description = $description;
-            $this->date = $date;
+            $this->date_ = $date_;
             $this->idJoueur = $idJoueur;
         }
 
@@ -22,7 +22,7 @@
         }
 
         public function getDate(): string{
-            return $this->date;
+            return $this->date_;
         }
 
         public function getIdJoueur(): int{
@@ -34,8 +34,8 @@
             $this->description = $description;
         }
 
-        public function setDate(string $date): void{
-            $this->date = $date;
+        public function setDate(string $date_): void{
+            $this->date_ = $date_;
         }
 
         public function setIdJoueur(int $idJoueur): void{
