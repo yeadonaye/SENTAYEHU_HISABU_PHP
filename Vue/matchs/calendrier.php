@@ -23,9 +23,10 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calendrier des Matchs</title>
-    <link rel="stylesheet" href="../../Vue/CSS/style.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="../../Vue/CSS/common.css">
+    <link rel="stylesheet" href="../../Vue/CSS/matchs.css">
 </head>
 <body>
     <!-- Navbar -->
@@ -55,7 +56,7 @@ try {
     </nav>
 
     <!-- Page Header -->
-    <div style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; padding: 2rem 0; margin-bottom: 2rem;">
+    <div style="background: linear-gradient(135deg, #C8102E 0%, #E8283C 100%); color: white; padding: 2rem 0; margin-bottom: 2rem;">
         <div class="container-fluid">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <div>
@@ -81,7 +82,7 @@ try {
             <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
                 <?php foreach ($matchs as $match): ?>
                     <div style="background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); overflow: hidden; transition: all 0.3s ease;" class="match-card">
-                        <div style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; padding: 1.25rem;">
+                        <div style="background: linear-gradient(135deg, #C8102E 0%, #E8283C 100%); color: white; padding: 1.25rem;">
                             <div style="display: flex; justify-content: space-between; align-items: start;">
                                 <div>
                                     <p style="margin: 0; font-size: 0.85rem; opacity: 0.9;">

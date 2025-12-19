@@ -36,15 +36,16 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestion des Joueurs - Accueil</title>
-    <link rel="stylesheet" href="Vue/CSS/style.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="Vue/CSS/common.css">
+    <link rel="stylesheet" href="Vue/CSS/index.css">
 </head>
 <body>
-    <!-- Navbar -->
+    <!-- Barre de navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark sticky-top navbar-custom">
         <div class="container-fluid">
-            <a class="navbar-brand fw-bold" href="index.php"><i class="bi bi-shield-check"></i> Gestion des Joueurs</a>
+            <a class="navbar-brand fw-bold" href="index.php"><img src="Vue/img/logo.png" alt="Logo Liverpool FC"> Liverpool FC</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -70,18 +71,18 @@ try {
         </div>
     </nav>
 
-    <!-- Hero Section -->
+    <!-- Première partie de la page d'acceuil -->
     <section class="hero-section">
         <div class="container-fluid">
             <div class="hero-content">
-                <h1 class="hero-title">BIENVENUE</h1>
+                <h1 class="hero-title">BIENVENUE À LIVERPOOL FC</h1>
                 <h2 class="hero-subtitle">Système de Gestion des Joueurs</h2>
                 <p class="hero-text">Gérez votre équipe de football avec efficacité et professionnalisme</p>
             </div>
         </div>
     </section>
 
-    <!-- Stats Section -->
+    <!-- Section des statistiques -->
     <div class="container my-5">
         <div class="row g-4 mb-5">
             <!-- Stats Cards -->
@@ -135,7 +136,7 @@ try {
             </div>
             <div class="footer-bottom">
                 <div class="container text-center">
-                    <p class="mb-0">&copy; <?php echo date('Y'); ?> Gestion des Joueurs. Tous droits réservés.</p>
+                    <p class="mb-0">&copy; <?php echo date('Y'); ?> Liverpool FC</p>
                 </div>
             </div>
         </div>
