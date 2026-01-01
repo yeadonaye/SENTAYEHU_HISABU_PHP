@@ -31,22 +31,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Les champs avec * sont obligatoires';
     } else {
         try {
+            // Déterminer le résultat si les scores sont fournis
+            $resultat = null;
+            if ($scoreNous !== '' && $scoreAdverse !== '') {
+                $sN = (int)$scoreNous;
+                $sA = (int)$scoreAdverse;
+                if ($sN > $sA) $resultat = 'Victoire';
+                elseif ($sN < $sA) $resultat = 'Défaite';
+                else $resultat = 'Nul';
+            }
+
             if ($id) {
                 // Modification
                 $stmt = $pdo->prepare('
                     UPDATE `Match_` 
-                    SET Nom_Equipe_Adverse = ?, Date_Rencontre = ?, Heure = ?, Lieu = ?, Score_Nous = ?, Score_Adverse = ? 
+                    SET Nom_Equipe_Adverse = ?, Date_Rencontre = ?, Heure = ?, Lieu = ?, Score_Nous = ?, Score_Adverse = ?, Resultat = ? 
                     WHERE Id_Match = ?
                 ');
-                $stmt->execute([$nomEquipeAdverse, $dateRencontre, $heure, $lieu, $scoreNous ?: null, $scoreAdverse ?: null, $id]);
+                $stmt->execute([$nomEquipeAdverse, $dateRencontre, $heure, $lieu, $scoreNous !== '' ? $scoreNous : null, $scoreAdverse !== '' ? $scoreAdverse : null, $resultat, $id]);
                 $success = 'Match modifié avec succès!';
             } else {
                 // Ajout
                 $stmt = $pdo->prepare('
-                    INSERT INTO `Match_` (Nom_Equipe_Adverse, Date_Rencontre, Heure, Lieu, Score_Nous, Score_Adverse) 
-                    VALUES (?, ?, ?, ?, ?, ?)
+                    INSERT INTO `Match_` (Nom_Equipe_Adverse, Date_Rencontre, Heure, Lieu, Score_Nous, Score_Adverse, Resultat) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
                 ');
-                $stmt->execute([$nomEquipeAdverse, $dateRencontre, $heure, $lieu, $scoreNous ?: null, $scoreAdverse ?: null]);
+                $stmt->execute([$nomEquipeAdverse, $dateRencontre, $heure, $lieu, $scoreNous !== '' ? $scoreNous : null, $scoreAdverse !== '' ? $scoreAdverse : null, $resultat]);
                 $success = 'Match ajouté avec succès!';
                 $id = $pdo->lastInsertId();
             }
@@ -72,23 +82,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark sticky-top navbar-custom">
         <div class="container-fluid">
-            <a class="navbar-brand fw-bold" href="../../index.php"><i class="bi bi-shield-check"></i> Gestion des Joueurs</a>
+            <a class="navbar-brand fw-bold" href="/SENTAYEHU_HISABU_PHP/index.php"><i class="bi bi-shield-check"></i> Gestion des Joueurs</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="../../index.php"><i class="bi bi-house-door"></i> Accueil</a>
+                        <a class="nav-link" href="/SENTAYEHU_HISABU_PHP/index.php"><i class="bi bi-house-door"></i> Accueil</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="../joueurs/liste_joueurs.php"><i class="bi bi-people"></i> Joueurs</a>
+                        <a class="nav-link" href="/SENTAYEHU_HISABU_PHP/Vue/joueurs/liste_joueurs.php"><i class="bi bi-people"></i> Joueurs</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="calendrier.php"><i class="bi bi-calendar3"></i> Matchs</a>
+                        <a class="nav-link active" href="/SENTAYEHU_HISABU_PHP/Vue/matchs/calendrier.php"><i class="bi bi-calendar3"></i> Matchs</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="../../logout.php"><i class="bi bi-box-arrow-right"></i> Déconnexion</a>
+                        <a class="nav-link" href="/SENTAYEHU_HISABU_PHP/logout.php"><i class="bi bi-box-arrow-right"></i> Déconnexion</a>
                     </li>
                 </ul>
             </div>

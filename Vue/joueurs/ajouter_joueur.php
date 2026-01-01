@@ -21,39 +21,74 @@ if ($id) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $numLicence = $_POST['numLicence'] ?? '';
     $nom = $_POST['nom'] ?? '';
     $prenom = $_POST['prenom'] ?? '';
     $poste = $_POST['poste'] ?? '';
     $numero = $_POST['numero'] ?? '';
     $dateNaissance = $_POST['dateNaissance'] ?? '';
 
-    if (empty($nom) || empty($prenom)) {
-        $error = 'Le nom et le prénom sont obligatoires';
+    // Basic required fields
+    if (empty($numLicence) || empty($nom) || empty($prenom)) {
+        $error = 'Le numéro de licence, le nom et le prénom sont obligatoires';
     } else {
-        try {
-            if ($id) {
-                // Modification
-                $stmt = $pdo->prepare('
-                    UPDATE Joueur 
-                    SET Nom = ?, Prenom = ?, Poste = ?, Numero = ?, DateNaissance = ? 
-                    WHERE Id_Joueur = ?
-                ');
-                $stmt->execute([$nom, $prenom, $poste, $numero, $dateNaissance, $id]);
-                $success = 'Joueur modifié avec succès!';
-            } else {
-                // Ajout
-                $stmt = $pdo->prepare('
-                    INSERT INTO Joueur (Nom, Prenom, Poste, Numero, DateNaissance) 
-                    VALUES (?, ?, ?, ?, ?)
-                ');
-                $stmt->execute([$nom, $prenom, $poste, $numero, $dateNaissance]);
-                $success = 'Joueur ajouté avec succès!';
-                $id = $pdo->lastInsertId();
-                $joueur = compact('nom', 'prenom', 'poste', 'numero', 'dateNaissance');
-                $joueur['Id_Joueur'] = $id;
+        // Validate Num_Licence: exactly 5 digits
+        if (!preg_match('/^\d{5}$/', $numLicence)) {
+            $error = 'Le numéro de licence doit contenir exactement 5 chiffres (pas de lettres).';
+        }
+
+        // Validate numero format if provided
+        if (!$error && $numero !== '') {
+            if (!preg_match('/^\d{1,2}$/', (string)$numero) || (int)$numero < 1 || (int)$numero > 99) {
+                $error = 'Le numéro de maillot doit être un nombre entier entre 1 et 99.';
             }
-        } catch (PDOException $e) {
-            $error = 'Erreur lors de l\'enregistrement: ' . $e->getMessage();
+        }
+
+        // Check uniqueness constraints
+        if (!$error) {
+            try {
+                // Check Num_Licence uniqueness
+                $stmt = $pdo->prepare('SELECT Id_Joueur FROM Joueur WHERE Num_Licence = ? LIMIT 1');
+                $stmt->execute([$numLicence]);
+                $existing = $stmt->fetch(PDO::FETCH_ASSOC);
+                if ($existing && (!$id || $existing['Id_Joueur'] != $id)) {
+                    $error = 'Ce numéro de licence est déjà utilisé par un autre joueur.';
+                }
+
+                // Check Numero uniqueness if provided
+                if (!$error && $numero !== '') {
+                    $stmt = $pdo->prepare('SELECT Id_Joueur FROM Joueur WHERE Numero = ? LIMIT 1');
+                    $stmt->execute([(int)$numero]);
+                    $existingNum = $stmt->fetch(PDO::FETCH_ASSOC);
+                    if ($existingNum && (!$id || $existingNum['Id_Joueur'] != $id)) {
+                        $error = 'Ce numéro de maillot est déjà pris par un autre joueur. Veuillez choisir un autre numéro.';
+                    }
+                }
+            } catch (PDOException $e) {
+                $error = 'Erreur lors de la vérification des données: ' . $e->getMessage();
+            }
+        }
+
+        if (!$error) {
+            try {
+                if ($id) {
+                    // Modification
+                    $stmt = $pdo->prepare("UPDATE Joueur SET Num_Licence = ?, Nom = ?, Prenom = ?, Poste = ?, Numero = ?, DateNaissance = ? WHERE Id_Joueur = ?");
+                    $stmt->execute([$numLicence, $nom, $prenom, $poste, $numero !== '' ? $numero : null, $dateNaissance, $id]);
+                    $success = 'Joueur modifié avec succès!';
+                } else {
+                    // Ajout
+                    $stmt = $pdo->prepare("INSERT INTO Joueur (Num_Licence, Nom, Prenom, Poste, Numero, DateNaissance) VALUES (?, ?, ?, ?, ?, ?)");
+                    $stmt->execute([$numLicence, $nom, $prenom, $poste, $numero !== '' ? $numero : null, $dateNaissance]);
+                    $success = 'Joueur ajouté avec succès!';
+                    $id = $pdo->lastInsertId();
+                    $joueur = compact('nom', 'prenom', 'poste', 'numero', 'dateNaissance');
+                    $joueur['Id_Joueur'] = $id;
+                    $joueur['Num_Licence'] = $numLicence;
+                }
+            } catch (PDOException $e) {
+                $error = 'Erreur lors de l\'enregistrement: ' . $e->getMessage();
+            }
         }
     }
 }
@@ -74,23 +109,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark sticky-top navbar-custom">
         <div class="container-fluid">
-            <a class="navbar-brand fw-bold" href="../../index.php"><i class="bi bi-shield-check"></i> Gestion des Joueurs</a>
+            <a class="navbar-brand fw-bold" href="/SENTAYEHU_HISABU_PHP/index.php"><i class="bi bi-shield-check"></i> Gestion des Joueurs</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="../../index.php"><i class="bi bi-house-door"></i> Accueil</a>
+                        <a class="nav-link" href="/SENTAYEHU_HISABU_PHP/index.php"><i class="bi bi-house-door"></i> Accueil</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="liste_joueurs.php"><i class="bi bi-people"></i> Joueurs</a>
+                        <a class="nav-link active" href="/SENTAYEHU_HISABU_PHP/Vue/joueurs/liste_joueurs.php"><i class="bi bi-people"></i> Joueurs</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="../matchs/calendrier.php"><i class="bi bi-calendar3"></i> Matchs</a>
+                        <a class="nav-link" href="/SENTAYEHU_HISABU_PHP/Vue/matchs/calendrier.php"><i class="bi bi-calendar3"></i> Matchs</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="../../logout.php"><i class="bi bi-box-arrow-right"></i> Déconnexion</a>
+                        <a class="nav-link" href="/SENTAYEHU_HISABU_PHP/logout.php"><i class="bi bi-box-arrow-right"></i> Déconnexion</a>
                     </li>
                 </ul>
             </div>
@@ -141,6 +176,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         value="<?php echo htmlspecialchars($joueur['Nom'] ?? ''); ?>"
                         required
                         placeholder="Entrez le nom"
+                    >
+                </div>
+
+                <div class="mb-3">
+                    <label for="numLicence" class="form-label fw-bold">Numéro de Licence *</label>
+                    <input
+                        type="number"
+                        class="form-control"
+                        id="numLicence"
+                        name="numLicence"
+                        value="<?php echo htmlspecialchars($joueur['Num_Licence'] ?? $joueur['Num_Licence'] ?? ''); ?>"
+                        required
+                        placeholder="Entrez le numéro de licence"
                     >
                 </div>
 
@@ -221,6 +269,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </footer>
 
+    <script>
+        // Client-side validation for immediate feedback
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.querySelector('form');
+            form.addEventListener('submit', function (e) {
+                const numLicence = document.getElementById('numLicence').value.trim();
+                const numero = document.getElementById('numero').value.trim();
+                const licenceRegex = /^\d{5}$/;
+                if (!licenceRegex.test(numLicence)) {
+                    e.preventDefault();
+                    alert('Le numéro de licence doit contenir exactement 5 chiffres (pas de lettres).');
+                    return false;
+                }
+                if (numero !== '') {
+                    const n = parseInt(numero, 10);
+                    if (isNaN(n) || n < 1 || n > 99) {
+                        e.preventDefault();
+                        alert('Le numéro de maillot doit être un nombre entier entre 1 et 99.');
+                        return false;
+                    }
+                }
+                return true;
+            });
+        });
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

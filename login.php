@@ -10,13 +10,14 @@ $error = '';
 $redirect = $_GET['redirect'] ?? 'index.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $identifiant = $_POST['identifiant'] ?? '';
     $password = $_POST['password'] ?? '';
     
-    if (authenticate($password)) {
+    if (authenticate($identifiant, $password)) {
         header('Location: ' . $redirect);
         exit;
     } else {
-        $error = 'Mot de passe incorrect!';
+        $error = 'Identifiant ou mot de passe incorrect!';
     }
 }
 ?>
@@ -50,6 +51,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <form method="POST" action="">
             <div class="form-group">
+                <label for="identifiant" class="form-label">Identifiant</label>
+                <input
+                    type="text"
+                    class="form-control"
+                    id="identifiant"
+                    name="identifiant"
+                    placeholder="Entrez l'identifiant"
+                    value="<?php echo htmlspecialchars($_POST['identifiant'] ?? ''); ?>"
+                    required
+                    autofocus
+                >
+            </div>
+
+            <div class="form-group">
                 <label for="password" class="form-label">Mot de passe</label>
                 <div class="input-group">
                     <input 
@@ -59,7 +74,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         name="password" 
                         placeholder="Entrez le mot de passe"
                         required
-                        autofocus
                     >
                     <button 
                         class="btn btn-outline-secondary" 

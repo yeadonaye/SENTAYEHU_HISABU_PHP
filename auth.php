@@ -2,8 +2,14 @@
 // Système d'authentification simple
 session_start();
 
-// Mot de passe en dur
-const ADMIN_PASSWORD = 'liverpoolPhp';
+// Identifiant et mot de passe en dur
+const ADMIN_IDENTIFIANT = 'admin';
+const ADMIN_PASSWORD = 'admin';
+
+// Load config if present (create a config.php with your Alwaysdata credentials)
+if (file_exists(__DIR__ . '/config.php')) {
+    require_once __DIR__ . '/config.php';
+}
 
 /**
  * Vérifier si l'utilisateur est authentifié
@@ -15,10 +21,11 @@ function isAuthenticated() {
 /**
  * Authentifier l'utilisateur
  */
-function authenticate($password) {
-    if ($password === ADMIN_PASSWORD) {
+function authenticate($identifiant, $password) {
+    if ($identifiant === ADMIN_IDENTIFIANT && $password === ADMIN_PASSWORD) {
         $_SESSION['authenticated'] = true;
         $_SESSION['login_time'] = time();
+        $_SESSION['user'] = $identifiant;
         return true;
     }
     return false;
@@ -48,7 +55,33 @@ function logout() {
  * Connexion à la base de données SQLite
  */
 function getDBConnection() {
-    // Chemin du fichier de base de données SQLite
+    // If a MySQL configuration is provided (DB_TYPE === 'mysql'), connect to MySQL (Alwaysdata)
+    if (defined('DB_TYPE') && DB_TYPE === 'mysql') {
+        $host = defined('DB_HOST') ? DB_HOST : 'localhost';
+        $port = defined('DB_PORT') ? DB_PORT : 3306;
+        $dbname = defined('DB_NAME') ? DB_NAME : '';
+        $user = defined('DB_USER') ? DB_USER : '';
+        $pass = defined('DB_PASS') ? DB_PASS : '';
+        $charset = defined('DB_CHARSET') ? DB_CHARSET : 'utf8mb4';
+
+        if (empty($dbname) || empty($user)) {
+            die('Configuration MySQL manquante : vérifie `config.php`.');
+        }
+
+        $dsn = "mysql:host={$host};port={$port};dbname={$dbname};charset={$charset}";
+        try {
+            $pdo = new PDO($dsn, $user, $pass, [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            ]);
+            // When using MySQL on Alwaysdata we assume tables already exist (no local initialization)
+            return $pdo;
+        } catch (PDOException $e) {
+            die("Erreur de connexion MySQL: " . $e->getMessage());
+        }
+    }
+
+    // Fallback to local SQLite
     $dbPath = __DIR__ . '/data/gestion_joueurs.db';
     $dbDir = dirname($dbPath);
     
@@ -74,9 +107,14 @@ function getDBConnection() {
  * Initialiser la base de données avec les tables nécessaires
  */
 function initializeDatabase($pdo) {
-    // Vérifier si la table Joueur existe
+    // Only run initialization for SQLite. If using MySQL (Alwaysdata), we assume tables are already created.
+    if (defined('DB_TYPE') && DB_TYPE === 'mysql') {
+        return;
+    }
+
+    // Vérifier si la table Joueur existe (SQLite)
     $stmt = $pdo->query("SELECT name FROM sqlite_master WHERE type='table' AND name='Joueur'");
-    if ($stmt->fetch()) {
+    if ($stmt && $stmt->fetch()) {
         return; // La base de données est déjà initialisée
     }
     

@@ -43,6 +43,58 @@ try {
 
 $tauxVictoire = $stats['totalMatchs'] > 0 ? round(($stats['victoires'] / $stats['totalMatchs']) * 100, 1) : 0;
 $differenceButts = $stats['totalButs'] - $stats['butsEncaisses'];
+
+// --- Calculs par joueur ---
+$players = [];
+try {
+    $stmt = $pdo->query('SELECT Id_Joueur, Num_Licence, Nom, Prenom, Statut, Poste FROM Joueur ORDER BY Nom, Prenom');
+    $players = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Préparer quelques requêtes réutilisables
+    $qStarts = $pdo->prepare('SELECT COUNT(*) FROM Participer p JOIN `Match_` m ON p.Id_Match = m.Id_Match WHERE p.Id_Joueur = :id AND p.Titulaire_ou_pas = 1');
+    $qSubs = $pdo->prepare('SELECT COUNT(*) FROM Participer p JOIN `Match_` m ON p.Id_Match = m.Id_Match WHERE p.Id_Joueur = :id AND p.Titulaire_ou_pas = 0');
+    $qAvgNote = $pdo->prepare('SELECT AVG(Note) as avgNote FROM Participer WHERE Id_Joueur = :id AND Note IS NOT NULL');
+    $qMatchesParticipated = $pdo->prepare('SELECT COUNT(DISTINCT p.Id_Match) FROM Participer p JOIN `Match_` m ON p.Id_Match = m.Id_Match WHERE p.Id_Joueur = :id');
+    $qWinsWhenPart = $pdo->prepare("SELECT COUNT(DISTINCT p.Id_Match) FROM Participer p JOIN `Match_` m ON p.Id_Match = m.Id_Match WHERE p.Id_Joueur = :id AND ((m.Resultat = 'Victoire') OR (m.Score_Nous IS NOT NULL AND m.Score_Adverse IS NOT NULL AND m.Score_Nous > m.Score_Adverse))");
+
+    // Fetch all matches ordered descending for consecutive check
+    $matchIdsStmt = $pdo->query('SELECT Id_Match FROM `Match_` WHERE (Score_Nous IS NOT NULL AND Score_Adverse IS NOT NULL) OR Resultat IS NOT NULL ORDER BY Date_Rencontre DESC, Heure DESC');
+    $matchesOrdered = $matchIdsStmt->fetchAll(PDO::FETCH_COLUMN);
+
+    foreach ($players as &$pl) {
+        $idp = $pl['Id_Joueur'];
+        $qStarts->execute([':id' => $idp]);
+        $pl['starts'] = (int)$qStarts->fetchColumn();
+
+        $qSubs->execute([':id' => $idp]);
+        $pl['subs'] = (int)$qSubs->fetchColumn();
+
+        $qAvgNote->execute([':id' => $idp]);
+        $avg = $qAvgNote->fetch(PDO::FETCH_ASSOC)['avgNote'];
+        $pl['avgNote'] = $avg !== null ? round($avg, 2) : null;
+
+        $qMatchesParticipated->execute([':id' => $idp]);
+        $participations = (int)$qMatchesParticipated->fetchColumn();
+        $pl['participations'] = $participations;
+
+        $qWinsWhenPart->execute([':id' => $idp]);
+        $winsPart = (int)$qWinsWhenPart->fetchColumn();
+        $pl['winPercentWhenParticipated'] = $participations > 0 ? round(($winsPart / $participations) * 100, 1) : null;
+
+        // Consecutive selections: loop matchesOrdered and count until first match where player did not participate
+        $consec = 0;
+        $pCheck = $pdo->prepare('SELECT COUNT(*) FROM Participer WHERE Id_Match = :mid AND Id_Joueur = :id');
+        foreach ($matchesOrdered as $mid) {
+            $pCheck->execute([':mid' => $mid, ':id' => $idp]);
+            $c = (int)$pCheck->fetchColumn();
+            if ($c > 0) $consec++; else break;
+        }
+        $pl['consecutiveSelections'] = $consec;
+    }
+    unset($pl);
+} catch (PDOException $e) {
+    // ignore per-player errors
+}
 ?>
 
 <!DOCTYPE html>
@@ -60,26 +112,26 @@ $differenceButts = $stats['totalButs'] - $stats['butsEncaisses'];
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark sticky-top navbar-custom">
         <div class="container-fluid">
-            <a class="navbar-brand fw-bold" href="index.php"><i class="bi bi-shield-check"></i> Gestion des Joueurs</a>
+            <a class="navbar-brand fw-bold" href="/SENTAYEHU_HISABU_PHP/index.php"><i class="bi bi-shield-check"></i> Gestion des Joueurs</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="index.php"><i class="bi bi-house-door"></i> Accueil</a>
+                        <a class="nav-link" href="/SENTAYEHU_HISABU_PHP/index.php"><i class="bi bi-house-door"></i> Accueil</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="Vue/joueurs/liste_joueurs.php"><i class="bi bi-people"></i> Joueurs</a>
+                        <a class="nav-link" href="/SENTAYEHU_HISABU_PHP/Vue/joueurs/liste_joueurs.php"><i class="bi bi-people"></i> Joueurs</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="Vue/matchs/calendrier.php"><i class="bi bi-calendar3"></i> Matchs</a>
+                        <a class="nav-link" href="/SENTAYEHU_HISABU_PHP/Vue/matchs/calendrier.php"><i class="bi bi-calendar3"></i> Matchs</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="statistiques.php"><i class="bi bi-graph-up"></i> Statistiques</a>
+                        <a class="nav-link active" href="/SENTAYEHU_HISABU_PHP/statistiques.php"><i class="bi bi-graph-up"></i> Statistiques</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="logout.php"><i class="bi bi-box-arrow-right"></i> Déconnexion</a>
+                        <a class="nav-link" href="/SENTAYEHU_HISABU_PHP/logout.php"><i class="bi bi-box-arrow-right"></i> Déconnexion</a>
                     </li>
                 </ul>
             </div>
@@ -87,7 +139,7 @@ $differenceButts = $stats['totalButs'] - $stats['butsEncaisses'];
     </nav>
 
     <!-- Page Header -->
-    <div style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; padding: 2rem 0; margin-bottom: 2rem;">
+    <div style="background: linear-gradient(135deg, #C8102E 0%, #E8283C 100%); color: white; padding: 2rem 0; margin-bottom: 2rem;">
         <div class="container-fluid">
             <h1 style="font-size: 2rem; font-weight: 700; margin: 0;"><i class="bi bi-graph-up"></i> Statistiques</h1>
             <p style="margin: 0.5rem 0 0; opacity: 0.9;">Vue d'ensemble des performances</p>
@@ -146,7 +198,7 @@ $differenceButts = $stats['totalButs'] - $stats['butsEncaisses'];
 
         <!-- Performance Details -->
         <div class="row g-4 mb-4">
-            <div class="col-lg-8">
+            <div class="col-12">
                 <div class="section-card">
                     <div class="section-header">
                         <h2 class="section-title"><i class="bi bi-bar-chart"></i> Performance de l'Équipe</h2>
@@ -171,9 +223,52 @@ $differenceButts = $stats['totalButs'] - $stats['butsEncaisses'];
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Buts Stats -->
-            <div class="col-lg-4">
+    <!-- Per-player table -->
+    <div class="container my-5">
+        <div class="section-card">
+            <div class="section-header">
+                <h2 class="section-title"><i class="bi bi-people"></i> Statistiques par Joueur</h2>
+            </div>
+            <div class="section-body">
+                <div style="overflow:auto">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Statut</th>
+                            <th>Poste préféré</th>
+                            <th>Titulaires</th>
+                            <th>Remplaçants</th>
+                            <th>Moyenne notes</th>
+                            <th>% Victoires (lorsqu'il a joué)</th>
+                            <th>Sélections consécutives</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($players as $pl): ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($pl['Nom'] . ' ' . $pl['Prenom']); ?></td>
+                                <td><?php echo htmlspecialchars($pl['Statut'] ?? ''); ?></td>
+                                <td><?php echo htmlspecialchars($pl['Poste'] ?? ''); ?></td>
+                                <td><?php echo (int)($pl['starts'] ?? 0); ?></td>
+                                <td><?php echo (int)($pl['subs'] ?? 0); ?></td>
+                                <td><?php echo $pl['avgNote'] !== null ? $pl['avgNote'] . '/5' : '-'; ?></td>
+                                <td><?php echo $pl['winPercentWhenParticipated'] !== null ? $pl['winPercentWhenParticipated'] . '%' : '-'; ?></td>
+                                <td><?php echo (int)($pl['consecutiveSelections'] ?? 0); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <!-- Buts Stats -->
+        <div class="row g-4 mb-4">
+            <div class="col-lg-12">
                 <div class="section-card">
                     <div class="section-header">
                         <h2 class="section-title"><i class="bi bi-target"></i> Buts</h2>
@@ -235,6 +330,47 @@ $differenceButts = $stats['totalButs'] - $stats['butsEncaisses'];
                             </a>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Per-player table -->
+    <div class="container my-5">
+        <div class="section-card">
+            <div class="section-header">
+                <h2 class="section-title"><i class="bi bi-people"></i> Statistiques par Joueur</h2>
+            </div>
+            <div class="section-body">
+                <div style="overflow:auto">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Statut</th>
+                            <th>Poste préféré</th>
+                            <th>Titulaires</th>
+                            <th>Remplaçants</th>
+                            <th>Moyenne notes</th>
+                            <th>% Victoires (lorsqu'il a joué)</th>
+                            <th>Sélections consécutives</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($players as $pl): ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($pl['Nom'] . ' ' . $pl['Prenom']); ?></td>
+                                <td><?php echo htmlspecialchars($pl['Statut'] ?? ''); ?></td>
+                                <td><?php echo htmlspecialchars($pl['Poste'] ?? ''); ?></td>
+                                <td><?php echo (int)($pl['starts'] ?? 0); ?></td>
+                                <td><?php echo (int)($pl['subs'] ?? 0); ?></td>
+                                <td><?php echo $pl['avgNote'] !== null ? $pl['avgNote'] . '/5' : '-'; ?></td>
+                                <td><?php echo $pl['winPercentWhenParticipated'] !== null ? $pl['winPercentWhenParticipated'] . '%' : '-'; ?></td>
+                                <td><?php echo (int)($pl['consecutiveSelections'] ?? 0); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
                 </div>
             </div>
         </div>

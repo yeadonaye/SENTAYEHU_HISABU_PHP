@@ -15,6 +15,36 @@ try {
 } catch (PDOException $e) {
     $error = 'Erreur lors du chargement des matchs: ' . $e->getMessage();
 }
+
+// Récupérer la composition pour chaque match
+$compositions = [];
+foreach ($matchs as &$match) {
+    try {
+        $stmt = $pdo->prepare('
+            SELECT Titulaire_ou_pas FROM Participer 
+            WHERE Id_Match = :id
+        ');
+        $stmt->execute([':id' => $match['Id_Match']]);
+        $participations = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        $titulaires = 0;
+        $remplacants = 0;
+        foreach ($participations as $p) {
+            if ($p['Titulaire_ou_pas']) {
+                $titulaires++;
+            } else {
+                $remplacants++;
+            }
+        }
+        
+        $compositions[$match['Id_Match']] = [
+            'titulaires' => $titulaires,
+            'remplacants' => $remplacants
+        ];
+    } catch (PDOException $e) {
+        $compositions[$match['Id_Match']] = ['titulaires' => 0, 'remplacants' => 0];
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -32,23 +62,23 @@ try {
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark sticky-top navbar-custom">
         <div class="container-fluid">
-            <a class="navbar-brand fw-bold" href="../../index.php"><i class="bi bi-shield-check"></i> Gestion des Joueurs</a>
+            <a class="navbar-brand fw-bold" href="/SENTAYEHU_HISABU_PHP/index.php"><i class="bi bi-shield-check"></i> Gestion des Joueurs</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="../../index.php"><i class="bi bi-house-door"></i> Accueil</a>
+                        <a class="nav-link" href="/SENTAYEHU_HISABU_PHP/index.php"><i class="bi bi-house-door"></i> Accueil</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="../joueurs/liste_joueurs.php"><i class="bi bi-people"></i> Joueurs</a>
+                        <a class="nav-link" href="/SENTAYEHU_HISABU_PHP/Vue/joueurs/liste_joueurs.php"><i class="bi bi-people"></i> Joueurs</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="calendrier.php"><i class="bi bi-calendar3"></i> Matchs</a>
+                        <a class="nav-link active" href="/SENTAYEHU_HISABU_PHP/Vue/matchs/calendrier.php"><i class="bi bi-calendar3"></i> Matchs</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="../../logout.php"><i class="bi bi-box-arrow-right"></i> Déconnexion</a>
+                        <a class="nav-link" href="/SENTAYEHU_HISABU_PHP/logout.php"><i class="bi bi-box-arrow-right"></i> Déconnexion</a>
                     </li>
                 </ul>
             </div>
@@ -125,7 +155,19 @@ try {
                                 <i class="bi bi-geo-alt me-2"></i><?php echo htmlspecialchars($match['Lieu'] ?? 'Lieu non spécifié'); ?>
                             </div>
 
+                            <?php 
+                                $comp = $compositions[$match['Id_Match']] ?? ['titulaires' => 0, 'remplacants' => 0];
+                            ?>
+                            <div style="background-color: #fff3cd; padding: 0.75rem; border-radius: 6px; margin-bottom: 1rem; font-size: 0.85rem;">
+                                <i class="bi bi-people-fill me-2" style="color: #C8102E;"></i>
+                                Titulaires: <strong><?php echo $comp['titulaires']; ?>/11</strong> | 
+                                Remplaçants: <strong><?php echo $comp['remplacants']; ?></strong>
+                            </div>
+
                             <div style="display: flex; gap: 0.5rem;">
+                                <a href="saisie_feuille_match.php?id=<?php echo $match['Id_Match']; ?>" class="btn btn-sm btn-success" style="flex: 1;">
+                                    <i class="bi bi-clipboard2-data me-1"></i>Composer l'équipe
+                                </a>
                                 <a href="modifier_match.php?id=<?php echo $match['Id_Match']; ?>" class="btn btn-sm btn-outline-primary" style="flex: 1;">
                                     <i class="bi bi-pencil me-1"></i>Modifier
                                 </a>
