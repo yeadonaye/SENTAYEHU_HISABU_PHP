@@ -10,7 +10,7 @@ class JoueurDao implements ModeleDao {
         $this->pdo = $pdo;
     }
 
-    public function getAll(): array{
+    public function selectAll(): array{
         $sql = "SELECT * FROM joueur ORDER BY nom";
         $stmt = $this->pdo->query($sql);
 
@@ -31,7 +31,7 @@ class JoueurDao implements ModeleDao {
         return $joueurs;
     }
 
-    public function getById(int $id): ?Joueur{
+    public function selectById(int $id): ?Joueur{
         $sql = "SELECT * FROM joueur where idJoueur = :id ";
         $stmt = $this->pdo->prepare($sql);
 
@@ -54,7 +54,7 @@ class JoueurDao implements ModeleDao {
         );
     }
 
-    public function add(object $obj): bool{
+    public function insert(object $obj): bool{
         if (!($obj instanceof Joueur)) return false;
         $sql = "INSERT INTO joueur
                 (numLicence, nom, prenom, dateNaissance, taille, poids, statut)

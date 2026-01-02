@@ -10,7 +10,7 @@ class ParticiperDao implements ModeleDao {
         $this->pdo = $pdo;
     }
 
-    public function getAll(): array {
+    public function selectAll(): array {
         $stmt = $this->pdo->query("SELECT * FROM participer");
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -28,7 +28,7 @@ class ParticiperDao implements ModeleDao {
     }
 
 
-    public function getById(int $id): ?Participer {
+    public function selectById(int $id): ?Participer {
         $stmt = $this->pdo->prepare("SELECT * FROM participer WHERE idParticipation = :id");
         $stmt->execute([':id' => $id]);
 
@@ -46,7 +46,7 @@ class ParticiperDao implements ModeleDao {
         );
     }
 
-    public function add(object $obj): bool {
+    public function insert(object $obj): bool {
         if (!($obj instanceof Participer)) return false;
 
         $sql = "INSERT INTO participer (poste, note, titulaireOuPas)
