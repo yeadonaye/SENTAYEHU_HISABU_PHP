@@ -78,6 +78,9 @@ foreach ($matchs as &$match) {
                         <a class="nav-link active" href="/SENTAYEHU_HISABU_PHP/Vue/matchs/calendrier.php"><i class="bi bi-calendar3"></i> Matchs</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="/SENTAYEHU_HISABU_PHP/statistiques.php"><i class="bi bi-graph-up"></i> Statistiques</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="/SENTAYEHU_HISABU_PHP/logout.php"><i class="bi bi-box-arrow-right"></i> Déconnexion</a>
                     </li>
                 </ul>

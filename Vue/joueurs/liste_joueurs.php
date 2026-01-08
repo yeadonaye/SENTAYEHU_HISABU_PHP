@@ -45,6 +45,9 @@ try {
                         <a class="nav-link" href="/SENTAYEHU_HISABU_PHP/Vue/matchs/calendrier.php"><i class="bi bi-calendar3"></i> Matchs</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="/SENTAYEHU_HISABU_PHP/statistiques.php"><i class="bi bi-graph-up"></i> Statistiques</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="/SENTAYEHU_HISABU_PHP/logout.php"><i class="bi bi-box-arrow-right"></i> Déconnexion</a>
                     </li>
                 </ul>
@@ -81,11 +84,14 @@ try {
                     <table style="width: 100%; border-collapse: collapse;">
                         <thead>
                             <tr style="background-color: #f8f9fa; border-bottom: 2px solid #ecf0f1;">
-                                <th style="padding: 1rem; text-align: left; font-weight: 600; color: #2c3e50;">ID</th>
+                                <th style="padding: 1rem; text-align: left; font-weight: 600; color: #2c3e50;">Id_Joueur</th>
+                                <th style="padding: 1rem; text-align: left; font-weight: 600; color: #2c3e50;">Numéro de Licence</th>
                                 <th style="padding: 1rem; text-align: left; font-weight: 600; color: #2c3e50;">Nom</th>
                                 <th style="padding: 1rem; text-align: left; font-weight: 600; color: #2c3e50;">Prénom</th>
-                                <th style="padding: 1rem; text-align: left; font-weight: 600; color: #2c3e50;">Poste</th>
-                                <th style="padding: 1rem; text-align: left; font-weight: 600; color: #2c3e50;">Numéro</th>
+                                <th style="padding: 1rem; text-align: left; font-weight: 600; color: #2c3e50;">Date de Naissance</th>
+                                <th style="padding: 1rem; text-align: left; font-weight: 600; color: #2c3e50;">Taille</th>
+                                <th style="padding: 1rem; text-align: left; font-weight: 600; color: #2c3e50;">Poids</th>
+                                <th style="padding: 1rem; text-align: left; font-weight: 600; color: #2c3e50;">Statut</th>
                                 <th style="padding: 1rem; text-align: center; font-weight: 600; color: #2c3e50;">Actions</th>
                             </tr>
                         </thead>
@@ -93,14 +99,17 @@ try {
                             <?php foreach ($joueurs as $joueur): ?>
                                 <tr style="border-bottom: 1px solid #ecf0f1; transition: background-color 0.3s ease;" onmouseover="this.style.backgroundColor='#f8f9fa'" onmouseout="this.style.backgroundColor='white'">
                                     <td style="padding: 1rem; color: #7f8c8d;"><?php echo htmlspecialchars($joueur['Id_Joueur']); ?></td>
+                                    <td style="padding: 1rem; color: #2c3e50;"><?php echo htmlspecialchars($joueur['Num_Licence'] ?? '-'); ?></td>
                                     <td style="padding: 1rem; font-weight: 600; color: #2c3e50;"><?php echo htmlspecialchars($joueur['Nom']); ?></td>
                                     <td style="padding: 1rem; color: #2c3e50;"><?php echo htmlspecialchars($joueur['Prenom']); ?></td>
+                                    <td style="padding: 1rem; color: #2c3e50;"><?php echo htmlspecialchars($joueur['Date_Naissance'] ?? '-'); ?></td>
+                                    <td style="padding: 1rem; color: #2c3e50;"><?php echo htmlspecialchars($joueur['Taille'] ?? '-'); ?> cm</td>
+                                    <td style="padding: 1rem; color: #2c3e50;"><?php echo htmlspecialchars($joueur['Poids'] ?? '-'); ?> kg</td>
                                     <td style="padding: 1rem; color: #2c3e50;">
-                                        <span style="background-color: #e3f2fd; color: #1976d2; padding: 0.35rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 500;">
-                                            <?php echo htmlspecialchars($joueur['Poste'] ?? 'N/A'); ?>
+                                        <span style="background-color: <?php echo (stripos($joueur['Statut'], 'bles') !== false) ? '#ffebee' : '#e8f5e9'; ?>; color: <?php echo (stripos($joueur['Statut'], 'bles') !== false) ? '#c62828' : '#2e7d32'; ?>; padding: 0.35rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 500;">
+                                            <?php echo (stripos($joueur['Statut'], 'bles') !== false) ? 'Blessé' : 'Actif'; ?>
                                         </span>
                                     </td>
-                                    <td style="padding: 1rem; color: #2c3e50; font-weight: 600;">#<?php echo htmlspecialchars($joueur['Numero'] ?? '-'); ?></td>
                                     <td style="padding: 1rem; text-align: center;">
                                         <a href="modifier_joueur.php?id=<?php echo $joueur['Id_Joueur']; ?>" class="btn btn-sm btn-outline-primary" style="margin-right: 0.5rem;">
                                             <i class="bi bi-pencil"></i>

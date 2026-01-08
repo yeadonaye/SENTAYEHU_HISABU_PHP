@@ -4,7 +4,7 @@ requireAuth();
 
 $pdo = getDBConnection();
 $joueur = [];
-$postes = ['Gardien', 'Défenseur', 'Milieu de terrain', 'Attaquant'];
+$statuts = ['Actif', 'Blessé'];
 $error = '';
 $success = '';
 
@@ -15,6 +15,15 @@ if ($id) {
         $stmt = $pdo->prepare('SELECT * FROM Joueur WHERE Id_Joueur = ?');
         $stmt->execute([$id]);
         $joueur = $stmt->fetch(PDO::FETCH_ASSOC);
+            // Normalize keys: keep original keys and lowercase variants
+            if ($joueur) {
+                $normalized = [];
+                foreach ($joueur as $k => $v) {
+                    $normalized[$k] = $v;
+                    $normalized[strtolower($k)] = $v;
+                }
+                $joueur = $normalized;
+            }
     } catch (PDOException $e) {
         $error = 'Erreur lors du chargement du joueur';
     }
@@ -24,23 +33,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $numLicence = $_POST['numLicence'] ?? '';
     $nom = $_POST['nom'] ?? '';
     $prenom = $_POST['prenom'] ?? '';
-    $poste = $_POST['poste'] ?? '';
-    $numero = $_POST['numero'] ?? '';
     $dateNaissance = $_POST['dateNaissance'] ?? '';
+    $taille = $_POST['taille'] ?? '';
+    $poids = $_POST['poids'] ?? '';
+    $statut = $_POST['statut'] ?? '';
 
     // Basic required fields
-    if (empty($numLicence) || empty($nom) || empty($prenom)) {
-        $error = 'Le numéro de licence, le nom et le prénom sont obligatoires';
+    if (empty($numLicence) || empty($nom) || empty($prenom) || empty($statut)) {
+        $error = 'Le numéro de licence, le nom, le prénom et le statut sont obligatoires';
     } else {
-        // Validate Num_Licence: exactly 5 digits
-        if (!preg_match('/^\d{5}$/', $numLicence)) {
-            $error = 'Le numéro de licence doit contenir exactement 5 chiffres (pas de lettres).';
+        // Validate taille and poids if provided
+        if (!$error && $taille !== '') {
+            if (!is_numeric($taille) || (float)$taille <= 0) {
+                $error = 'La taille doit être un nombre positif.';
+            }
         }
 
-        // Validate numero format if provided
-        if (!$error && $numero !== '') {
-            if (!preg_match('/^\d{1,2}$/', (string)$numero) || (int)$numero < 1 || (int)$numero > 99) {
-                $error = 'Le numéro de maillot doit être un nombre entier entre 1 et 99.';
+        if (!$error && $poids !== '') {
+            if (!is_numeric($poids) || (float)$poids <= 0) {
+                $error = 'Le poids doit être un nombre positif.';
             }
         }
 
@@ -54,16 +65,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($existing && (!$id || $existing['Id_Joueur'] != $id)) {
                     $error = 'Ce numéro de licence est déjà utilisé par un autre joueur.';
                 }
-
-                // Check Numero uniqueness if provided
-                if (!$error && $numero !== '') {
-                    $stmt = $pdo->prepare('SELECT Id_Joueur FROM Joueur WHERE Numero = ? LIMIT 1');
-                    $stmt->execute([(int)$numero]);
-                    $existingNum = $stmt->fetch(PDO::FETCH_ASSOC);
-                    if ($existingNum && (!$id || $existingNum['Id_Joueur'] != $id)) {
-                        $error = 'Ce numéro de maillot est déjà pris par un autre joueur. Veuillez choisir un autre numéro.';
-                    }
-                }
             } catch (PDOException $e) {
                 $error = 'Erreur lors de la vérification des données: ' . $e->getMessage();
             }
@@ -71,18 +72,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (!$error) {
             try {
+                // Convert values to proper types
+                $taille_value = !empty($taille) ? (float)$taille : null;
+                $poids_value = !empty($poids) ? (float)$poids : null;
+                $dateNaissance_value = !empty($dateNaissance) ? $dateNaissance : null;
+                
                 if ($id) {
                     // Modification
-                    $stmt = $pdo->prepare("UPDATE Joueur SET Num_Licence = ?, Nom = ?, Prenom = ?, Poste = ?, Numero = ?, DateNaissance = ? WHERE Id_Joueur = ?");
-                    $stmt->execute([$numLicence, $nom, $prenom, $poste, $numero !== '' ? $numero : null, $dateNaissance, $id]);
+                    $stmt = $pdo->prepare("UPDATE Joueur SET Num_Licence = ?, Nom = ?, Prenom = ?, Date_Naissance = ?, Taille = ?, Poids = ?, Statut = ? WHERE Id_Joueur = ?");
+                    $stmt->execute([$numLicence, $nom, $prenom, $dateNaissance_value, $taille_value, $poids_value, $statut, $id]);
                     $success = 'Joueur modifié avec succès!';
                 } else {
                     // Ajout
-                    $stmt = $pdo->prepare("INSERT INTO Joueur (Num_Licence, Nom, Prenom, Poste, Numero, DateNaissance) VALUES (?, ?, ?, ?, ?, ?)");
-                    $stmt->execute([$numLicence, $nom, $prenom, $poste, $numero !== '' ? $numero : null, $dateNaissance]);
+                    $stmt = $pdo->prepare("INSERT INTO Joueur (Num_Licence, Nom, Prenom, Date_Naissance, Taille, Poids, Statut) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                    $stmt->execute([$numLicence, $nom, $prenom, $dateNaissance_value, $taille_value, $poids_value, $statut]);
                     $success = 'Joueur ajouté avec succès!';
                     $id = $pdo->lastInsertId();
-                    $joueur = compact('nom', 'prenom', 'poste', 'numero', 'dateNaissance');
+                    $joueur = compact('nom', 'prenom', 'dateNaissance', 'taille', 'poids', 'statut');
                     $joueur['Id_Joueur'] = $id;
                     $joueur['Num_Licence'] = $numLicence;
                 }
@@ -123,6 +129,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/SENTAYEHU_HISABU_PHP/Vue/matchs/calendrier.php"><i class="bi bi-calendar3"></i> Matchs</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/SENTAYEHU_HISABU_PHP/statistiques.php"><i class="bi bi-graph-up"></i> Statistiques</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/SENTAYEHU_HISABU_PHP/logout.php"><i class="bi bi-box-arrow-right"></i> Déconnexion</a>
@@ -167,6 +176,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div style="background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); padding: 2rem; max-width: 600px; margin: 0 auto;">
             <form method="POST" action="">
                 <div class="mb-3">
+                    <label for="numLicence" class="form-label fw-bold">Numéro de Licence *</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        id="numLicence"
+                        name="numLicence"
+                        value="<?php echo htmlspecialchars($joueur['Num_Licence'] ?? ''); ?>"
+                        required
+                        placeholder="Entrez le numéro de licence"
+                    >
+                </div>
+
+                <div class="mb-3">
                     <label for="nom" class="form-label fw-bold">Nom *</label>
                     <input 
                         type="text" 
@@ -176,19 +198,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         value="<?php echo htmlspecialchars($joueur['Nom'] ?? ''); ?>"
                         required
                         placeholder="Entrez le nom"
-                    >
-                </div>
-
-                <div class="mb-3">
-                    <label for="numLicence" class="form-label fw-bold">Numéro de Licence *</label>
-                    <input
-                        type="number"
-                        class="form-control"
-                        id="numLicence"
-                        name="numLicence"
-                        value="<?php echo htmlspecialchars($joueur['Num_Licence'] ?? $joueur['Num_Licence'] ?? ''); ?>"
-                        required
-                        placeholder="Entrez le numéro de licence"
                     >
                 </div>
 
@@ -206,40 +215,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <div class="mb-3">
-                    <label for="poste" class="form-label fw-bold">Poste</label>
-                    <select class="form-control" id="poste" name="poste">
-                        <option value="">Sélectionner un poste</option>
-                        <?php foreach ($postes as $p): ?>
-                            <option value="<?php echo htmlspecialchars($p); ?>" <?php echo ($joueur['Poste'] ?? '') === $p ? 'selected' : ''; ?>>
-                                <?php echo htmlspecialchars($p); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-
-                <div class="mb-3">
-                    <label for="numero" class="form-label fw-bold">Numéro de Maillot</label>
-                    <input 
-                        type="number" 
-                        class="form-control" 
-                        id="numero" 
-                        name="numero" 
-                        value="<?php echo htmlspecialchars($joueur['Numero'] ?? ''); ?>"
-                        min="1"
-                        max="99"
-                        placeholder="Ex: 7"
-                    >
-                </div>
-
-                <div class="mb-3">
                     <label for="dateNaissance" class="form-label fw-bold">Date de Naissance</label>
                     <input 
                         type="date" 
                         class="form-control" 
                         id="dateNaissance" 
                         name="dateNaissance" 
-                        value="<?php echo htmlspecialchars($joueur['DateNaissance'] ?? ''); ?>"
+                        value="<?php echo htmlspecialchars($joueur['Date_Naissance'] ?? ''); ?>"
                     >
+                </div>
+
+                <div class="mb-3">
+                    <label for="taille" class="form-label fw-bold">Taille (cm)</label>
+                    <input 
+                        type="number" 
+                        class="form-control" 
+                        id="taille" 
+                        name="taille" 
+                        value="<?php echo htmlspecialchars($joueur['Taille'] ?? ''); ?>"
+                        min="1"
+                        placeholder="Ex: 180"
+                    >
+                </div>
+
+                <div class="mb-3">
+                    <label for="poids" class="form-label fw-bold">Poids (kg)</label>
+                    <input 
+                        type="number" 
+                        class="form-control" 
+                        id="poids" 
+                        name="poids" 
+                        value="<?php echo htmlspecialchars($joueur['Poids'] ?? ''); ?>"
+                        min="1"
+                        step="0.1"
+                        placeholder="Ex: 75"
+                    >
+                </div>
+
+                <div class="mb-3">
+                    <label for="statut" class="form-label fw-bold">Statut *</label>
+                    <select class="form-control" id="statut" name="statut" required>
+                        <option value="">Sélectionner un statut</option>
+                        <?php foreach ($statuts as $s): ?>
+                            <option value="<?php echo htmlspecialchars($s); ?>" <?php echo ($joueur['Statut'] ?? '') === $s ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($s); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
 
                 <div style="display: flex; gap: 1rem; margin-top: 2rem;">
@@ -275,21 +297,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             const form = document.querySelector('form');
             form.addEventListener('submit', function (e) {
                 const numLicence = document.getElementById('numLicence').value.trim();
-                const numero = document.getElementById('numero').value.trim();
-                const licenceRegex = /^\d{5}$/;
-                if (!licenceRegex.test(numLicence)) {
+                const statut = document.getElementById('statut').value.trim();
+                const taille = document.getElementById('taille').value.trim();
+                const poids = document.getElementById('poids').value.trim();
+                if (statut === '') {
                     e.preventDefault();
-                    alert('Le numéro de licence doit contenir exactement 5 chiffres (pas de lettres).');
+                    alert('Le statut est obligatoire.');
                     return false;
                 }
-                if (numero !== '') {
-                    const n = parseInt(numero, 10);
-                    if (isNaN(n) || n < 1 || n > 99) {
+                
+                if (taille !== '') {
+                    const t = parseFloat(taille);
+                    if (isNaN(t) || t <= 0) {
                         e.preventDefault();
-                        alert('Le numéro de maillot doit être un nombre entier entre 1 et 99.');
+                        alert('La taille doit être un nombre positif.');
                         return false;
                     }
                 }
+                
+                if (poids !== '') {
+                    const p = parseFloat(poids);
+                    if (isNaN(p) || p <= 0) {
+                        e.preventDefault();
+                        alert('Le poids doit être un nombre positif.');
+                        return false;
+                    }
+                }
+                
                 return true;
             });
         });

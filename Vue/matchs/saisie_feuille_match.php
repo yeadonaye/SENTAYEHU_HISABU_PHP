@@ -24,7 +24,7 @@ if (!$match) {
 }
 
 // Récupérer tous les joueurs actifs
-$stmt = $pdo->query("SELECT * FROM Joueur WHERE Statut = 'Actif' ORDER BY Nom, Prenom");
+$stmt = $pdo->query("SELECT * FROM Joueur WHERE Statut != 'Blessé' ORDER BY Nom, Prenom");
 $joueurs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Récupérer les postes possibles
@@ -101,29 +101,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Récupérer les commentaires et notes pour les joueurs
-$stmt = $pdo->query('
-    SELECT Id_Joueur, Description, Date_ FROM Commentaire ORDER BY Date_ DESC
-');
 $commentaires = [];
-while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-    $joueurId = $row['Id_Joueur'];
-    if (!isset($commentaires[$joueurId])) {
-        $commentaires[$joueurId] = [];
+try {
+    $stmt = $pdo->query('
+        SELECT Id_Joueur, Description, Date_ FROM Commentaire ORDER BY Date_ DESC
+    ');
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $joueurId = $row['Id_Joueur'];
+        if (!isset($commentaires[$joueurId])) {
+            $commentaires[$joueurId] = [];
+        }
+        $commentaires[$joueurId][] = $row;
     }
-    $commentaires[$joueurId][] = $row;
+} catch (PDOException $e) {
+    // La table Commentaire ou la colonne Date_ peut ne pas exister
+    $commentaires = [];
 }
 
 // Récupérer les notes pour les joueurs
-$stmt = $pdo->query('
-    SELECT Id_Joueur, Note FROM Participer WHERE Note IS NOT NULL
-');
 $notes = [];
-while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-    $joueurId = $row['Id_Joueur'];
-    if (!isset($notes[$joueurId])) {
-        $notes[$joueurId] = [];
+try {
+    $stmt = $pdo->query('
+        SELECT Id_Joueur, Note FROM Participer WHERE Note IS NOT NULL
+    ');
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $joueurId = $row['Id_Joueur'];
+        if (!isset($notes[$joueurId])) {
+            $notes[$joueurId] = [];
+        }
+        $notes[$joueurId][] = $row['Note'];
     }
-    $notes[$joueurId][] = $row['Note'];
+} catch (PDOException $e) {
+    // La table Participer peut ne pas avoir la colonne Note
+    $notes = [];
 }
 ?>
 
@@ -209,6 +219,26 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             font-weight: bold;
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
+        .disabled-player {
+            opacity: 0.5;
+            pointer-events: none;
+            background-color: #f5f5f5 !important;
+        }
+        .disabled-player input[type="checkbox"],
+        .disabled-player select {
+            cursor: not-allowed;
+        }
+        .joueur-card.injured {
+            border: 2px solid #ccc;
+            background-color: #e8e8e8;
+            opacity: 0.6;
+            cursor: not-allowed !important;
+        }
+        .joueur-card.injured input[type="checkbox"],
+        .joueur-card.injured select {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
     </style>
 </head>
 <body>
@@ -281,13 +311,17 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                     <?php foreach ($joueurs as $joueur):
                         $joueurId = $joueur['Id_Joueur'];
                         $isTitulaire = isset($composition[$joueurId]) && $composition[$joueurId]['Titulaire_ou_pas'];
+                        $isBlessé = stripos($joueur['Statut'], 'bless') !== false;
                     ?>
                         <div class="col-lg-4 col-md-6">
-                            <div class="joueur-card" onclick="toggleJoueur(this, 'titulaires', <?php echo $joueurId; ?>)">
+                            <div class="joueur-card <?php echo $isBlessé ? 'injured' : ''; ?>" onclick="<?php echo !$isBlessé ? "toggleJoueur(this, 'titulaires', " . $joueurId . ")" : 'return false;'; ?>" style="<?php echo $isBlessé ? 'cursor: not-allowed;' : ''; ?>">
                                 <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
                                     <input type="checkbox" name="titulaires" value="<?php echo $joueurId; ?>" 
-                                        <?php echo $isTitulaire ? 'checked' : ''; ?> style="margin-right: 0.5rem;">
+                                        <?php echo $isTitulaire ? 'checked' : ''; ?> style="margin-right: 0.5rem;" <?php echo $isBlessé ? 'disabled' : ''; ?>>
                                     <strong><?php echo htmlspecialchars($joueur['Nom'] . ' ' . $joueur['Prenom']); ?></strong>
+                                    <?php if ($isBlessé): ?>
+                                        <span style="margin-left: auto; background-color: #ff6b6b; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: bold;">BLESSÉ</span>
+                                    <?php endif; ?>
                                 </div>
 
                                 <div class="joueur-info">
@@ -295,7 +329,7 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                                     <div><i class="bi bi-weight"></i> Poids: <?php echo $joueur['Poids']; ?> kg</div>
                                 </div>
 
-                                <select name="poste_titulaires[<?php echo $joueurId; ?>]" class="form-select poste-select" required>
+                                <select name="poste_titulaires[<?php echo $joueurId; ?>]" class="form-select poste-select" data-joueur-id="<?php echo $joueurId; ?>" data-type="titulaires">
                                     <option value="">-- Sélectionner un poste --</option>
                                     <?php foreach ($postes as $poste): ?>
                                         <option value="<?php echo $poste; ?>"
@@ -344,13 +378,17 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                     <?php foreach ($joueurs as $joueur):
                         $joueurId = $joueur['Id_Joueur'];
                         $isRemplacant = isset($composition[$joueurId]) && !$composition[$joueurId]['Titulaire_ou_pas'];
+                        $isBlessé = stripos($joueur['Statut'], 'bless') !== false;
                     ?>
                         <div class="col-lg-4 col-md-6">
-                            <div class="joueur-card" onclick="toggleJoueur(this, 'remplacants', <?php echo $joueurId; ?>)">
+                            <div class="joueur-card <?php echo $isBlessé ? 'injured' : ''; ?>" onclick="<?php echo !$isBlessé ? "toggleJoueur(this, 'remplacants', " . $joueurId . ")" : 'return false;'; ?>" style="<?php echo $isBlessé ? 'cursor: not-allowed;' : ''; ?>">
                                 <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
                                     <input type="checkbox" name="remplacants" value="<?php echo $joueurId; ?>" 
-                                        <?php echo $isRemplacant ? 'checked' : ''; ?> style="margin-right: 0.5rem;">
+                                        <?php echo $isRemplacant ? 'checked' : ''; ?> style="margin-right: 0.5rem;" <?php echo $isBlessé ? 'disabled' : ''; ?>>
                                     <strong><?php echo htmlspecialchars($joueur['Nom'] . ' ' . $joueur['Prenom']); ?></strong>
+                                    <?php if ($isBlessé): ?>
+                                        <span style="margin-left: auto; background-color: #ff6b6b; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: bold;">BLESSÉ</span>
+                                    <?php endif; ?>
                                 </div>
 
                                 <div class="joueur-info">
@@ -358,7 +396,7 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                                     <div><i class="bi bi-weight"></i> Poids: <?php echo $joueur['Poids']; ?> kg</div>
                                 </div>
 
-                                <select name="poste_remplacants[<?php echo $joueurId; ?>]" class="form-select poste-select">
+                                <select name="poste_remplacants[<?php echo $joueurId; ?>]" class="form-select poste-select" data-joueur-id="<?php echo $joueurId; ?>" data-type="remplacants">
                                     <option value="">-- Sélectionner un poste --</option>
                                     <?php foreach ($postes as $poste): ?>
                                         <option value="<?php echo $poste; ?>"
@@ -418,10 +456,45 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
     <script>
         function toggleJoueur(element, type, joueurId) {
             const checkbox = element.querySelector('input[type="checkbox"]');
+            const othersContainer = type === 'titulaires' ? document.getElementById('remplacants-container') : document.getElementById('titulaires-container');
+            
             checkbox.checked = !checkbox.checked;
             updateCardStyle(element, checkbox.checked);
+            updatePosteValidation(checkbox.checked, type, joueurId);
+            
+            // Si on sélectionne un joueur, le désactiver dans l'autre section
+            if (checkbox.checked) {
+                const otherCheckbox = othersContainer.querySelector(`input[value="${joueurId}"]`);
+                if (otherCheckbox) {
+                    otherCheckbox.checked = false;
+                    const otherCard = otherCheckbox.closest('.joueur-card');
+                    updateCardStyle(otherCard, false);
+                    otherCard.classList.add('disabled-player');
+                    const otherType = type === 'titulaires' ? 'remplacants' : 'titulaires';
+                    updatePosteValidation(false, otherType, joueurId);
+                }
+            } else {
+                const otherCheckbox = othersContainer.querySelector(`input[value="${joueurId}"]`);
+                if (otherCheckbox) {
+                    const otherCard = otherCheckbox.closest('.joueur-card');
+                    otherCard.classList.remove('disabled-player');
+                }
+            }
+            
             updateCounter();
             validateForm();
+        }
+
+        function updatePosteValidation(isSelected, type, joueurId) {
+            const posteSelect = document.querySelector(`select[name="poste_${type}[${joueurId}]"]`);
+            if (posteSelect) {
+                if (isSelected) {
+                    posteSelect.setAttribute('required', 'required');
+                } else {
+                    posteSelect.removeAttribute('required');
+                    posteSelect.value = '';
+                }
+            }
         }
 
         function updateCardStyle(element, isChecked) {
@@ -440,8 +513,19 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         function validateForm() {
             const titulaires = document.querySelectorAll('input[name="titulaires"]:checked').length;
             const submitBtn = document.getElementById('submit-btn');
+            let posteValid = true;
             
-            if (titulaires >= 11) {
+            // Valider que tous les joueurs sélectionnés ont un poste
+            document.querySelectorAll('input[type="checkbox"]:checked').forEach(checkbox => {
+                const joueurId = checkbox.value;
+                const type = checkbox.name;
+                const posteSelect = document.querySelector(`select[name="poste_${type}[${joueurId}]"]`);
+                if (posteSelect && posteSelect.value === '') {
+                    posteValid = false;
+                }
+            });
+            
+            if (titulaires >= 11 && posteValid) {
                 submitBtn.disabled = false;
                 submitBtn.classList.remove('btn-danger');
             } else {
@@ -452,9 +536,37 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
 
         // Initialiser au chargement de la page
         document.addEventListener('DOMContentLoaded', () => {
+            // Initialiser les cartes sélectionnées
             document.querySelectorAll('.joueur-card input[type="checkbox"]:checked').forEach(checkbox => {
+                const joueurId = checkbox.value;
+                const type = checkbox.name;
                 updateCardStyle(checkbox.closest('.joueur-card'), true);
+                updatePosteValidation(true, type, joueurId);
             });
+            
+            // Désactiver les doublons entre titulaires et remplaçants
+            const titulairesContainer = document.getElementById('titulaires-container');
+            const remplacants = document.getElementById('remplacants-container');
+            
+            document.querySelectorAll('input[name="titulaires"]:checked').forEach(checkbox => {
+                const joueurId = checkbox.value;
+                const otherCheckbox = remplacants.querySelector(`input[value="${joueurId}"]`);
+                if (otherCheckbox) {
+                    const otherCard = otherCheckbox.closest('.joueur-card');
+                    otherCard.classList.add('disabled-player');
+                }
+            });
+            
+            // Ajouter les event listeners sur les checkboxes
+            document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', validateForm);
+            });
+            
+            // Ajouter les event listeners sur les selects de poste
+            document.querySelectorAll('select[class*="poste-select"]').forEach(select => {
+                select.addEventListener('change', validateForm);
+            });
+            
             updateCounter();
             validateForm();
         });

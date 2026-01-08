@@ -19,6 +19,15 @@ if ($id) {
     }
 }
 
+// Show success message after redirect (Post-Redirect-Get)
+if (isset($_GET['success'])) {
+    if ($_GET['success'] === 'modified') {
+        $success = 'Match modifié avec succès!';
+    } elseif ($_GET['success'] === 'created') {
+        $success = 'Match ajouté avec succès!';
+    }
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nomEquipeAdverse = $_POST['nomEquipeAdverse'] ?? '';
     $dateRencontre = $_POST['dateRencontre'] ?? '';
@@ -31,34 +40,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Les champs avec * sont obligatoires';
     } else {
         try {
-            // Déterminer le résultat si les scores sont fournis
+            // Créer le résultat au format "3-2" si les scores sont fournis
             $resultat = null;
             if ($scoreNous !== '' && $scoreAdverse !== '') {
                 $sN = (int)$scoreNous;
                 $sA = (int)$scoreAdverse;
-                if ($sN > $sA) $resultat = 'Victoire';
-                elseif ($sN < $sA) $resultat = 'Défaite';
-                else $resultat = 'Nul';
+                $resultat = $sN . '-' . $sA;
             }
 
             if ($id) {
                 // Modification
                 $stmt = $pdo->prepare('
                     UPDATE `Match_` 
-                    SET Nom_Equipe_Adverse = ?, Date_Rencontre = ?, Heure = ?, Lieu = ?, Score_Nous = ?, Score_Adverse = ?, Resultat = ? 
+                    SET Nom_Equipe_Adverse = ?, Date_Rencontre = ?, Heure = ?, Lieu = ?, Resultat = ? 
                     WHERE Id_Match = ?
                 ');
-                $stmt->execute([$nomEquipeAdverse, $dateRencontre, $heure, $lieu, $scoreNous !== '' ? $scoreNous : null, $scoreAdverse !== '' ? $scoreAdverse : null, $resultat, $id]);
-                $success = 'Match modifié avec succès!';
+                $stmt->execute([$nomEquipeAdverse, $dateRencontre, $heure, $lieu, $resultat, $id]);
+                // Redirect to reload fresh data from DB (Post-Redirect-Get)
+                header('Location: ajouter_match.php?id=' . $id . '&success=modified');
+                exit;
             } else {
                 // Ajout
                 $stmt = $pdo->prepare('
-                    INSERT INTO `Match_` (Nom_Equipe_Adverse, Date_Rencontre, Heure, Lieu, Score_Nous, Score_Adverse, Resultat) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                    INSERT INTO `Match_` (Nom_Equipe_Adverse, Date_Rencontre, Heure, Lieu, Resultat) 
+                    VALUES (?, ?, ?, ?, ?)
                 ');
-                $stmt->execute([$nomEquipeAdverse, $dateRencontre, $heure, $lieu, $scoreNous !== '' ? $scoreNous : null, $scoreAdverse !== '' ? $scoreAdverse : null, $resultat]);
-                $success = 'Match ajouté avec succès!';
+                $stmt->execute([$nomEquipeAdverse, $dateRencontre, $heure, $lieu, $resultat]);
                 $id = $pdo->lastInsertId();
+                // Redirect to the edit page for the newly created match
+                header('Location: ajouter_match.php?id=' . $id . '&success=created');
+                exit;
             }
         } catch (PDOException $e) {
             $error = 'Erreur lors de l\'enregistrement: ' . $e->getMessage();
@@ -96,6 +107,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </li>
                     <li class="nav-item">
                         <a class="nav-link active" href="/SENTAYEHU_HISABU_PHP/Vue/matchs/calendrier.php"><i class="bi bi-calendar3"></i> Matchs</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/SENTAYEHU_HISABU_PHP/statistiques.php"><i class="bi bi-graph-up"></i> Statistiques</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/SENTAYEHU_HISABU_PHP/logout.php"><i class="bi bi-box-arrow-right"></i> Déconnexion</a>
@@ -195,10 +209,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <label for="scoreNous" class="form-label fw-bold">Notre Score</label>
                         <input 
                             type="number" 
-                            class="form-control" 
+                            class="form-control score-input" 
                             id="scoreNous" 
                             name="scoreNous" 
-                            value="<?php echo htmlspecialchars($match['Score_Nous'] ?? ''); ?>"
+                            value="<?php 
+                                $scoreNous = '';
+                                if (isset($match['Resultat']) && !empty($match['Resultat'])) {
+                                    $scores = explode('-', $match['Resultat']);
+                                    $scoreNous = $scores[0] ?? '';
+                                }
+                                echo htmlspecialchars($scoreNous);
+                            ?>"
                             min="0"
                             placeholder="0"
                         >
@@ -208,10 +229,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <label for="scoreAdverse" class="form-label fw-bold">Score Adverse</label>
                         <input 
                             type="number" 
-                            class="form-control" 
+                            class="form-control score-input" 
                             id="scoreAdverse" 
                             name="scoreAdverse" 
-                            value="<?php echo htmlspecialchars($match['Score_Adverse'] ?? ''); ?>"
+                            value="<?php 
+                                $scoreAdverse = '';
+                                if (isset($match['Resultat']) && !empty($match['Resultat'])) {
+                                    $scores = explode('-', $match['Resultat']);
+                                    $scoreAdverse = $scores[1] ?? '';
+                                }
+                                echo htmlspecialchars($scoreAdverse);
+                            ?>"
                             min="0"
                             placeholder="0"
                         >
@@ -246,5 +274,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function checkMatchDate() {
+            const dateInput = document.getElementById('dateRencontre').value;
+            const heureInput = document.getElementById('heure').value;
+            const scoreNous = document.getElementById('scoreNous');
+            const scoreAdverse = document.getElementById('scoreAdverse');
+            
+            if (!dateInput || !heureInput) {
+                scoreNous.disabled = true;
+                scoreAdverse.disabled = true;
+                return;
+            }
+            
+            // Combiner la date et l'heure pour créer un DateTime
+            const matchDateTime = new Date(dateInput + 'T' + heureInput);
+            const now = new Date();
+            
+            // Désactiver les scores si le match est dans le futur
+            if (matchDateTime > now) {
+                scoreNous.disabled = true;
+                scoreAdverse.disabled = true;
+                scoreNous.title = 'Les scores ne peuvent être saisis que si le match est terminé';
+                scoreAdverse.title = 'Les scores ne peuvent être saisis que si le match est terminé';
+            } else {
+                scoreNous.disabled = false;
+                scoreAdverse.disabled = false;
+                scoreNous.title = '';
+                scoreAdverse.title = '';
+            }
+        }
+        
+        // Vérifier la date au chargement et au changement
+        document.addEventListener('DOMContentLoaded', () => {
+            checkMatchDate();
+            
+            document.getElementById('dateRencontre').addEventListener('change', checkMatchDate);
+            document.getElementById('heure').addEventListener('change', checkMatchDate);
+        });
+    </script>
 </body>
 </html>
