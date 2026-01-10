@@ -1,6 +1,9 @@
 <?php
-require_once '../../auth.php';
+require_once __DIR__ . '/../../Modele/DAO/auth.php';
 requireAuth();
+
+// Compute project root for redirects
+$projectRoot = dirname($_SERVER['SCRIPT_NAME'], 2);
 
 $pdo = getDBConnection();
 $id = $_GET['id'] ?? null;
@@ -14,6 +17,6 @@ if ($id) {
     }
 }
 
-header('Location: calendrier.php');
+header('Location: ' . $projectRoot . '/Vue/Afficher/afficher_match.php');
 exit;
 ?>

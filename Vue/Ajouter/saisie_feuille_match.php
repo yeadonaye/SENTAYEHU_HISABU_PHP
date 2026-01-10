@@ -1,6 +1,9 @@
 <?php
-require_once '../../auth.php';
+require_once __DIR__ . '/../../Modele/DAO/auth.php';
 requireAuth();
+
+// Compute project root for redirects
+$projectRoot = dirname($_SERVER['SCRIPT_NAME'], 2);
 
 $pdo = getDBConnection();
 $error = '';
@@ -9,7 +12,7 @@ $success = '';
 // Récupérer l'ID du match
 $matchId = $_GET['id'] ?? null;
 if (!$matchId) {
-    header('Location: calendrier.php');
+    header('Location: ' . $projectRoot . '/Vue/Afficher/afficher_match.php');
     exit;
 }
 
@@ -19,7 +22,7 @@ $stmt->execute([':id' => $matchId]);
 $match = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$match) {
-    header('Location: calendrier.php');
+    header('Location: ' . $projectRoot . '/Vue/Afficher/afficher_match.php');
     exit;
 }
 
@@ -169,7 +172,7 @@ try {
             grid-template-columns: 1fr 1fr;
             gap: 0.5rem;
             font-size: 0.9rem;
-            color: #666;
+            color: #666666;
         }
         .poste-select {
             margin-top: 0.5rem;
@@ -243,33 +246,7 @@ try {
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark sticky-top navbar-custom">
-        <div class="container-fluid">
-            <a class="navbar-brand fw-bold" href="/SENTAYEHU_HISABU_PHP/index.php"><img src="../img/logo.png" alt="Logo Liverpool FC"> Liverpool FC</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/SENTAYEHU_HISABU_PHP/index.php"><i class="bi bi-house-door"></i> Accueil</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/SENTAYEHU_HISABU_PHP/Vue/joueurs/liste_joueurs.php"><i class="bi bi-people"></i> Joueurs</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="/SENTAYEHU_HISABU_PHP/Vue/matchs/calendrier.php"><i class="bi bi-calendar3"></i> Matchs</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/SENTAYEHU_HISABU_PHP/statistiques.php"><i class="bi bi-graph-up"></i> Statistiques</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/SENTAYEHU_HISABU_PHP/logout.php"><i class="bi bi-box-arrow-right"></i> Déconnexion</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+    <?php include '../partials/navbar.php'; ?>
 
     <!-- Page Header -->
     <div style="background: linear-gradient(135deg, #C8102E 0%, #E8283C 100%); color: white; padding: 2rem 0; margin-bottom: 2rem;">

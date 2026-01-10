@@ -1,5 +1,6 @@
 <?php
-require_once 'auth.php';
+// auth.php lives in Modele/DAO; require it relative to this view
+require_once __DIR__ . '/../../Modele/DAO/auth.php';
 requireAuth();
 
 $pdo = getDBConnection();
@@ -105,38 +106,12 @@ try {
     <title>Statistiques</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="Vue/CSS/common.css">
-    <link rel="stylesheet" href="Vue/CSS/index.css">
+    <link rel="stylesheet" href="../CSS/common.css">
+    <link rel="stylesheet" href="../CSS/index.css">
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark sticky-top navbar-custom">
-        <div class="container-fluid">
-            <a class="navbar-brand fw-bold" href="/SENTAYEHU_HISABU_PHP/index.php"><i class="bi bi-shield-check"></i> Gestion des Joueurs</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/SENTAYEHU_HISABU_PHP/index.php"><i class="bi bi-house-door"></i> Accueil</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/SENTAYEHU_HISABU_PHP/Vue/joueurs/liste_joueurs.php"><i class="bi bi-people"></i> Joueurs</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/SENTAYEHU_HISABU_PHP/Vue/matchs/calendrier.php"><i class="bi bi-calendar3"></i> Matchs</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="/SENTAYEHU_HISABU_PHP/statistiques.php"><i class="bi bi-graph-up"></i> Statistiques</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/SENTAYEHU_HISABU_PHP/logout.php"><i class="bi bi-box-arrow-right"></i> Déconnexion</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+    <?php include '../partials/navbar.php'; ?>
 
     <!-- Page Header -->
     <div style="background: linear-gradient(135deg, #C8102E 0%, #E8283C 100%); color: white; padding: 2rem 0; margin-bottom: 2rem;">
@@ -314,63 +289,22 @@ try {
                     </div>
                     <div class="section-body">
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                            <a href="Vue/joueurs/liste_joueurs.php" style="padding: 1.25rem; background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); color: white; border-radius: 8px; text-decoration: none; text-align: center; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 24px rgba(52, 152, 219, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                            <a href="liste_joueurs.php" style="padding: 1.25rem; background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); color: white; border-radius: 8px; text-decoration: none; text-align: center; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 24px rgba(52, 152, 219, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
                                 <i class="bi bi-person-plus" style="display: block; font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
                                 <strong>Ajouter un Joueur</strong>
                             </a>
 
-                            <a href="Vue/matchs/calendrier.php" style="padding: 1.25rem; background: linear-gradient(135deg, #27ae60 0%, #229954 100%); color: white; border-radius: 8px; text-decoration: none; text-align: center; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 24px rgba(39, 174, 96, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                            <a href="../matchs/calendrier.php" style="padding: 1.25rem; background: linear-gradient(135deg, #27ae60 0%, #229954 100%); color: white; border-radius: 8px; text-decoration: none; text-align: center; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 24px rgba(39, 174, 96, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
                                 <i class="bi bi-calendar-plus" style="display: block; font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
                                 <strong>Planifier un Match</strong>
                             </a>
 
-                            <a href="Vue/joueurs/liste_joueurs.php" style="padding: 1.25rem; background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); color: white; border-radius: 8px; text-decoration: none; text-align: center; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 24px rgba(155, 89, 182, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                            <a href="liste_joueurs.php" style="padding: 1.25rem; background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); color: white; border-radius: 8px; text-decoration: none; text-align: center; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 24px rgba(155, 89, 182, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
                                 <i class="bi bi-people" style="display: block; font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
                                 <strong>Voir les Joueurs</strong>
                             </a>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Per-player table -->
-    <div class="container my-5">
-        <div class="section-card">
-            <div class="section-header">
-                <h2 class="section-title"><i class="bi bi-people"></i> Statistiques par Joueur</h2>
-            </div>
-            <div class="section-body">
-                <div style="overflow:auto">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Nom</th>
-                            <th>Statut</th>
-                            <th>Poste préféré</th>
-                            <th>Titulaires</th>
-                            <th>Remplaçants</th>
-                            <th>Moyenne notes</th>
-                            <th>% Victoires (lorsqu'il a joué)</th>
-                            <th>Sélections consécutives</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($players as $pl): ?>
-                            <tr>
-                                <td><?php echo htmlspecialchars($pl['Nom'] . ' ' . $pl['Prenom']); ?></td>
-                                <td><?php echo htmlspecialchars($pl['Statut'] ?? ''); ?></td>
-                                <td><?php echo htmlspecialchars($pl['Poste'] ?? ''); ?></td>
-                                <td><?php echo (int)($pl['starts'] ?? 0); ?></td>
-                                <td><?php echo (int)($pl['subs'] ?? 0); ?></td>
-                                <td><?php echo $pl['avgNote'] !== null ? $pl['avgNote'] . '/5' : '-'; ?></td>
-                                <td><?php echo $pl['winPercentWhenParticipated'] !== null ? $pl['winPercentWhenParticipated'] . '%' : '-'; ?></td>
-                                <td><?php echo (int)($pl['consecutiveSelections'] ?? 0); ?></td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
                 </div>
             </div>
         </div>

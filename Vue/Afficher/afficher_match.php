@@ -1,52 +1,3 @@
-<?php
-require_once '../../auth.php';
-requireAuth();
-
-$pdo = getDBConnection();
-$matchs = [];
-$error = '';
-
-try {
-    $stmt = $pdo->query('
-        SELECT * FROM `Match_` 
-        ORDER BY Date_Rencontre DESC, Heure DESC
-    ');
-    $matchs = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    $error = 'Erreur lors du chargement des matchs: ' . $e->getMessage();
-}
-
-// Récupérer la composition pour chaque match
-$compositions = [];
-foreach ($matchs as &$match) {
-    try {
-        $stmt = $pdo->prepare('
-            SELECT Titulaire_ou_pas FROM Participer 
-            WHERE Id_Match = :id
-        ');
-        $stmt->execute([':id' => $match['Id_Match']]);
-        $participations = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
-        $titulaires = 0;
-        $remplacants = 0;
-        foreach ($participations as $p) {
-            if ($p['Titulaire_ou_pas']) {
-                $titulaires++;
-            } else {
-                $remplacants++;
-            }
-        }
-        
-        $compositions[$match['Id_Match']] = [
-            'titulaires' => $titulaires,
-            'remplacants' => $remplacants
-        ];
-    } catch (PDOException $e) {
-        $compositions[$match['Id_Match']] = ['titulaires' => 0, 'remplacants' => 0];
-    }
-}
-?>
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -55,62 +6,14 @@ foreach ($matchs as &$match) {
     <title>Calendrier des Matchs</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="../../Vue/CSS/common.css">
-    <link rel="stylesheet" href="../../Vue/CSS/matchs.css">
+    <link rel="stylesheet" href="../CSS/common.css">
+    <link rel="stylesheet" href="../CSS/matchs.css">
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark sticky-top navbar-custom">
-        <div class="container-fluid">
-            <a class="navbar-brand fw-bold" href="/SENTAYEHU_HISABU_PHP/index.php"><i class="bi bi-shield-check"></i> Gestion des Joueurs</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/SENTAYEHU_HISABU_PHP/index.php"><i class="bi bi-house-door"></i> Accueil</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/SENTAYEHU_HISABU_PHP/Vue/joueurs/liste_joueurs.php"><i class="bi bi-people"></i> Joueurs</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="/SENTAYEHU_HISABU_PHP/Vue/matchs/calendrier.php"><i class="bi bi-calendar3"></i> Matchs</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/SENTAYEHU_HISABU_PHP/statistiques.php"><i class="bi bi-graph-up"></i> Statistiques</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/SENTAYEHU_HISABU_PHP/logout.php"><i class="bi bi-box-arrow-right"></i> Déconnexion</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Page Header -->
-    <div style="background: linear-gradient(135deg, #C8102E 0%, #E8283C 100%); color: white; padding: 2rem 0; margin-bottom: 2rem;">
-        <div class="container-fluid">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <h1 style="font-size: 2rem; font-weight: 700; margin: 0;"><i class="bi bi-calendar-event"></i> Calendrier des Matchs</h1>
-                    <p style="margin: 0.5rem 0 0; opacity: 0.9;">Tous vos matchs programmés</p>
-                </div>
-                <a href="ajouter_match.php" class="btn btn-light" style="font-weight: 600;">
-                    <i class="bi bi-plus-circle me-2"></i>Planifier un Match
-                </a>
-            </div>
-        </div>
-    </div>
-
+    <?php include '../partials/navbar.php'; ?>
+    
     <div class="container-fluid">
-        <?php if ($error): ?>
-            <div class="alert alert-danger" role="alert">
-                <i class="bi bi-exclamation-circle me-2"></i>
-                <?php echo htmlspecialchars($error); ?>
-            </div>
-        <?php endif; ?>
-
         <?php if (!empty($matchs)): ?>
             <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
                 <?php foreach ($matchs as $match): ?>
@@ -194,19 +97,7 @@ foreach ($matchs as &$match) {
         <?php endif; ?>
     </div>
 
-    <!-- Footer -->
-    <footer class="footer mt-5">
-        <div class="footer-content">
-            <div style="text-align: center;">
-                <h5 class="footer-title">Gestion des Joueurs</h5>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <div class="container text-center">
-                <p class="mb-0">&copy; <?php echo date('Y'); ?> Gestion des Joueurs. Tous droits réservés.</p>
-            </div>
-        </div>
-    </footer>
+    <?php include '../partials/footer.php'; ?>
 
     <style>
         .match-card:hover {
