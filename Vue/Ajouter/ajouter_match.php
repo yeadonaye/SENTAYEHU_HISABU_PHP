@@ -2,8 +2,10 @@
 require_once __DIR__ . '/../../Modele/DAO/auth.php';
 requireAuth();
 
-// Compute project root for redirects
-$projectRoot = dirname($_SERVER['SCRIPT_NAME'], 2);
+// Compute application base (first path segment) for reliable redirects
+$script = str_replace('\\','/', $_SERVER['SCRIPT_NAME'] ?? '');
+$parts = explode('/', trim($script, '/'));
+$base = '/' . ($parts[0] ?? '');
 
 $pdo = getDBConnection();
 $match = [];
@@ -60,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ');
                 $stmt->execute([$nomEquipeAdverse, $dateRencontre, $heure, $lieu, $resultat, $id]);
                 // Redirect to reload fresh data from DB (Post-Redirect-Get)
-                header('Location: ' . $projectRoot . '/Vue/Ajouter/ajouter_match.php?id=' . $id . '&success=modified');
+                header('Location: ' . $base . '/Vue/Ajouter/ajouter_match.php?id=' . $id . '&success=modified');
                 exit;
             } else {
                 // Ajout
@@ -71,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->execute([$nomEquipeAdverse, $dateRencontre, $heure, $lieu, $resultat]);
                 $id = $pdo->lastInsertId();
                 // Redirect to the edit page for the newly created match
-                header('Location: ' . $projectRoot . '/Vue/Ajouter/ajouter_match.php?id=' . $id . '&success=created');
+                header('Location: ' . $base . '/Vue/Ajouter/ajouter_match.php?id=' . $id . '&success=created');
                 exit;
             }
         } catch (PDOException $e) {
@@ -106,7 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <?php echo $id ? 'Modifier un Match' : 'Planifier un Match'; ?>
                     </h1>
                 </div>
-                <a href="calendrier.php" class="btn btn-light" style="font-weight: 600;">
+                <a href="<?php echo $base; ?>/Vue/Afficher/afficher_match.php" class="btn btn-light" style="font-weight: 600;">
                     <i class="bi bi-arrow-left me-2"></i>Retour
                 </a>
             </div>
@@ -228,7 +230,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <i class="bi bi-check-circle me-2"></i>
                         <?php echo $id ? 'Modifier' : 'Ajouter'; ?>
                     </button>
-                    <a href="calendrier.php" class="btn btn-secondary" style="flex: 1; font-weight: 600; padding: 0.75rem; text-decoration: none; display: flex; align-items: center; justify-content: center;">
+                    <a href="<?php echo $base; ?>/Vue/Afficher/afficher_match.php" class="btn btn-secondary" style="flex: 1; font-weight: 600; padding: 0.75rem; text-decoration: none; display: flex; align-items: center; justify-content: center;">
                         <i class="bi bi-x-circle me-2"></i>Annuler
                     </a>
                 </div>

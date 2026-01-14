@@ -1,3 +1,4 @@
+<?php include '../../Controleur/afficher/afficher_match.php'; ?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -74,10 +75,10 @@
                                 <a href="saisie_feuille_match.php?id=<?php echo $match['Id_Match']; ?>" class="btn btn-sm btn-success" style="flex: 1;">
                                     <i class="bi bi-clipboard2-data me-1"></i>Composer l'équipe
                                 </a>
-                                <a href="modifier_match.php?id=<?php echo $match['Id_Match']; ?>" class="btn btn-sm btn-outline-primary" style="flex: 1;">
+                                <a href="../Modifier/modifier_match.php?id=<?php echo $match['Id_Match']; ?>" class="btn btn-sm btn-outline-primary" style="flex: 1;">
                                     <i class="bi bi-pencil me-1"></i>Modifier
                                 </a>
-                                <a href="supprimer_match.php?id=<?php echo $match['Id_Match']; ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Êtes-vous sûr?')" style="flex: 1;">
+                                <a href="../../Controleur/suppirmer/supprimer_match.php?id=<?php echo $match['Id_Match']; ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Êtes-vous sûr?')" style="flex: 1;">
                                     <i class="bi bi-trash me-1"></i>Supprimer
                                 </a>
                             </div>

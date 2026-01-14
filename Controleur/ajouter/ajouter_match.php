@@ -2,8 +2,10 @@
 require_once __DIR__ . '/../../Modele/DAO/auth.php';
 requireAuth();
 
-// Compute project root for redirects (e.g. /SENTAYEHU_HISABU_PHP)
-$projectRoot = dirname($_SERVER['SCRIPT_NAME'], 2);
+// Compute application base (first path segment) for reliable redirects (e.g. /SENTAYEHU_HISABU_PHP)
+$script = str_replace('\\','/', $_SERVER['SCRIPT_NAME'] ?? '');
+$parts = explode('/', trim($script, '/'));
+$base = '/' . ($parts[0] ?? '');
 
 $pdo = getDBConnection();
 $match = [];
@@ -60,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ');
                 $stmt->execute([$nomEquipeAdverse, $dateRencontre, $heure, $lieu, $resultat, $id]);
                 // Redirect to reload fresh data from DB (Post-Redirect-Get)
-                header('Location: ' . $projectRoot . '/Vue/Ajouter/ajouter_match.php?id=' . $id . '&success=modified');
+                header('Location: ' . $base . '/Vue/Ajouter/ajouter_match.php?id=' . $id . '&success=modified');
                 exit;
             } else {
                 // Ajout
@@ -71,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->execute([$nomEquipeAdverse, $dateRencontre, $heure, $lieu, $resultat]);
                 $id = $pdo->lastInsertId();
                 // Redirect to the edit page for the newly created match
-                header('Location: ' . $projectRoot . '/Vue/Ajouter/ajouter_match.php?id=' . $id . '&success=created');
+                header('Location: ' . $base . '/Vue/Ajouter/ajouter_match.php?id=' . $id . '&success=created');
                 exit;
             }
         } catch (PDOException $e) {

@@ -2,8 +2,10 @@
 require_once __DIR__ . '/../../Modele/DAO/auth.php';
 requireAuth();
 
-// Compute project root for redirects
-$projectRoot = dirname($_SERVER['SCRIPT_NAME'], 2);
+// Compute application base (first path segment) for reliable redirects
+$script = str_replace('\\','/', $_SERVER['SCRIPT_NAME'] ?? '');
+$parts = explode('/', trim($script, '/'));
+$base = '/' . ($parts[0] ?? '');
 
 $pdo = getDBConnection();
 $error = '';
@@ -12,7 +14,7 @@ $success = '';
 // Récupérer l'ID du match
 $matchId = $_GET['id'] ?? null;
 if (!$matchId) {
-    header('Location: ' . $projectRoot . '/Vue/Afficher/afficher_match.php');
+    header('Location: ' . $base . '/Vue/Afficher/afficher_match.php');
     exit;
 }
 
@@ -22,7 +24,7 @@ $stmt->execute([':id' => $matchId]);
 $match = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$match) {
-    header('Location: ' . $projectRoot . '/Vue/Afficher/afficher_match.php');
+    header('Location: ' . $base . '/Vue/Afficher/afficher_match.php');
     exit;
 }
 
