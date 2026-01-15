@@ -1,48 +1,36 @@
 <?php
-// Copied from Vue/matchs/calendrier.php
 require_once __DIR__ . '/../../Modele/DAO/auth.php';
+require_once __DIR__ . '/../../Modele/DAO/MatchDao.php';
 requireAuth();
 
 $pdo = getDBConnection();
+$matchDao = new MatchDao($pdo);
 $matchs = [];
 $error = '';
 
 try {
-    $stmt = $pdo->query('
-        SELECT * FROM `Match_` 
-        ORDER BY Date_Rencontre DESC, Heure DESC
-    ');
-    $matchs = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
+    $matchsObjects = $matchDao->getAll();
+    // Convert Match_ objects to arrays for template compatibility
+    foreach ($matchsObjects as $match) {
+        $matchs[] = [
+            'Id_Match' => $match->getIdMatch(),
+            'Date_Rencontre' => $match->getDateRencontre(),
+            'Heure' => $match->getHeure(),
+            'Nom_Equipe_Adverse' => $match->getNomEquipeAdverse(),
+            'Lieu' => $match->getLieu(),
+            'Resultat' => $match->getResultat()
+        ];
+    }
+} catch (Exception $e) {
     $error = 'Erreur lors du chargement des matchs: ' . $e->getMessage();
 }
 
 // Récupérer la composition pour chaque match
 $compositions = [];
-foreach ($matchs as &$match) {
+foreach ($matchs as $match) {
     try {
-        $stmt = $pdo->prepare('
-            SELECT Titulaire_ou_pas FROM Participer 
-            WHERE Id_Match = :id
-        ');
-        $stmt->execute([':id' => $match['Id_Match']]);
-        $participations = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
-        $titulaires = 0;
-        $remplacants = 0;
-        foreach ($participations as $p) {
-            if ($p['Titulaire_ou_pas']) {
-                $titulaires++;
-            } else {
-                $remplacants++;
-            }
-        }
-        
-        $compositions[$match['Id_Match']] = [
-            'titulaires' => $titulaires,
-            'remplacants' => $remplacants
-        ];
-    } catch (PDOException $e) {
+        $compositions[$match['Id_Match']] = $matchDao->getCompositionsByMatchId($match['Id_Match']);
+    } catch (Exception $e) {
         $compositions[$match['Id_Match']] = ['titulaires' => 0, 'remplacants' => 0];
     }
 }

@@ -1,5 +1,7 @@
 <?php
 require_once __DIR__ . '/../../Modele/DAO/auth.php';
+require_once __DIR__ . '/../../Modele/DAO/MatchDao.php';
+require_once __DIR__ . '/../../Modele/Match.php';
 requireAuth();
 
 // Compute application base (first path segment) for reliable redirects
@@ -8,6 +10,7 @@ $parts = explode('/', trim($script, '/'));
 $base = '/' . ($parts[0] ?? '');
 
 $pdo = getDBConnection();
+$matchDao = new MatchDao($pdo);
 $match = [];
 $error = '';
 $success = '';
@@ -16,10 +19,19 @@ $id = $_GET['id'] ?? null;
 
 if ($id) {
     try {
-        $stmt = $pdo->prepare('SELECT * FROM `Match_` WHERE Id_Match = ?');
-        $stmt->execute([$id]);
-        $match = $stmt->fetch(PDO::FETCH_ASSOC);
-    } catch (PDOException $e) {
+        $matchObj = $matchDao->getById((int)$id);
+        if ($matchObj) {
+            // Convert object to array for template
+            $match = [
+                'Id_Match' => $matchObj->getIdMatch(),
+                'Date_Rencontre' => $matchObj->getDateRencontre(),
+                'Heure' => $matchObj->getHeure(),
+                'Nom_Equipe_Adverse' => $matchObj->getNomEquipeAdverse(),
+                'Lieu' => $matchObj->getLieu(),
+                'Resultat' => $matchObj->getResultat()
+            ];
+        }
+    } catch (Exception $e) {
         $error = 'Erreur lors du chargement du match';
     }
 }
@@ -46,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         try {
             // Créer le résultat au format "3-2" si les scores sont fournis
-            $resultat = null;
+            $resultat = '';
             if ($scoreNous !== '' && $scoreAdverse !== '') {
                 $sN = (int)$scoreNous;
                 $sA = (int)$scoreAdverse;
@@ -55,28 +67,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if ($id) {
                 // Modification
-                $stmt = $pdo->prepare('
-                    UPDATE `Match_` 
-                    SET Nom_Equipe_Adverse = ?, Date_Rencontre = ?, Heure = ?, Lieu = ?, Resultat = ? 
-                    WHERE Id_Match = ?
-                ');
-                $stmt->execute([$nomEquipeAdverse, $dateRencontre, $heure, $lieu, $resultat, $id]);
+                $matchObj = new Match_(
+                    (int)$id,
+                    $dateRencontre,
+                    $heure,
+                    $nomEquipeAdverse,
+                    $lieu,
+                    $resultat
+                );
+                $matchDao->update($matchObj);
                 // Redirect to reload fresh data from DB (Post-Redirect-Get)
                 header('Location: ' . $base . '/Vue/Ajouter/ajouter_match.php?id=' . $id . '&success=modified');
                 exit;
             } else {
                 // Ajout
-                $stmt = $pdo->prepare('
-                    INSERT INTO `Match_` (Nom_Equipe_Adverse, Date_Rencontre, Heure, Lieu, Resultat) 
-                    VALUES (?, ?, ?, ?, ?)
-                ');
-                $stmt->execute([$nomEquipeAdverse, $dateRencontre, $heure, $lieu, $resultat]);
-                $id = $pdo->lastInsertId();
+                $matchObj = new Match_(
+                    0, // ID temporaire
+                    $dateRencontre,
+                    $heure,
+                    $nomEquipeAdverse,
+                    $lieu,
+                    $resultat
+                );
+                $matchDao->add($matchObj);
+                $newMatches = $matchDao->getAll();
+                $id = end($newMatches)->getIdMatch();
                 // Redirect to the edit page for the newly created match
                 header('Location: ' . $base . '/Vue/Ajouter/ajouter_match.php?id=' . $id . '&success=created');
                 exit;
             }
-        } catch (PDOException $e) {
+        } catch (Exception $e) {
             $error = 'Erreur lors de l\'enregistrement: ' . $e->getMessage();
         }
     }

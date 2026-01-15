@@ -4,21 +4,18 @@ require_once __DIR__ . '/../../Modele/DAO/JoueurDao.php';
 require_once __DIR__ . '/../../Modele/Joueur.php';
 requireAuth();
 
-// Compute application base (first path segment) for reliable redirects
-$script = str_replace('\\','/', $_SERVER['SCRIPT_NAME'] ?? '');
-$parts = explode('/', trim($script, '/'));
-$base = '/' . ($parts[0] ?? '');
-
 $pdo = getDBConnection();
 $joueurDao = new JoueurDao($pdo);
-$joueur = []; // Initialize as empty array for template compatibility
+$joueur = [];
 $statuts = ['Actif', 'Blessé'];
 $error = '';
 $success = '';
 
 $id = $_GET['id'] ?? null;
 
-if ($id) {
+if (!$id) {
+    $error = 'Aucun joueur spécifié';
+} else {
     try {
         $joueurObj = $joueurDao->getById((int)$id);
         if ($joueurObj) {
@@ -33,6 +30,8 @@ if ($id) {
                 'Poids' => $joueurObj->getPoids(),
                 'Statut' => $joueurObj->getStatut()
             ];
+        } else {
+            $error = 'Joueur non trouvé';
         }
     } catch (Exception $e) {
         $error = 'Erreur lors du chargement du joueur';
@@ -70,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 // Check Num_Licence uniqueness
                 $existing = $joueurDao->getByNumLicence($numLicence);
-                if ($existing && (!$id || $existing->getIdJoueur() != $id)) {
+                if ($existing && $existing->getIdJoueur() != $id) {
                     $error = 'Ce numéro de licence est déjà utilisé par un autre joueur.';
                 }
             } catch (Exception $e) {
@@ -85,45 +84,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $poids_value = !empty($poids) ? (int)$poids : 0;
                 $dateNaissance_value = !empty($dateNaissance) ? $dateNaissance : '';
                 
-                if ($id) {
-                    // Modification
-                    $joueurObj = new Joueur(
-                        (int)$id,
-                        (int)$numLicence,
-                        $nom,
-                        $prenom,
-                        $dateNaissance_value,
-                        $taille_value,
-                        $poids_value,
-                        $statut
-                    );
-                    $joueurDao->update($joueurObj);
-                    $success = 'Joueur modifié avec succès!';
-                } else {
-                    // Ajout - l'ID sera généré par la base de données
-                    $joueurObj = new Joueur(
-                        0, // ID temporaire, sera remplacé par la DB
-                        (int)$numLicence,
-                        $nom,
-                        $prenom,
-                        $dateNaissance_value,
-                        $taille_value,
-                        $poids_value,
-                        $statut
-                    );
-                    $joueurDao->add($joueurObj);
-                    // Redirection automatique vers la liste des joueurs
-                    header('Location: ' . $base . '/Vue/Afficher/liste_joueurs.php');
-                    exit;
-                }
+                // Modification
+                $joueurObj = new Joueur(
+                    (int)$id,
+                    (int)$numLicence,
+                    $nom,
+                    $prenom,
+                    $dateNaissance_value,
+                    $taille_value,
+                    $poids_value,
+                    $statut
+                );
+                $joueurDao->update($joueurObj);
+                $success = 'Joueur modifié avec succès!';
+                
+                // Update $joueur array for display
+                $joueur = [
+                    'Id_Joueur' => $id,
+                    'Num_Licence' => $numLicence,
+                    'Nom' => $nom,
+                    'Prenom' => $prenom,
+                    'Date_Naissance' => $dateNaissance_value,
+                    'Taille' => $taille_value,
+                    'Poids' => $poids_value,
+                    'Statut' => $statut
+                ];
             } catch (Exception $e) {
                 $error = 'Erreur lors de l\'enregistrement: ' . $e->getMessage();
             }
         }
     }
 }
-?>
-
-
-
 ?>

@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../../Modele/DAO/auth.php';
+require_once __DIR__ . '/../../Modele/DAO/MatchDao.php';
 requireAuth();
 
 // Compute application base (first path segment) for reliable redirects
@@ -8,13 +9,16 @@ $parts = explode('/', trim($script, '/'));
 $base = '/' . ($parts[0] ?? '');
 
 $pdo = getDBConnection();
+$matchDao = new MatchDao($pdo);
 $id = $_GET['id'] ?? null;
 
 if ($id) {
     try {
-        $stmt = $pdo->prepare('DELETE FROM `Match_` WHERE Id_Match = ?');
-        $stmt->execute([$id]);
-    } catch (PDOException $e) {
+        $match = $matchDao->getById((int)$id);
+        if ($match) {
+            $matchDao->delete($match);
+        }
+    } catch (Exception $e) {
         // Ignorer l'erreur
     }
 }

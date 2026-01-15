@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../../Modele/DAO/auth.php';
+require_once __DIR__ . '/../../Modele/DAO/JoueurDao.php';
 requireAuth();
 
 // Compute application base (first path segment) for reliable redirects
@@ -8,13 +9,16 @@ $parts = explode('/', trim($script, '/'));
 $base = '/' . ($parts[0] ?? '');
 
 $pdo = getDBConnection();
+$joueurDao = new JoueurDao($pdo);
 $id = $_GET['id'] ?? null;
 
 if ($id) {
     try {
-        $stmt = $pdo->prepare('DELETE FROM Joueur WHERE Id_Joueur = ?');
-        $stmt->execute([$id]);
-    } catch (PDOException $e) {
+        $joueur = $joueurDao->getById((int)$id);
+        if ($joueur) {
+            $joueurDao->delete($joueur);
+        }
+    } catch (Exception $e) {
         // Ignorer l'erreur
     }
 }

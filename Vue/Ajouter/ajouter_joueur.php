@@ -108,15 +108,17 @@ $base = '/' . ($parts[0] ?? '');
                 </div>
 
                 <div class="mb-3">
-                    <label for="taille" class="form-label fw-bold">Taille (cm)</label>
+                    <label for="taille" class="form-label fw-bold">Taille (m)</label>
                     <input 
                         type="number" 
                         class="form-control" 
                         id="taille" 
                         name="taille" 
                         value="<?php echo htmlspecialchars($joueur['Taille'] ?? ''); ?>"
-                        min="1"
-                        placeholder="Ex: 180"
+                        min="0.5"
+                        max="2.5"
+                        step="0.01"
+                        placeholder="Ex: 1.80"
                     >
                 </div>
 

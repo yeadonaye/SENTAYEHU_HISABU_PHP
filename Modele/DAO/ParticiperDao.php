@@ -27,8 +27,7 @@ class ParticiperDao implements ModeleDao {
         return $participations;
     }
 
-
-    public function getById(int $id): ?Participer {
+    public function getById(int $id): Participer{
         $stmt = $this->pdo->prepare("SELECT * FROM participer WHERE idParticipation = :id");
         $stmt->execute([':id' => $id]);
 
@@ -77,9 +76,10 @@ class ParticiperDao implements ModeleDao {
     }
 
 
-    public function delete(int $id): bool {
+    public function delete(object $obj): bool {
+        if (!($obj instanceof Participer)) return false;
         $sql = "DELETE FROM participer WHERE idParticipation = :id";
-        return $this->pdo->prepare($sql)->execute([':id' => $id]);
+        return $this->pdo->prepare($sql)->execute([':id' => $obj->getIdParticipation()]);
     }
 }
 ?>

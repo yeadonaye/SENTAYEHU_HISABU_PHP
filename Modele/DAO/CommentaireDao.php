@@ -1,7 +1,7 @@
 <?php
 
-    require_once "Modele/Commentaire.php";
-    require_once "Modele/ModeleDao.php";
+    require_once __DIR__ . "/../Commentaire.php";
+    require_once "ModeleDao.php";
 
     class CommentaireDao implements ModeleDao {
 
@@ -35,7 +35,7 @@
         // ---------------------------------
         // SELECT BY ID
         // ---------------------------------        
-        public function getById(int $id):object{
+        public function getById(int $id): Commentaire{
             $sql = "SELECT * FROM commentaire WHERE idCommentaire = :id";
             $stmt = $this->pdo->prepare($sql);
 
@@ -57,26 +57,23 @@
         // ---------------------------------
         // SELECT BY JOUEUR
         // --------------------------------- 
-        public function getByJoueur(int $id):object{
+        public function getByJoueur(int $id): array{
             $sql = "SELECT * FROM commentaire WHERE idJoueur = :id";
             $stmt = $this->pdo->prepare($sql);
 
             $stmt->bindValue(':id', $id, PDO::PARAM_INT);
             $stmt->execute();
 
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            if (!$row) return null;
-
             $commentaires = [];
 
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $commentaires[] = new Commentaire(
-                $row['idCommentaire'],
-                $row['description'],
-                $row['date_'],
-                $row['idJoueur']
-            );
+                $commentaires[] = new Commentaire(
+                    $row['idCommentaire'],
+                    $row['description'],
+                    $row['date_'],
+                    $row['idJoueur']
+                );
+            }
 
             return $commentaires;
         }
@@ -84,10 +81,10 @@
         // ---------------------------------
         // INSERT
         // ---------------------------------
-        public function add(object $obj):bool{
+        public function add(object $obj): bool{
             if (!$obj instanceof Commentaire) return false;
 
-            $sql = "INSERT INTO commanetaire
+            $sql = "INSERT INTO commentaire
                     (description, date_, idJoueur)
                     VALUES(:description, :date_, :idJoueur)";
 
@@ -103,32 +100,34 @@
         // ---------------------------------
         // UPDATE
         // ---------------------------------
-        public function update(object $obj):bool{
-        if (!$obj instanceof Commentaire) return false;
+        public function update(object $obj): bool{
+            if (!$obj instanceof Commentaire) return false;
 
-        $sql = "UPDATE commentaire SET 
-                    description = :description,
-                    date_ = :date_,
-                    idJoueur = :idJoueur
-                WHERE idJoueur = :id";
+            $sql = "UPDATE commentaire SET 
+                        description = :description,
+                        date_ = :date_,
+                        idJoueur = :idJoueur
+                    WHERE idCommentaire = :id";
 
-        $stmt = $this->pdo->prepare($sql);
+            $stmt = $this->pdo->prepare($sql);
 
-        return $stmt->execute([
-            ':description' => $obj->getDescription(),
-            ':date_' => $obj->getDate(),
-            ':idJoueur' => $obj->getIdJoueur()
-        ]);
+            return $stmt->execute([
+                ':description' => $obj->getDescription(),
+                ':date_' => $obj->getDate(),
+                ':idJoueur' => $obj->getIdJoueur(),
+                ':id' => $obj->getIdCommentaire()
+            ]);
         }
 
         // ---------------------------------
         // DELETE
         // ---------------------------------
-        public function delete(object $obj):bool{
+        public function delete(object $obj): bool{
+            if (!$obj instanceof Commentaire) return false;
             $sql = "DELETE FROM commentaire WHERE idCommentaire = :id";
             $stmt = $this->pdo->prepare($sql);
 
-            return $stmt->execute([':id' => $id]);
+            return $stmt->execute([':id' => $obj->getIdCommentaire()]);
         }
     }
 ?>

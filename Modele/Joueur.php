@@ -5,12 +5,12 @@ class Joueur {
     private string $nom;
     private string $prenom;
     private string $dateNaissance;
-    private int $taille;
+    private float $taille;
     private int $poids;
     private string $statut;
 
     public function __construct(int $idJoueur, int $numLicence, string $nom, string $prenom, 
-    string $dateNaissance, int $taille, int $poids, string $statut){
+    string $dateNaissance, float $taille, int $poids, string $statut){
         $this->idJoueur = $idJoueur;
         $this->numLicence = $numLicence;
         $this->nom = $nom;
@@ -43,7 +43,7 @@ class Joueur {
         return $this->dateNaissance;
     }
 
-    public function getTaille(): int {
+    public function getTaille(): float {
         return $this->taille;
     }
 
@@ -72,7 +72,7 @@ class Joueur {
         $this->dateNaissance = $dateNaissance;
     }
 
-    public function setTaille(int $taille): void {
+    public function setTaille(float $taille): void {
         $this->taille = $taille;
     }
 
