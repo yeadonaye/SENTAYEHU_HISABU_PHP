@@ -55,10 +55,9 @@
                         $isTitulaire = isset($composition[$joueurId]) && $composition[$joueurId]['Titulaire_ou_pas'];
                         $isBlessé = stripos($joueur['Statut'], 'bless') !== false;
                     ?>
-                        <div class="col-lg-4 col-md-6">
                             <div class="joueur-card <?php echo $isBlessé ? 'injured' : ''; ?>" onclick="<?php echo !$isBlessé ? "toggleJoueur(this, 'titulaires', " . $joueurId . ")" : 'return false;'; ?>" <?php echo $isBlessé ? 'style="cursor: not-allowed;"' : ''; ?>>
                                 <div class="flex-between">
-                                    <input type="checkbox" name="titulaires" value="<?php echo $joueurId; ?>" 
+                                    <input type="checkbox" name="titulaires[]" value="<?php echo $joueurId; ?>" 
                                         <?php echo $isTitulaire ? 'checked' : ''; ?> <?php echo $isBlessé ? 'disabled' : ''; ?>>
                                     <strong><?php echo htmlspecialchars($joueur['Nom'] . ' ' . $joueur['Prenom']); ?></strong>
                                     <?php if ($isBlessé): ?>
@@ -106,7 +105,6 @@
                                     </div>
                                 <?php endif; ?>
                             </div>
-                        </div>
                     <?php endforeach; ?>
                 </div>
             </div>
@@ -122,10 +120,9 @@
                         $isRemplacant = isset($composition[$joueurId]) && !$composition[$joueurId]['Titulaire_ou_pas'];
                         $isBlessé = stripos($joueur['Statut'], 'bless') !== false;
                     ?>
-                        <div class="col-lg-4 col-md-6">
                             <div class="joueur-card <?php echo $isBlessé ? 'injured' : ''; ?>" onclick="<?php echo !$isBlessé ? "toggleJoueur(this, 'remplacants', " . $joueurId . ")" : 'return false;'; ?>" <?php echo $isBlessé ? 'style="cursor: not-allowed;"' : ''; ?>>
                                 <div class="flex-between">
-                                    <input type="checkbox" name="remplacants" value="<?php echo $joueurId; ?>" 
+                                    <input type="checkbox" name="remplacants[]" value="<?php echo $joueurId; ?>" 
                                         <?php echo $isRemplacant ? 'checked' : ''; ?> <?php echo $isBlessé ? 'disabled' : ''; ?>>
                                     <strong><?php echo htmlspecialchars($joueur['Nom'] . ' ' . $joueur['Prenom']); ?></strong>
                                     <?php if ($isBlessé): ?>
@@ -173,7 +170,6 @@
                                     </div>
                                 <?php endif; ?>
                             </div>
-                        </div>
                     <?php endforeach; ?>
                 </div>
             </div>
@@ -249,12 +245,12 @@
         }
 
         function updateCounter() {
-            const titulaires = document.querySelectorAll('input[name="titulaires"]:checked').length;
+            const titulaires = document.querySelectorAll('input[name="titulaires[]"]:checked').length;
             document.getElementById('count-value').textContent = titulaires;
         }
 
         function validateForm() {
-            const titulaires = document.querySelectorAll('input[name="titulaires"]:checked').length;
+            const titulaires = document.querySelectorAll('input[name="titulaires[]"]:checked').length;
             const submitBtn = document.getElementById('submit-btn');
             let posteValid = true;
             
@@ -291,7 +287,7 @@
             const titulairesContainer = document.getElementById('titulaires-container');
             const remplacants = document.getElementById('remplacants-container');
             
-            document.querySelectorAll('input[name="titulaires"]:checked').forEach(checkbox => {
+            document.querySelectorAll('input[name="titulaires[]"]:checked').forEach(checkbox => {
                 const joueurId = checkbox.value;
                 const otherCheckbox = remplacants.querySelector(`input[value="${joueurId}"]`);
                 if (otherCheckbox) {

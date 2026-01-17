@@ -1,4 +1,5 @@
 <?php
+include '../../Controleur/ajouter/ajouter_match.php';
 // Les données doivent être injectées par le contrôleur
 $base = $base ?? '';
 $match = $match_display ?? [];
@@ -71,11 +72,14 @@ $success = $success ?? '';
                     <div class="col-md-6 mb-3">
                         <label for="dateRencontre" class="form-label fw-bold">Date *</label>
                         <input 
-                            type="date" 
+                            type="text" 
                             class="form-control" 
                             id="dateRencontre" 
                             name="dateRencontre" 
                             value="<?php echo htmlspecialchars($match['Date_Rencontre'] ?? ''); ?>"
+                            pattern="\d{2}/\d{2}/\d{4}"
+                            inputmode="numeric"
+                            placeholder="jj/mm/aaaa"
                             required
                         >
                     </div>
@@ -88,6 +92,7 @@ $success = $success ?? '';
                             id="heure" 
                             name="heure" 
                             value="<?php echo htmlspecialchars($match['Heure'] ?? ''); ?>"
+                            step="60"
                             required
                         >
                     </div>
@@ -163,24 +168,42 @@ $success = $success ?? '';
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <?php include '../Afficher/footer.php'; ?>
     <script>
+        function parseDateFr(value) {
+            const parts = value.split('/');
+            if (parts.length !== 3) return null;
+            const [jour, mois, annee] = parts.map(Number);
+            if (!jour || !mois || !annee) return null;
+            // Date object months are 0-based
+            const d = new Date(annee, mois - 1, jour);
+            // Validate components to avoid 32/13/etc.
+            if (d.getFullYear() !== annee || d.getMonth() !== mois - 1 || d.getDate() !== jour) return null;
+            return d;
+        }
+
         function checkMatchDate() {
             const dateInput = document.getElementById('dateRencontre').value;
             const heureInput = document.getElementById('heure').value;
             const scoreNous = document.getElementById('scoreNous');
             const scoreAdverse = document.getElementById('scoreAdverse');
             
-            if (!dateInput || !heureInput) {
+            const parsedDate = parseDateFr(dateInput);
+            if (!parsedDate || !heureInput) {
                 scoreNous.disabled = true;
                 scoreAdverse.disabled = true;
                 return;
             }
-            
-            // Combiner la date et l'heure pour créer un DateTime
-            const matchDateTime = new Date(dateInput + 'T' + heureInput);
+
+            const [h, m] = heureInput.split(':').map(Number);
+            if (Number.isNaN(h) || Number.isNaN(m)) {
+                scoreNous.disabled = true;
+                scoreAdverse.disabled = true;
+                return;
+            }
+            parsedDate.setHours(h, m, 0, 0);
             const now = new Date();
             
             // Désactiver les scores si le match est dans le futur
-            if (matchDateTime > now) {
+            if (parsedDate > now) {
                 scoreNous.disabled = true;
                 scoreAdverse.disabled = true;
                 scoreNous.title = 'Les scores ne peuvent être saisis que si le match est terminé';

@@ -15,6 +15,28 @@ $match = null;
 $error = '';
 $success = '';
 
+// Helpers
+$toFrDate = static function (?string $date) {
+    if (!$date) return '';
+    $d = DateTime::createFromFormat('Y-m-d', $date);
+    return $d ? $d->format('d/m/Y') : $date;
+};
+
+$toDbDate = static function (?string $dateFr) {
+    if (!$dateFr) return null;
+    $d = DateTime::createFromFormat('d/m/Y', $dateFr);
+    return $d ? $d->format('Y-m-d') : null;
+};
+
+$normalizeTime = static function (?string $time) {
+    if (!$time) return '';
+    // Accept HH:MM or HH:MM:SS from DB, return HH:MM
+    if (preg_match('/^(\d{2}:\d{2})/', $time, $m)) {
+        return $m[1];
+    }
+    return $time;
+};
+
 $id = $_GET['id'] ?? null;
 
 if ($id) {
@@ -44,7 +66,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (empty($nomEquipeAdverse) || empty($dateRencontre) || empty($heure)) {
         $error = 'Les champs avec * sont obligatoires';
-    } else {
+    }
+
+    // Validate date format dd/mm/yyyy
+    $dateSql = $toDbDate($dateRencontre);
+    if (!$error && !$dateSql) {
+        $error = 'Date invalide (format jj/mm/aaaa)';
+    }
+
+    // Validate 24h time HH:MM
+    if (!$error && !preg_match('/^(?:[01]\d|2[0-3]):[0-5]\d$/', $heure)) {
+        $error = 'Heure invalide (format 24h HH:MM)';
+    }
+
+    if (!$error) {
         try {
             // Créer le résultat au format "3-2" si les scores sont fournis
             $resultat = '';
@@ -58,7 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Modification
                 $matchObj = new Match_(
                     (int)$id,
-                    $dateRencontre,
+                    $dateSql,
                     $heure,
                     $nomEquipeAdverse,
                     $lieu,
@@ -72,7 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Ajout
                 $matchObj = new Match_(
                     0, // ID temporaire
-                    $dateRencontre,
+                    $dateSql,
                     $heure,
                     $nomEquipeAdverse,
                     $lieu,
@@ -95,10 +130,20 @@ if ($match) {
     $match_display = [
         'Id_Match' => $match->getIdMatch(),
         'Nom_Equipe_Adverse' => $match->getNomEquipeAdverse(),
-        'Date_Rencontre' => $match->getDateRencontre(),
-        'Heure' => $match->getHeure(),
+        'Date_Rencontre' => $toFrDate($match->getDateRencontre()),
+        'Heure' => $normalizeTime($match->getHeure()),
         'Lieu' => $match->getLieu(),
         'Resultat' => $match->getResultat()
+    ];
+} elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Keep user input on validation errors
+    $match_display = [
+        'Id_Match' => $id,
+        'Nom_Equipe_Adverse' => $nomEquipeAdverse ?? '',
+        'Date_Rencontre' => $dateRencontre ?? '',
+        'Heure' => $heure ?? '',
+        'Lieu' => $lieu ?? '',
+        'Resultat' => ''
     ];
 }
 ?>

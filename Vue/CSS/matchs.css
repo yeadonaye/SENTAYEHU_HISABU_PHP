@@ -363,11 +363,20 @@
     opacity: 0.9;
 }
 
+/* Joueur Cards Container - Responsive Grid */
+#titulaires-container,
+#remplacants-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 300px));
+    gap: 1rem;
+    justify-content: start;
+}
+
 /* Joueur Card */
 .joueur-card {
-    padding: 1rem;
+    padding: 0.65rem 0.75rem;
     border: 2px solid #e0e0e0;
-    border-radius: 8px;
+    border-radius: 6px;
     background: white;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -388,9 +397,9 @@
     background-color: #e8f5e9;
 }
 
-/* Checkbox styling */
+/* Checkbox styling - hidden (click on card toggles) */
 .joueur-card input[type="checkbox"] {
-    margin-right: 0.5rem;
+    display: none;
 }
 
 /* Injured badge */
