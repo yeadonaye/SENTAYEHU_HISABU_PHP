@@ -1,31 +1,25 @@
-<?php
-// Base absolu: premier segment du SCRIPT_NAME (ex: /SENTAYEHU_HISABU_PHP)
-$script = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '');
-$parts = explode('/', trim($script, '/'));
-$base = '/' . ($parts[0] ?? '');
-?>
 <nav class="navbar navbar-expand-lg navbar-dark sticky-top navbar-custom">
     <div class="container-fluid">
-        <a class="navbar-brand fw-bold" href="<?php echo $base; ?>/index.php"><i class="bi bi-shield-check"></i> Gestion des Joueurs</a>
+        <a class="navbar-brand fw-bold" href="/SENTAYEHU_HISABU_PHP/index.php"><i class="bi bi-shield-check"></i> Gestion des Joueurs</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="<?php echo $base; ?>/index.php"><i class="bi bi-house-door"></i> Accueil</a>
+                    <a class="nav-link" href="/SENTAYEHU_HISABU_PHP/index.php"><i class="bi bi-house-door"></i> Accueil</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="<?php echo $base; ?>/Vue/Afficher/liste_joueurs.php"><i class="bi bi-people"></i> Joueurs</a>
+                    <a class="nav-link" href="/SENTAYEHU_HISABU_PHP/Vue/Afficher/liste_joueurs.php"><i class="bi bi-people"></i> Joueurs</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="<?php echo $base; ?>/Vue/Afficher/afficher_match.php"><i class="bi bi-calendar3"></i> Matchs</a>
+                    <a class="nav-link" href="/SENTAYEHU_HISABU_PHP/Vue/Afficher/afficher_match.php"><i class="bi bi-calendar3"></i> Matchs</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="<?php echo $base; ?>/Vue/Afficher/statistiques.php"><i class="bi bi-graph-up"></i> Statistiques</a>
+                    <a class="nav-link" href="/SENTAYEHU_HISABU_PHP/Vue/Afficher/statistiques.php"><i class="bi bi-graph-up"></i> Statistiques</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="<?php echo $base; ?>/logout.php"><i class="bi bi-box-arrow-right"></i> Déconnexion</a>
+                    <a class="nav-link" href="/SENTAYEHU_HISABU_PHP/logout.php"><i class="bi bi-box-arrow-right"></i> Déconnexion</a>
                 </li>
             </ul>
         </div>
