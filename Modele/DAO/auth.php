@@ -36,7 +36,7 @@ function authenticate($identifiant, $password) {
  */
 function requireAuth() {
     if (!isAuthenticated()) {
-        header('Location: ' . dirname($_SERVER['PHP_SELF']) . '/login.php?redirect=' . urlencode($_SERVER['REQUEST_URI']));
+        header('Location: /SENTAYEHU_HISABU_PHP/login.php?redirect=' . urlencode($_SERVER['REQUEST_URI']));
         exit;
     }
 }
