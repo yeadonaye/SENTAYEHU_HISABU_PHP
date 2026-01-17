@@ -1,146 +1,4 @@
-<?php
-require_once __DIR__ . '/../../Modele/DAO/auth.php';
-requireAuth();
-
-// Compute application base (first path segment) for reliable redirects
-$script = str_replace('\\','/', $_SERVER['SCRIPT_NAME'] ?? '');
-$parts = explode('/', trim($script, '/'));
-$base = '/' . ($parts[0] ?? '');
-
-$pdo = getDBConnection();
-$error = '';
-$success = '';
-
-// Récupérer l'ID du match
-$matchId = $_GET['id'] ?? null;
-if (!$matchId) {
-    header('Location: ' . $base . '/Vue/Afficher/afficher_match.php');
-    exit;
-}
-
-// Récupérer les infos du match
-$stmt = $pdo->prepare('SELECT * FROM `Match_` WHERE Id_Match = :id');
-$stmt->execute([':id' => $matchId]);
-$match = $stmt->fetch(PDO::FETCH_ASSOC);
-
-if (!$match) {
-    header('Location: ' . $base . '/Vue/Afficher/afficher_match.php');
-    exit;
-}
-
-// Récupérer tous les joueurs actifs
-$stmt = $pdo->query("SELECT * FROM Joueur WHERE Statut != 'Blessé' ORDER BY Nom, Prenom");
-$joueurs = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-// Récupérer les postes possibles
-$postes = ['Gardien', 'Défenseur', 'Milieu', 'Attaquant'];
-
-// Récupérer la composition actuelle pour ce match
-$stmt = $pdo->prepare('SELECT * FROM Participer WHERE Id_Match = :id');
-$stmt->execute([':id' => $matchId]);
-$participations = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-$composition = [];
-foreach ($participations as $p) {
-    $composition[$p['Id_Joueur']] = $p;
-}
-
-// Traitement du formulaire de soumission
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $titulaires = $_POST['titulaires'] ?? [];
-    $remplacants = $_POST['remplacants'] ?? [];
-    $posteTitulaires = $_POST['poste_titulaires'] ?? [];
-    $posteRemplacants = $_POST['poste_remplacants'] ?? [];
-    $notesPost = $_POST['note'] ?? [];
-
-    // Validation du nombre minimum de joueurs (11 titulaires)
-    if (count($titulaires) < 11) {
-        $error = 'Vous devez sélectionner au moins 11 titulaires.';
-    } else {
-        try {
-            // Supprimer les participations existantes
-            $stmt = $pdo->prepare('DELETE FROM Participer WHERE Id_Match = :id');
-            $stmt->execute([':id' => $matchId]);
-
-            // Insérer les titulaires
-            foreach ($titulaires as $joueurId) {
-                $poste = $posteTitulaires[$joueurId] ?? null;
-                if ($poste) {
-                    $noteVal = isset($notesPost[$joueurId]) && $notesPost[$joueurId] !== '' ? (int)$notesPost[$joueurId] : null;
-                    $stmt = $pdo->prepare('
-                        INSERT INTO Participer (Id_Joueur, Id_Match, Poste, Titulaire_ou_pas, Note)
-                        VALUES (:joueur, :match, :poste, 1, :note)
-                    ');
-                    $stmt->execute([
-                        ':joueur' => $joueurId,
-                        ':match' => $matchId,
-                        ':poste' => $poste,
-                        ':note' => $noteVal
-                    ]);
-                }
-            }
-
-            // Insérer les remplaçants
-            foreach ($remplacants as $joueurId) {
-                $poste = $posteRemplacants[$joueurId] ?? null;
-                if ($poste) {
-                    $noteVal = isset($notesPost[$joueurId]) && $notesPost[$joueurId] !== '' ? (int)$notesPost[$joueurId] : null;
-                    $stmt = $pdo->prepare('
-                        INSERT INTO Participer (Id_Joueur, Id_Match, Poste, Titulaire_ou_pas, Note)
-                        VALUES (:joueur, :match, :poste, 0, :note)
-                    ');
-                    $stmt->execute([
-                        ':joueur' => $joueurId,
-                        ':match' => $matchId,
-                        ':poste' => $poste,
-                        ':note' => $noteVal
-                    ]);
-                }
-            }
-
-            $success = 'Feuille de match sauvegardée avec succès.';
-        } catch (PDOException $e) {
-            $error = 'Erreur lors de la sauvegarde: ' . $e->getMessage();
-        }
-    }
-}
-
-// Récupérer les commentaires et notes pour les joueurs
-$commentaires = [];
-try {
-    $stmt = $pdo->query('
-        SELECT Id_Joueur, Description, Date_ FROM Commentaire ORDER BY Date_ DESC
-    ');
-    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $joueurId = $row['Id_Joueur'];
-        if (!isset($commentaires[$joueurId])) {
-            $commentaires[$joueurId] = [];
-        }
-        $commentaires[$joueurId][] = $row;
-    }
-} catch (PDOException $e) {
-    // La table Commentaire ou la colonne Date_ peut ne pas exister
-    $commentaires = [];
-}
-
-// Récupérer les notes pour les joueurs
-$notes = [];
-try {
-    $stmt = $pdo->query('
-        SELECT Id_Joueur, Note FROM Participer WHERE Note IS NOT NULL
-    ');
-    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $joueurId = $row['Id_Joueur'];
-        if (!isset($notes[$joueurId])) {
-            $notes[$joueurId] = [];
-        }
-        $notes[$joueurId][] = $row['Note'];
-    }
-} catch (PDOException $e) {
-    // La table Participer peut ne pas avoir la colonne Note
-    $notes = [];
-}
-?>
+<?php include '../../Controleur/ajouter/saisie_feuille_match.php'; ?>
 
 <!DOCTYPE html>
 <html lang="fr">
@@ -152,111 +10,16 @@ try {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
     <link rel="stylesheet" href="../CSS/common.css">
     <link rel="stylesheet" href="../CSS/matchs.css">
-    <style>
-        .joueur-card {
-            border: 2px solid #ecf0f1;
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        .joueur-card:hover {
-            border-color: #E8283C;
-            box-shadow: 0 4px 12px rgba(232, 40, 60, 0.1);
-        }
-        .joueur-card.selected {
-            border-color: #E8283C;
-            background-color: rgba(232, 40, 60, 0.05);
-        }
-        .joueur-info {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.5rem;
-            font-size: 0.9rem;
-            color: #666666;
-        }
-        .poste-select {
-            margin-top: 0.5rem;
-        }
-        .composition-section {
-            background: #f8f9fa;
-            padding: 1.5rem;
-            border-radius: 8px;
-            margin-bottom: 2rem;
-        }
-        .composition-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: #C8102E;
-            margin-bottom: 1rem;
-        }
-        .commentaire-item {
-            padding: 0.5rem;
-            background: white;
-            border-left: 3px solid #E8283C;
-            margin: 0.25rem 0;
-            font-size: 0.85rem;
-        }
-        .note-badge {
-            display: inline-block;
-            background: #E8283C;
-            color: white;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            margin: 0.25rem 0.25rem 0.25rem 0;
-        }
-        .selection-counter {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #C8102E;
-            color: white;
-            padding: 1rem;
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            font-weight: bold;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
-        .disabled-player {
-            opacity: 0.5;
-            pointer-events: none;
-            background-color: #f5f5f5 !important;
-        }
-        .disabled-player input[type="checkbox"],
-        .disabled-player select {
-            cursor: not-allowed;
-        }
-        .joueur-card.injured {
-            border: 2px solid #ccc;
-            background-color: #e8e8e8;
-            opacity: 0.6;
-            cursor: not-allowed !important;
-        }
-        .joueur-card.injured input[type="checkbox"],
-        .joueur-card.injured select {
-            cursor: not-allowed;
-            opacity: 0.5;
-        }
-    </style>
 </head>
 <body>
-    <!-- Navbar -->
-    <?php include '../partials/navbar.php'; ?>
-
+    <?php include '../Afficher/navbar.php'; ?>
     <!-- Page Header -->
-    <div style="background: linear-gradient(135deg, #C8102E 0%, #E8283C 100%); color: white; padding: 2rem 0; margin-bottom: 2rem;">
+    <div class="sheet-page-header">
         <div class="container-fluid">
-            <h1 style="font-size: 2rem; font-weight: 700; margin: 0;">
+            <h1>
                 <i class="bi bi-clipboard2-data"></i> Saisie Feuille de Match
             </h1>
-            <p style="margin: 0.5rem 0 0; opacity: 0.9;">
+            <p>
                 <?php echo htmlspecialchars($match['Nom_Equipe_Adverse']); ?> - 
                 <?php echo date('d/m/Y \à H:i', strtotime($match['Date_Rencontre'] . ' ' . $match['Heure'])); ?>
             </p>
@@ -293,13 +56,13 @@ try {
                         $isBlessé = stripos($joueur['Statut'], 'bless') !== false;
                     ?>
                         <div class="col-lg-4 col-md-6">
-                            <div class="joueur-card <?php echo $isBlessé ? 'injured' : ''; ?>" onclick="<?php echo !$isBlessé ? "toggleJoueur(this, 'titulaires', " . $joueurId . ")" : 'return false;'; ?>" style="<?php echo $isBlessé ? 'cursor: not-allowed;' : ''; ?>">
-                                <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+                            <div class="joueur-card <?php echo $isBlessé ? 'injured' : ''; ?>" onclick="<?php echo !$isBlessé ? "toggleJoueur(this, 'titulaires', " . $joueurId . ")" : 'return false;'; ?>" <?php echo $isBlessé ? 'style="cursor: not-allowed;"' : ''; ?>>
+                                <div class="flex-between">
                                     <input type="checkbox" name="titulaires" value="<?php echo $joueurId; ?>" 
-                                        <?php echo $isTitulaire ? 'checked' : ''; ?> style="margin-right: 0.5rem;" <?php echo $isBlessé ? 'disabled' : ''; ?>>
+                                        <?php echo $isTitulaire ? 'checked' : ''; ?> <?php echo $isBlessé ? 'disabled' : ''; ?>>
                                     <strong><?php echo htmlspecialchars($joueur['Nom'] . ' ' . $joueur['Prenom']); ?></strong>
                                     <?php if ($isBlessé): ?>
-                                        <span style="margin-left: auto; background-color: #ff6b6b; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: bold;">BLESSÉ</span>
+                                        <span class="injured-badge">BLESSÉ</span>
                                     <?php endif; ?>
                                 </div>
 
@@ -318,14 +81,14 @@ try {
                                     <?php endforeach; ?>
                                 </select>
 
-                                <div style="margin-top:0.5rem;">
-                                    <label style="font-size:0.85rem; font-weight:600;">Note (0-5)</label>
+                                <div class="player-note-section">
+                                    <label class="note-label">Note (0-5)</label>
                                     <input type="number" name="note[<?php echo $joueurId; ?>]" min="0" max="5" step="1" class="form-control" value="<?php echo isset($composition[$joueurId]) && $composition[$joueurId]['Note'] !== null ? (int)$composition[$joueurId]['Note'] : ''; ?>">
                                 </div>
 
                                 <?php if (isset($notes[$joueurId])): ?>
-                                    <div style="margin-top: 0.5rem;">
-                                        <strong style="font-size: 0.85rem;">Évaluations:</strong>
+                                    <div class="note-container">
+                                        <strong class="note-title">Évaluations:</strong>
                                         <?php foreach ($notes[$joueurId] as $note): ?>
                                             <span class="note-badge"><?php echo $note; ?>/5</span>
                                         <?php endforeach; ?>
@@ -333,8 +96,8 @@ try {
                                 <?php endif; ?>
 
                                 <?php if (isset($commentaires[$joueurId])): ?>
-                                    <div style="margin-top: 0.5rem;">
-                                        <strong style="font-size: 0.85rem;">Commentaires récents:</strong>
+                                    <div class="note-container">
+                                        <strong class="note-title">Commentaires récents:</strong>
                                         <?php foreach (array_slice($commentaires[$joueurId], 0, 2) as $com): ?>
                                             <div class="commentaire-item">
                                                 "<?php echo htmlspecialchars(substr($com['Description'], 0, 60)); ?>..."
@@ -360,13 +123,13 @@ try {
                         $isBlessé = stripos($joueur['Statut'], 'bless') !== false;
                     ?>
                         <div class="col-lg-4 col-md-6">
-                            <div class="joueur-card <?php echo $isBlessé ? 'injured' : ''; ?>" onclick="<?php echo !$isBlessé ? "toggleJoueur(this, 'remplacants', " . $joueurId . ")" : 'return false;'; ?>" style="<?php echo $isBlessé ? 'cursor: not-allowed;' : ''; ?>">
-                                <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+                            <div class="joueur-card <?php echo $isBlessé ? 'injured' : ''; ?>" onclick="<?php echo !$isBlessé ? "toggleJoueur(this, 'remplacants', " . $joueurId . ")" : 'return false;'; ?>" <?php echo $isBlessé ? 'style="cursor: not-allowed;"' : ''; ?>>
+                                <div class="flex-between">
                                     <input type="checkbox" name="remplacants" value="<?php echo $joueurId; ?>" 
-                                        <?php echo $isRemplacant ? 'checked' : ''; ?> style="margin-right: 0.5rem;" <?php echo $isBlessé ? 'disabled' : ''; ?>>
+                                        <?php echo $isRemplacant ? 'checked' : ''; ?> <?php echo $isBlessé ? 'disabled' : ''; ?>>
                                     <strong><?php echo htmlspecialchars($joueur['Nom'] . ' ' . $joueur['Prenom']); ?></strong>
                                     <?php if ($isBlessé): ?>
-                                        <span style="margin-left: auto; background-color: #ff6b6b; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: bold;">BLESSÉ</span>
+                                        <span class="injured-badge">BLESSÉ</span>
                                     <?php endif; ?>
                                 </div>
 
@@ -385,14 +148,14 @@ try {
                                     <?php endforeach; ?>
                                 </select>
 
-                                <div style="margin-top:0.5rem;">
-                                    <label style="font-size:0.85rem; font-weight:600;">Note (0-5)</label>
+                                <div class="player-note-section">
+                                    <label class="note-label">Note (0-5)</label>
                                     <input type="number" name="note[<?php echo $joueurId; ?>]" min="0" max="5" step="1" class="form-control" value="<?php echo isset($composition[$joueurId]) && $composition[$joueurId]['Note'] !== null ? (int)$composition[$joueurId]['Note'] : ''; ?>">
                                 </div>
 
                                 <?php if (isset($notes[$joueurId])): ?>
-                                    <div style="margin-top: 0.5rem;">
-                                        <strong style="font-size: 0.85rem;">Évaluations:</strong>
+                                    <div class="note-container">
+                                        <strong class="note-title">Évaluations:</strong>
                                         <?php foreach ($notes[$joueurId] as $note): ?>
                                             <span class="note-badge"><?php echo $note; ?>/5</span>
                                         <?php endforeach; ?>
@@ -400,8 +163,8 @@ try {
                                 <?php endif; ?>
 
                                 <?php if (isset($commentaires[$joueurId])): ?>
-                                    <div style="margin-top: 0.5rem;">
-                                        <strong style="font-size: 0.85rem;">Commentaires récents:</strong>
+                                    <div class="note-container">
+                                        <strong class="note-title">Commentaires récents:</strong>
                                         <?php foreach (array_slice($commentaires[$joueurId], 0, 2) as $com): ?>
                                             <div class="commentaire-item">
                                                 "<?php echo htmlspecialchars(substr($com['Description'], 0, 60)); ?>..."
@@ -431,6 +194,7 @@ try {
         <span id="count-value">0</span>
     </div>
 
+    <?php include '../Afficher/footer.php'; ?>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function toggleJoueur(element, type, joueurId) {

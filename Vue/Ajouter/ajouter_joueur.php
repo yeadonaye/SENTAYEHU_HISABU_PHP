@@ -20,20 +20,18 @@ $base = '/' . ($parts[0] ?? '');
     <link rel="stylesheet" href="<?php echo $base; ?>/Vue/CSS/joueurs.css">
 </head>
 <body>
-    <!-- Navbar -->
-    <?php include '../partials/navbar.php'; ?>
-
+    <?php include '../Afficher/navbar.php'; ?>
     <!-- Page Header -->
-    <div style="background: linear-gradient(135deg, #C8102E 0%, #E8283C 100%); color: white; padding: 2rem 0; margin-bottom: 2rem;">
+    <div class="page-header-gradient">
         <div class="container-fluid">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="page-header-content">
                 <div>
-                    <h1 style="font-size: 2rem; font-weight: 700; margin: 0;">
+                    <h1 class="page-header-title">
                         <i class="bi <?php echo $id ? 'bi-pencil' : 'bi-plus-circle'; ?>"></i> 
                         <?php echo $id ? 'Modifier un Joueur' : 'Ajouter un Joueur'; ?>
                     </h1>
                 </div>
-                <a href="<?php echo $base; ?>/Vue/Afficher/liste_joueurs.php" class="btn btn-light" style="font-weight: 600;">
+                <a href="<?php echo $base; ?>/Vue/Afficher/liste_joueurs.php" class="btn btn-light btn-retour">
                     <i class="bi bi-arrow-left me-2"></i>Retour
                 </a>
             </div>
@@ -55,8 +53,25 @@ $base = '/' . ($parts[0] ?? '');
             </div>
         <?php endif; ?>
 
-        <div style="background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); padding: 2rem; max-width: 600px; margin: 0 auto;">
+        <div class="form-container">
             <form method="POST" action="">
+                <div class="mb-3">
+                    <label for="idJoueur" class="form-label fw-bold">ID du Joueur</label>
+                    <input
+                        type="number"
+                        class="form-control"
+                        id="idJoueur"
+                        name="idJoueur"
+                        value="<?php echo htmlspecialchars($joueur['Id_Joueur'] ?? ''); ?>"
+                        placeholder="<?php echo !$id ? 'Laisser vide pour auto-génération' : ''; ?>"
+                        min="1"
+                        <?php echo $id ? 'disabled class="input-disabled"' : ''; ?>
+                    >
+                    <?php if (!$id): ?>
+                    <small class="text-muted">Laisser vide pour que l'ID soit généré automatiquement</small>
+                    <?php endif; ?>
+                </div>
+
                 <div class="mb-3">
                     <label for="numLicence" class="form-label fw-bold">Numéro de Licence *</label>
                     <input
@@ -148,12 +163,12 @@ $base = '/' . ($parts[0] ?? '');
                     </select>
                 </div>
 
-                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-                    <button type="submit" class="btn btn-primary" style="flex: 1; font-weight: 600; padding: 0.75rem;">
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
                         <i class="bi bi-check-circle me-2"></i>
                         <?php echo $id ? 'Modifier' : 'Ajouter'; ?>
                     </button>
-                    <a href="<?php echo $base; ?>/Vue/Afficher/liste_joueurs.php" class="btn btn-secondary" style="flex: 1; font-weight: 600; padding: 0.75rem; text-decoration: none; display: flex; align-items: center; justify-content: center;">
+                    <a href="<?php echo $base; ?>/Vue/Afficher/liste_joueurs.php" class="btn btn-secondary">
                         <i class="bi bi-x-circle me-2"></i>Annuler
                     </a>
                 </div>
@@ -164,7 +179,7 @@ $base = '/' . ($parts[0] ?? '');
     <!-- Footer -->
     <footer class="footer mt-5">
         <div class="footer-content">
-            <div style="text-align: center;">
+            <div class="text-center">
                 <h5 class="footer-title">Gestion des Joueurs</h5>
             </div>
         </div>
@@ -175,43 +190,7 @@ $base = '/' . ($parts[0] ?? '');
         </div>
     </footer>
 
-    <script>
-        // Client-side validation for immediate feedback
-        document.addEventListener('DOMContentLoaded', function () {
-            const form = document.querySelector('form');
-            form.addEventListener('submit', function (e) {
-                const numLicence = document.getElementById('numLicence').value.trim();
-                const statut = document.getElementById('statut').value.trim();
-                const taille = document.getElementById('taille').value.trim();
-                const poids = document.getElementById('poids').value.trim();
-                if (statut === '') {
-                    e.preventDefault();
-                    alert('Le statut est obligatoire.');
-                    return false;
-                }
-                
-                if (taille !== '') {
-                    const t = parseFloat(taille);
-                    if (isNaN(t) || t <= 0) {
-                        e.preventDefault();
-                        alert('La taille doit être un nombre positif.');
-                        return false;
-                    }
-                }
-                
-                if (poids !== '') {
-                    const p = parseFloat(poids);
-                    if (isNaN(p) || p <= 0) {
-                        e.preventDefault();
-                        alert('Le poids doit être un nombre positif.');
-                        return false;
-                    }
-                }
-                
-                return true;
-            });
-        });
-    </script>
+    <?php include '../Afficher/footer.php'; ?>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

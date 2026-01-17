@@ -29,7 +29,7 @@
             return $matchs;
         }
 
-        public function getById(int $id): Match_{
+        public function getById(int $id): ?Match_{
             $sql = "SELECT * FROM `Match_` WHERE Id_Match = :id";
             $stmt = $this->pdo->prepare($sql);
             $stmt->bindValue(':id', $id, PDO::PARAM_INT);
@@ -110,6 +110,39 @@
             }
             
             return ['titulaires' => $titulaires, 'remplacants' => $remplacants];
+        }
+
+        public function getGlobalStats(): array {
+            $sql = "
+                SELECT 
+                    COUNT(*) as total,
+                    SUM(CASE WHEN Score_Nous > Score_Adverse THEN 1 ELSE 0 END) as victoires,
+                    SUM(CASE WHEN Score_Nous < Score_Adverse THEN 1 ELSE 0 END) as defaites,
+                    SUM(CASE WHEN Score_Nous = Score_Adverse THEN 1 ELSE 0 END) as nuls,
+                    SUM(Score_Nous) as buts,
+                    SUM(Score_Adverse) as butsEncaisses
+                FROM `Match_`
+                WHERE Score_Nous IS NOT NULL AND Score_Adverse IS NOT NULL
+            ";
+            $stmt = $this->pdo->query($sql);
+            return $stmt->fetch(PDO::FETCH_ASSOC) ?? [
+                'total' => 0,
+                'victoires' => 0,
+                'defaites' => 0,
+                'nuls' => 0,
+                'buts' => 0,
+                'butsEncaisses' => 0
+            ];
+        }
+
+        public function getMatchesOrderedByDate(): array {
+            $sql = "
+                SELECT Id_Match FROM `Match_` 
+                WHERE (Score_Nous IS NOT NULL AND Score_Adverse IS NOT NULL) OR Resultat IS NOT NULL 
+                ORDER BY Date_Rencontre DESC, Heure DESC
+            ";
+            $stmt = $this->pdo->query($sql);
+            return $stmt->fetchAll(PDO::FETCH_COLUMN);
         }
     }
 ?>

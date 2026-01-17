@@ -14,29 +14,29 @@ class JoueurDao implements ModeleDao {
 
     // Récupère tous les joueurs de la bd
     public function getAll(): array{
-        $sql = "SELECT * FROM joueur ORDER BY nom";
+        $sql = "SELECT * FROM Joueur ORDER BY Nom";
         $stmt = $this->pdo->query($sql);
 
         $joueurs = [];
 
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)){
             $joueurs[] = new Joueur(
-                $row['idJoueur'],
-                $row['numLicence'],
-                $row['nom'],
-                $row['prenom'],
-                $row['dateNaissance'],
-                $row['taille'],
-                $row['poids'],
-                $row['statut']
+                $row['Id_Joueur'],
+                $row['Num_Licence'],
+                $row['Nom'],
+                $row['Prenom'],
+                $row['Date_Naissance'],
+                $row['Taille'],
+                $row['Poids'],
+                $row['Statut']
             );
         }
         return $joueurs;
     }
 
     // Récupère un joueur par son id
-    public function getById(int $id): ?Joueur{
-        $sql = "SELECT * FROM joueur where idJoueur = :id ";
+    public function getById(int $id): ?Joueur{  
+        $sql = "SELECT * FROM Joueur where Id_Joueur = :id ";
         $stmt = $this->pdo->prepare($sql);
 
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
@@ -47,25 +47,27 @@ class JoueurDao implements ModeleDao {
         if(!$row) return null;
 
         return new Joueur(
-            $row['idJoueur'],
-                $row['numLicence'],
-                $row['nom'],
-                $row['prenom'],
-                $row['dateNaissance'],
-                $row['taille'],
-                $row['poids'],
-                $row['statut']
+            $row['Id_Joueur'],
+                $row['Num_Licence'],
+                $row['Nom'],
+                $row['Prenom'],
+                $row['Date_Naissance'],
+                $row['Taille'],
+                $row['Poids'],
+                $row['Statut']
         );
     }
 
     // Ajoute un joueur à la liste
     public function add(object $obj): bool{
         if (!($obj instanceof Joueur)) return false;
-        $sql = "INSERT INTO joueur
-                (numLicence, nom, prenom, dateNaissance, taille, poids, statut)
-                VALUES (:numLicence, :nom, :prenom, :dateNaissance, :taille, :poids, :statut)";
+    
+        $sql = "INSERT INTO Joueur
+                (Id_Joueur, Num_Licence, Nom, Prenom, Date_Naissance, Taille, Poids, Statut)
+                VALUES (:idJoueur, :numLicence, :nom, :prenom, :dateNaissance, :taille, :poids, :statut)";
         $stmt = $this->pdo->prepare($sql);
         return $stmt->execute([
+            ':idJoueur' => $obj->getIdJoueur(),
             ':numLicence' => $obj->getNumLicence(),
             ':nom'  => $obj->getNom(),
             ':prenom' => $obj->getPrenom(),
@@ -80,15 +82,15 @@ class JoueurDao implements ModeleDao {
     public function update(object $obj): bool{
         if(!$obj instanceof Joueur) return false;
 
-        $sql = "UPDATE joueur SET 
-                    numLicence = :numLicence,
-                    nom = :nom,
-                    prenom = :prenom,
-                    dateNaissance = :dateNaissance,
-                    taille = :taille,
-                    poids = :poids,
-                    statut = :statut
-                WHERE idJoueur = :id";
+        $sql = "UPDATE Joueur SET 
+                    Num_Licence = :numLicence,
+                    Nom = :nom,
+                    Prenom = :prenom,
+                    Date_Naissance = :dateNaissance,
+                    Taille = :taille,
+                    Poids = :poids,
+                    Statut = :statut
+                WHERE Id_Joueur = :id";
         $stmt = $this->pdo->prepare($sql);
 
         return $stmt->execute([
@@ -107,7 +109,7 @@ class JoueurDao implements ModeleDao {
     // supprime un joueur parmi la liste
     public function delete(object $obj): bool{
         if(!$obj instanceof Joueur) return false;
-        $sql = "DELETE FROM joueur WHERE idJoueur = :id";
+        $sql = "DELETE FROM Joueur WHERE Id_Joueur = :id";
         $stmt = $this->pdo->prepare($sql);
 
         return $stmt->execute([':id' => $obj->getIdJoueur()]);
@@ -115,7 +117,7 @@ class JoueurDao implements ModeleDao {
 
     // Recupere un joueur par son numéro de licence
     public function getByNumLicence(string $numLicence): ?Joueur { // ?Joueur pour indiquer aue l'objet peut etre null
-        $sql = "SELECT * FROM joueur WHERE numLicence = :numLicence";
+        $sql = "SELECT * FROM Joueur WHERE Num_Licence = :numLicence";
         $stmt = $this->pdo->prepare($sql);
         $stmt->bindValue(':numLicence', $numLicence);
         $stmt->execute();
@@ -125,15 +127,151 @@ class JoueurDao implements ModeleDao {
         if (!$row) return null;
         
         return new Joueur(
-            $row['idJoueur'],
-            $row['numLicence'],
-            $row['nom'],
-            $row['prenom'],
-            $row['dateNaissance'],
-            $row['taille'],
-            $row['poids'],
-            $row['statut']
+            $row['Id_Joueur'],
+            $row['Num_Licence'],
+            $row['Nom'],
+            $row['Prenom'],
+            $row['Date_Naissance'],
+            $row['Taille'],
+            $row['Poids'],
+            $row['Statut']
         );
+    }
+
+    // Méthodes supplémentaires
+
+    /**
+     * Récupère tous les joueurs actifs (non blessés)
+     */
+    public function getActifs(): array {
+        $sql = "SELECT * FROM Joueur WHERE Statut != 'Blessé' ORDER BY Nom, Prenom";
+        $stmt = $this->pdo->query($sql);
+        
+        $joueurs = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $joueurs[] = new Joueur(
+                $row['Id_Joueur'],
+                $row['Num_Licence'],
+                $row['Nom'],
+                $row['Prenom'],
+                $row['Date_Naissance'],
+                $row['Taille'],
+                $row['Poids'],
+                $row['Statut']
+            );
+        }
+        return $joueurs;
+    }
+
+    /**
+     * Récupère le nombre total de joueurs
+     */
+    public function compterTotalJoueurs(): int {
+        $sql = "SELECT COUNT(*) as count FROM Joueur";
+        $stmt = $this->pdo->query($sql);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return (int)($result['count'] ?? 0);
+    }
+
+    /**
+     * Récupère tous les joueurs avec leurs stats
+     */
+    public function getTousAvecStatistiques(): array {
+        $sql = "SELECT Id_Joueur, Num_Licence, Nom, Prenom, Statut, Poste FROM Joueur ORDER BY Nom, Prenom";
+        $stmt = $this->pdo->query($sql);
+        
+        $joueurs = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $joueurs[] = $row;
+        }
+        return $joueurs;
+    }
+
+    /**
+     * Récupère le nombre de titularisations pour un joueur
+     */
+    public function compterTitularisations(int $joueurId): int {
+        $sql = "SELECT COUNT(*) FROM Participer p JOIN `Match_` m ON p.Id_Match = m.Id_Match 
+                WHERE p.Id_Joueur = :id AND p.Titulaire_ou_pas = 1";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':id' => $joueurId]);
+        return (int)$stmt->fetchColumn();
+    }
+
+    /**
+     * Récupère le nombre de remplaçages pour un joueur
+     */
+    public function compterRemplacements(int $joueurId): int {
+        $sql = "SELECT COUNT(*) FROM Participer p JOIN `Match_` m ON p.Id_Match = m.Id_Match 
+                WHERE p.Id_Joueur = :id AND p.Titulaire_ou_pas = 0";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':id' => $joueurId]);
+        return (int)$stmt->fetchColumn();
+    }
+
+    /**
+     * Récupère la note moyenne pour un joueur
+     */
+    public function obtenirNoteMoyenne(int $joueurId): ?float {
+        $sql = "SELECT AVG(Note) as avgNote FROM Participer WHERE Id_Joueur = :id AND Note IS NOT NULL";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':id' => $joueurId]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $avg = $result['avgNote'] ?? null;
+        return $avg !== null ? round($avg, 2) : null;
+    }
+
+    /**
+     * Récupère le nombre de participations pour un joueur
+     */
+    public function compterParticipations(int $joueurId): int {
+        $sql = "SELECT COUNT(DISTINCT p.Id_Match) FROM Participer p 
+                JOIN `Match_` m ON p.Id_Match = m.Id_Match 
+                WHERE p.Id_Joueur = :id";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':id' => $joueurId]);
+        return (int)$stmt->fetchColumn();
+    }
+
+    /**
+     * Récupère le pourcentage de victoires quand le joueur a participé
+     */
+    public function pourcentageVictoiresLorsParticipation(int $joueurId): ?float {
+        $participations = $this->compterParticipations($joueurId);
+        
+        if ($participations === 0) return null;
+        
+        $sql = "SELECT COUNT(DISTINCT p.Id_Match) FROM Participer p 
+                JOIN `Match_` m ON p.Id_Match = m.Id_Match 
+                WHERE p.Id_Joueur = :id AND 
+                ((m.Resultat = 'Victoire') OR 
+                (m.Score_Nous IS NOT NULL AND m.Score_Adverse IS NOT NULL AND m.Score_Nous > m.Score_Adverse))";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':id' => $joueurId]);
+        $wins = (int)$stmt->fetchColumn();
+        
+        return round(($wins / $participations) * 100, 1);
+    }
+
+    /**
+     * Récupère le nombre de sélections consécutives pour un joueur
+     */
+    public function compterSelectionsConsecutives(int $joueurId, array $matchesOrdered): int {
+        $consecutive = 0;
+        $sql = "SELECT COUNT(*) FROM Participer WHERE Id_Match = :mid AND Id_Joueur = :id";
+        $stmt = $this->pdo->prepare($sql);
+        
+        foreach ($matchesOrdered as $matchId) {
+            $stmt->execute([':mid' => $matchId, ':id' => $joueurId]);
+            $count = (int)$stmt->fetchColumn();
+            if ($count > 0) {
+                $consecutive++;
+            } else {
+                break;
+            }
+        }
+        
+        return $consecutive;
     }
 
 }

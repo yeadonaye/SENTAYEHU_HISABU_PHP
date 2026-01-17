@@ -1,106 +1,10 @@
 <?php
-require_once __DIR__ . '/../../Modele/DAO/auth.php';
-require_once __DIR__ . '/../../Modele/DAO/MatchDao.php';
-require_once __DIR__ . '/../../Modele/Match.php';
-requireAuth();
-
-// Compute application base (first path segment) for reliable redirects
-$script = str_replace('\\','/', $_SERVER['SCRIPT_NAME'] ?? '');
-$parts = explode('/', trim($script, '/'));
-$base = '/' . ($parts[0] ?? '');
-
-$pdo = getDBConnection();
-$matchDao = new MatchDao($pdo);
-$match = [];
-$error = '';
-$success = '';
-
-$id = $_GET['id'] ?? null;
-
-if ($id) {
-    try {
-        $matchObj = $matchDao->getById((int)$id);
-        if ($matchObj) {
-            // Convert object to array for template
-            $match = [
-                'Id_Match' => $matchObj->getIdMatch(),
-                'Date_Rencontre' => $matchObj->getDateRencontre(),
-                'Heure' => $matchObj->getHeure(),
-                'Nom_Equipe_Adverse' => $matchObj->getNomEquipeAdverse(),
-                'Lieu' => $matchObj->getLieu(),
-                'Resultat' => $matchObj->getResultat()
-            ];
-        }
-    } catch (Exception $e) {
-        $error = 'Erreur lors du chargement du match';
-    }
-}
-
-// Show success message after redirect (Post-Redirect-Get)
-if (isset($_GET['success'])) {
-    if ($_GET['success'] === 'modified') {
-        $success = 'Match modifié avec succès!';
-    } elseif ($_GET['success'] === 'created') {
-        $success = 'Match ajouté avec succès!';
-    }
-}
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $nomEquipeAdverse = $_POST['nomEquipeAdverse'] ?? '';
-    $dateRencontre = $_POST['dateRencontre'] ?? '';
-    $heure = $_POST['heure'] ?? '';
-    $lieu = $_POST['lieu'] ?? '';
-    $scoreNous = $_POST['scoreNous'] ?? '';
-    $scoreAdverse = $_POST['scoreAdverse'] ?? '';
-
-    if (empty($nomEquipeAdverse) || empty($dateRencontre) || empty($heure)) {
-        $error = 'Les champs avec * sont obligatoires';
-    } else {
-        try {
-            // Créer le résultat au format "3-2" si les scores sont fournis
-            $resultat = '';
-            if ($scoreNous !== '' && $scoreAdverse !== '') {
-                $sN = (int)$scoreNous;
-                $sA = (int)$scoreAdverse;
-                $resultat = $sN . '-' . $sA;
-            }
-
-            if ($id) {
-                // Modification
-                $matchObj = new Match_(
-                    (int)$id,
-                    $dateRencontre,
-                    $heure,
-                    $nomEquipeAdverse,
-                    $lieu,
-                    $resultat
-                );
-                $matchDao->update($matchObj);
-                // Redirect to reload fresh data from DB (Post-Redirect-Get)
-                header('Location: ' . $base . '/Vue/Ajouter/ajouter_match.php?id=' . $id . '&success=modified');
-                exit;
-            } else {
-                // Ajout
-                $matchObj = new Match_(
-                    0, // ID temporaire
-                    $dateRencontre,
-                    $heure,
-                    $nomEquipeAdverse,
-                    $lieu,
-                    $resultat
-                );
-                $matchDao->add($matchObj);
-                $newMatches = $matchDao->getAll();
-                $id = end($newMatches)->getIdMatch();
-                // Redirect to the edit page for the newly created match
-                header('Location: ' . $base . '/Vue/Ajouter/ajouter_match.php?id=' . $id . '&success=created');
-                exit;
-            }
-        } catch (Exception $e) {
-            $error = 'Erreur lors de l\'enregistrement: ' . $e->getMessage();
-        }
-    }
-}
+// Les données doivent être injectées par le contrôleur
+$base = $base ?? '';
+$match = $match_display ?? [];
+$id = $match['Id_Match'] ?? ($id ?? null);
+$error = $error ?? '';
+$success = $success ?? '';
 ?>
 
 <!DOCTYPE html>
@@ -115,20 +19,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="../CSS/matchs.css">
 </head>
 <body>
-    <!-- Navbar -->
-    <?php include '../partials/navbar.php'; ?>
-
+        <?php include '../Afficher/navbar.php'; ?>
     <!-- Page Header -->
-    <div style="background: linear-gradient(135deg, #C8102E 0%, #E8283C 100%); color: white; padding: 2rem 0; margin-bottom: 2rem;">
+    <div class="page-header-gradient">
         <div class="container-fluid">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="page-header-content">
                 <div>
-                    <h1 style="font-size: 2rem; font-weight: 700; margin: 0;">
+                    <h1 class="page-header-title">
                         <i class="bi <?php echo $id ? 'bi-pencil' : 'bi-plus-circle'; ?>"></i> 
                         <?php echo $id ? 'Modifier un Match' : 'Planifier un Match'; ?>
                     </h1>
                 </div>
-                <a href="<?php echo $base; ?>/Vue/Afficher/afficher_match.php" class="btn btn-light" style="font-weight: 600;">
+                <a href="<?php echo $base; ?>/Vue/Afficher/afficher_match.php" class="btn btn-light btn-retour">
                     <i class="bi bi-arrow-left me-2"></i>Retour
                 </a>
             </div>
@@ -150,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         <?php endif; ?>
 
-        <div style="background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); padding: 2rem; max-width: 600px; margin: 0 auto;">
+        <div class="form-container">
             <form method="POST" action="">
                 <div class="mb-3">
                     <label for="nomEquipeAdverse" class="form-label fw-bold">Équipe Adverse *</label>
@@ -245,12 +147,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
                 </div>
 
-                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-                    <button type="submit" class="btn btn-primary" style="flex: 1; font-weight: 600; padding: 0.75rem;">
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
                         <i class="bi bi-check-circle me-2"></i>
                         <?php echo $id ? 'Modifier' : 'Ajouter'; ?>
                     </button>
-                    <a href="<?php echo $base; ?>/Vue/Afficher/afficher_match.php" class="btn btn-secondary" style="flex: 1; font-weight: 600; padding: 0.75rem; text-decoration: none; display: flex; align-items: center; justify-content: center;">
+                    <a href="<?php echo $base; ?>/Vue/Afficher/afficher_match.php" class="btn btn-secondary">
                         <i class="bi bi-x-circle me-2"></i>Annuler
                     </a>
                 </div>
@@ -258,9 +160,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 
-    <?php include '../partials/footer.php'; ?>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <?php include '../Afficher/footer.php'; ?>
     <script>
         function checkMatchDate() {
             const dateInput = document.getElementById('dateRencontre').value;

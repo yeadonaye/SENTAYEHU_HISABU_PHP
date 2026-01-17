@@ -15,7 +15,7 @@
         // SELECT ALL
         // ---------------------------------
         public function getAll(): array{
-            $sql = 'SELECT * FROM commentaire order by idCommentaire';
+            $sql = 'SELECT * FROM Commentaire order by idCommentaire';
             $stmt = $this->pdo->query($sql);
 
             $commentaires = [];
@@ -35,8 +35,8 @@
         // ---------------------------------
         // SELECT BY ID
         // ---------------------------------        
-        public function getById(int $id): Commentaire{
-            $sql = "SELECT * FROM commentaire WHERE idCommentaire = :id";
+        public function getById(int $id): ?Commentaire{
+            $sql = "SELECT * FROM Commentaire WHERE idCommentaire = :id";
             $stmt = $this->pdo->prepare($sql);
 
             $stmt->bindValue(':id', $id, PDO::PARAM_INT);
@@ -58,7 +58,7 @@
         // SELECT BY JOUEUR
         // --------------------------------- 
         public function getByJoueur(int $id): array{
-            $sql = "SELECT * FROM commentaire WHERE idJoueur = :id";
+            $sql = "SELECT * FROM Commentaire WHERE idJoueur = :id";
             $stmt = $this->pdo->prepare($sql);
 
             $stmt->bindValue(':id', $id, PDO::PARAM_INT);
@@ -84,7 +84,7 @@
         public function add(object $obj): bool{
             if (!$obj instanceof Commentaire) return false;
 
-            $sql = "INSERT INTO commentaire
+            $sql = "INSERT INTO Commentaire
                     (description, date_, idJoueur)
                     VALUES(:description, :date_, :idJoueur)";
 
@@ -103,7 +103,7 @@
         public function update(object $obj): bool{
             if (!$obj instanceof Commentaire) return false;
 
-            $sql = "UPDATE commentaire SET 
+            $sql = "UPDATE Commentaire SET 
                         description = :description,
                         date_ = :date_,
                         idJoueur = :idJoueur
@@ -124,7 +124,7 @@
         // ---------------------------------
         public function delete(object $obj): bool{
             if (!$obj instanceof Commentaire) return false;
-            $sql = "DELETE FROM commentaire WHERE idCommentaire = :id";
+            $sql = "DELETE FROM Commentaire WHERE idCommentaire = :id";
             $stmt = $this->pdo->prepare($sql);
 
             return $stmt->execute([':id' => $obj->getIdCommentaire()]);

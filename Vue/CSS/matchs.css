@@ -273,3 +273,292 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* ============================================
+   FORMULAIRE D'AJOUT/MODIFICATION DE MATCH
+   ============================================ */
+
+.page-header-gradient {
+    background: linear-gradient(135deg, #C8102E 0%, #E8283C 100%);
+    color: white;
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+}
+
+.page-header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.page-header-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.btn-retour {
+    font-weight: 600;
+}
+
+/* Formulaire */
+.form-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    padding: 2rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.form-actions button,
+.form-actions a {
+    flex: 1;
+    font-weight: 600;
+    padding: 0.75rem;
+}
+
+.form-actions a {
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.score-input {
+    /* Style pour les inputs de score */
+}
+
+/* ============================================
+   SAISIE FEUILLE DE MATCH
+   ============================================ */
+
+.sheet-page-header {
+    background: linear-gradient(135deg, #C8102E 0%, #E8283C 100%);
+    color: white;
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+}
+
+.sheet-page-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.sheet-page-header p {
+    margin: 0.5rem 0 0;
+    opacity: 0.9;
+}
+
+/* Joueur Card */
+.joueur-card {
+    padding: 1rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.joueur-card:hover:not(.injured) {
+    border-color: #C8102E;
+    background-color: #fafafa;
+}
+
+.joueur-card.injured {
+    opacity: 0.6;
+    background-color: #f5f5f5;
+}
+
+.joueur-card.selected {
+    border-color: #28a745;
+    background-color: #e8f5e9;
+}
+
+/* Checkbox styling */
+.joueur-card input[type="checkbox"] {
+    margin-right: 0.5rem;
+}
+
+/* Injured badge */
+.injured-badge {
+    margin-left: auto;
+    background-color: #ff6b6b;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: bold;
+}
+
+/* Flex items */
+.flex-between {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+/* Note and evaluation section */
+.player-note-section {
+    margin-top: 0.5rem;
+}
+
+.note-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.note-container {
+    margin-top: 0.5rem;
+}
+
+.note-title {
+    font-size: 0.85rem;
+    font-weight: bold;
+}
+
+/* Match composition info box */
+.match-composition {
+    background-color: #fff3cd;
+    padding: 0.75rem;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    font-size: 0.85rem;
+}
+
+/* Empty state styling */
+.empty-state-icon {
+    font-size: 3rem;
+    color: #bdc3c7;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.empty-state-title {
+    color: #7f8c8d;
+    margin-bottom: 1rem;
+}
+
+.empty-state-text {
+    color: #95a5a6;
+    margin-bottom: 1.5rem;
+}
+
+/* Joueur cards for sheet selection */
+.joueur-card {
+    border: 2px solid #ecf0f1;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.joueur-card:hover {
+    border-color: #E8283C;
+    box-shadow: 0 4px 12px rgba(232, 40, 60, 0.1);
+}
+
+.joueur-card.selected {
+    border-color: #E8283C;
+    background-color: rgba(232, 40, 60, 0.05);
+}
+
+.joueur-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: #666666;
+}
+
+.poste-select {
+    margin-top: 0.5rem;
+}
+
+.composition-section {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+}
+
+.composition-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #C8102E;
+    margin-bottom: 1rem;
+}
+
+.commentaire-item {
+    padding: 0.5rem;
+    background: white;
+    border-left: 3px solid #E8283C;
+    margin: 0.25rem 0;
+    font-size: 0.85rem;
+}
+
+.note-badge {
+    display: inline-block;
+    background: #E8283C;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    margin: 0.25rem 0.25rem 0.25rem 0;
+}
+
+.selection-counter {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #C8102E;
+    color: white;
+    padding: 1rem;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.disabled-player {
+    opacity: 0.5;
+    pointer-events: none;
+    background-color: #f5f5f5 !important;
+}
+
+.disabled-player input[type="checkbox"],
+.disabled-player select {
+    cursor: not-allowed;
+}
+
+.joueur-card.injured {
+    border: 2px solid #ccc;
+    background-color: #e8e8e8;
+    opacity: 0.6;
+    cursor: not-allowed !important;
+}
+
+.joueur-card.injured input[type="checkbox"],
+.joueur-card.injured select {
+    cursor: not-allowed;
+    opacity: 0.5;
+}

@@ -40,6 +40,7 @@ if ($id) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $idJoueur = $_POST['idJoueur'] ?? '';
     $numLicence = $_POST['numLicence'] ?? '';
     $nom = $_POST['nom'] ?? '';
     $prenom = $_POST['prenom'] ?? '';
@@ -52,16 +53,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($numLicence) || empty($nom) || empty($prenom) || empty($statut)) {
         $error = 'Le numéro de licence, le nom, le prénom et le statut sont obligatoires';
     } else {
-        // Validate taille and poids if provided
+        // Validate taille if provided
         if (!$error && $taille !== '') {
             if (!is_numeric($taille) || (float)$taille <= 0 || (float)$taille > 3) {
-                $error = 'La taille doit être un nombre entre 0 et 3 mètres.';
+                $error = 'La taille doit être un nombre positif entre 0 et 3 mètres.';
             }
         }
 
+        // Validate poids if provided
         if (!$error && $poids !== '') {
             if (!is_numeric($poids) || (float)$poids <= 0) {
                 $error = 'Le poids doit être un nombre positif.';
+            }
+        }
+
+        // Validate statut is in allowed values
+        if (!$error && !in_array($statut, $statuts)) {
+            $error = 'Le statut sélectionné est invalide.';
+        }
+
+        // Validate numLicence format
+        if (!$error && !preg_match('/^[0-9A-Za-z\-]+$/', $numLicence)) {
+            $error = 'Le numéro de licence doit contenir uniquement des chiffres, lettres et tirets.';
+        }
+
+        // Validate custom ID if provided for new players
+        if (!$error && !$id && !empty($idJoueur)) {
+            if (!is_numeric($idJoueur) || (int)$idJoueur <= 0) {
+                $error = 'L\'ID du joueur doit être un nombre positif.';
+            } else {
+                // Check if ID already exists
+                try {
+                    $existingById = $joueurDao->getById((int)$idJoueur);
+                    if ($existingById) {
+                        $error = 'Cet ID est déjà utilisé par un autre joueur.';
+                    }
+                } catch (Exception $e) {
+                    // ID doesn't exist, which is good
+                }
             }
         }
 
@@ -100,9 +129,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $joueurDao->update($joueurObj);
                     $success = 'Joueur modifié avec succès!';
                 } else {
-                    // Ajout - l'ID sera généré par la base de données
+                    // Ajout - utiliser l'ID personnalisé ou 0 pour auto-génération
+                    $idToUse = !empty($idJoueur) ? (int)$idJoueur : 0;
                     $joueurObj = new Joueur(
-                        0, // ID temporaire, sera remplacé par la DB
+                        $idToUse,
                         (int)$numLicence,
                         $nom,
                         $prenom,
@@ -122,8 +152,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
-?>
-
-
-
 ?>

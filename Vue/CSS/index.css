@@ -332,6 +332,202 @@
     }
 }
 
+/* ============================================
+   STATISTIQUES PAGE STYLES
+   ============================================ */
+
+/* Page Header */
+.page-header-gradient {
+    background: linear-gradient(135deg, #C8102E 0%, #E8283C 100%);
+    color: white;
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+}
+
+.page-header-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.page-header-subtitle {
+    margin: 0.5rem 0 0;
+    opacity: 0.9;
+}
+
+/* Performance Grid and Cards */
+.performance-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1.5rem;
+}
+
+.performance-card {
+    color: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.performance-card.wins {
+    background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+}
+
+.performance-card.draws {
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+}
+
+.performance-card.losses {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+}
+
+.performance-label {
+    margin: 0;
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.performance-number {
+    margin: 0.5rem 0 0;
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+/* Table Responsive */
+.table-responsive {
+    overflow: auto;
+}
+
+/* Goals Stats */
+.goals-stat {
+    margin-bottom: 1.5rem;
+}
+
+.goals-stat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.goals-label {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.goals-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.goals-number.scored {
+    color: #27ae60;
+}
+
+.goals-number.conceded {
+    color: #e74c3c;
+}
+
+.progress-bar-wrapper {
+    background: #ecf0f1;
+    border-radius: 6px;
+    height: 8px;
+    overflow: hidden;
+}
+
+.progress-bar-filled {
+    background: linear-gradient(90deg, #27ae60 0%, #229954 100%);
+    height: 100%;
+    width: 100%;
+}
+
+.progress-bar-filled.conceded {
+    background: linear-gradient(90deg, #e74c3c 0%, #c0392b 100%);
+}
+
+.goals-average {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+    text-align: center;
+}
+
+.goals-average-label {
+    margin: 0;
+    color: #7f8c8d;
+    font-size: 0.9rem;
+}
+
+.goals-average-value {
+    margin: 0.5rem 0 0;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+/* Quick Actions Grid */
+.quick-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.action-card {
+    padding: 1.25rem;
+    color: white;
+    border-radius: 8px;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.3s ease;
+    display: block;
+}
+
+.action-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.action-card-blue {
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+}
+
+.action-card-blue:hover {
+    box-shadow: 0 8px 24px rgba(52, 152, 219, 0.4);
+}
+
+.action-card-green {
+    background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+}
+
+.action-card-green:hover {
+    box-shadow: 0 8px 24px rgba(39, 174, 96, 0.4);
+}
+
+.action-card-purple {
+    background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+}
+
+.action-card-purple:hover {
+    box-shadow: 0 8px 24px rgba(155, 89, 182, 0.4);
+}
+
+.action-card-icon {
+    display: block;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Footer */
+.footer-text-center {
+    text-align: center;
+}
+
+/* Stat Number with Dynamic Color */
+.stat-number[data-value] {
+    color: inherit;
+}
+
 @media (max-width: 768px) {
     .hero-title {
         font-size: 2.5rem;
@@ -351,5 +547,9 @@
 
     .section-title {
         font-size: 1.1rem;
+    }
+
+    .quick-actions-grid {
+        grid-template-columns: 1fr;
     }
 }

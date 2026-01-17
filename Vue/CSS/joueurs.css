@@ -198,3 +198,193 @@ tbody td .badge {
         padding: 0.75rem;
     }
 }
+
+/* ============================================
+   FORMULAIRE D'AJOUT/MODIFICATION DE JOUEUR
+   ============================================ */
+
+.page-header-gradient {
+    background: linear-gradient(135deg, #C8102E 0%, #E8283C 100%);
+    color: white;
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+}
+
+.page-header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.page-header-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.btn-retour {
+    font-weight: 600;
+}
+
+/* Formulaire */
+.form-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    padding: 2rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.form-actions button,
+.form-actions a {
+    flex: 1;
+    font-weight: 600;
+    padding: 0.75rem;
+}
+
+.form-actions a {
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Input désactivé (champ ID en modification) */
+.input-disabled {
+    background-color: #e9ecef;
+    cursor: not-allowed;
+}
+/* ============================================
+   LISTE JOUEURS PAGE STYLES
+   ============================================ */
+
+/* Page Header */
+.page-header-gradient {
+    background: linear-gradient(135deg, #C8102E 0%, #E8283C 100%);
+    color: white;
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+}
+
+.page-header-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.page-header-subtitle {
+    margin: 0.5rem 0 0;
+    opacity: 0.9;
+}
+
+.btn-add-player {
+    font-weight: 600;
+}
+
+/* Players Card */
+.players-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+/* Players Table */
+.players-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.players-table-header {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #ecf0f1;
+}
+
+.players-table-header th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.players-table-row {
+    border-bottom: 1px solid #ecf0f1;
+    transition: background-color 0.3s ease;
+}
+
+.players-table-row:hover {
+    background-color: #f8f9fa;
+}
+
+.players-table-row td {
+    padding: 1rem;
+    color: #2c3e50;
+}
+
+.players-table-id {
+    color: #7f8c8d;
+}
+
+.players-table-name {
+    font-weight: 600;
+}
+
+.players-table-actions {
+    text-align: center;
+}
+
+.players-table-actions .btn {
+    margin-right: 0.5rem;
+}
+
+/* Status Badge */
+.status-badge {
+    display: inline-block;
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.status-active {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+
+.status-injured {
+    background-color: #ffebee;
+    color: #c62828;
+}
+
+/* Empty State */
+.empty-state {
+    padding: 3rem;
+    text-align: center;
+}
+
+.empty-state-icon {
+    font-size: 3rem;
+    color: #bdc3c7;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.empty-state-title {
+    color: #7f8c8d;
+    margin-bottom: 1rem;
+}
+
+.empty-state-text {
+    color: #95a5a6;
+    margin-bottom: 1.5rem;
+}
