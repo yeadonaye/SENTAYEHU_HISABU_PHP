@@ -1,4 +1,7 @@
 <?php
+require_once __DIR__ . '/Modele/DAO/auth.php';
+requireAuth();
+
 // Page d'accueil sans accès DAO/BD
 $playerCount = 0;
 $injuredCount = 0;
