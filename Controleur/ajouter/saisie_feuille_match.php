@@ -72,7 +72,7 @@ $postes = ['Gardien', 'Défenseur', 'Milieu', 'Attaquant'];
 
 // Récupérer la composition actuelle pour ce match
 try {
-    $participations = $participerDao->getByMatch((int)$matchId);
+    $participations = $participerDao->obtenirParMatch((int)$matchId);
 } catch (Exception $e) {
     $participations = [];
 }
@@ -90,20 +90,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $posteRemplacants = $_POST['poste_remplacants'] ?? [];
     $notesPost = $_POST['note'] ?? [];
 
+    // Ensure arrays
+    if (!is_array($titulaires)) {
+        $titulaires = [$titulaires];
+    }
+    if (!is_array($remplacants)) {
+        $remplacants = [$remplacants];
+    }
+
     // Validation du nombre minimum de joueurs (11 titulaires)
     if (count($titulaires) < 11) {
         $error = 'Vous devez sélectionner au moins 11 titulaires.';
     } else {
         try {
             // Supprimer les participations existantes
-            $participerDao->deleteByMatch((int)$matchId);
+            $participerDao->supprimerParMatch((int)$matchId);
 
             // Insérer les titulaires
             foreach ($titulaires as $joueurId) {
                 $poste = $posteTitulaires[$joueurId] ?? null;
                 if ($poste) {
                     $noteVal = isset($notesPost[$joueurId]) && $notesPost[$joueurId] !== '' ? (int)$notesPost[$joueurId] : null;
-                    $participerDao->addParticipation((int)$joueurId, (int)$matchId, $poste, true, $noteVal);
+                    $participerDao->ajouterParticipation((int)$joueurId, (int)$matchId, $poste, true, $noteVal);
                 }
             }
 
@@ -112,7 +120,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $poste = $posteRemplacants[$joueurId] ?? null;
                 if ($poste) {
                     $noteVal = isset($notesPost[$joueurId]) && $notesPost[$joueurId] !== '' ? (int)$notesPost[$joueurId] : null;
-                    $participerDao->addParticipation((int)$joueurId, (int)$matchId, $poste, false, $noteVal);
+                    $participerDao->ajouterParticipation((int)$joueurId, (int)$matchId, $poste, false, $noteVal);
                 }
             }
 
@@ -126,7 +134,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Récupérer les commentaires et notes pour les joueurs
 $commentaires = [];
 try {
-    $commentairesRows = $participerDao->getCommentairesByMatch((int)$matchId);
+    $commentairesRows = $participerDao->obtenirCommentairesParMatch((int)$matchId);
     foreach ($commentairesRows as $row) {
         $joueurId = $row['Id_Joueur'];
         if (!isset($commentaires[$joueurId])) {
@@ -141,7 +149,7 @@ try {
 // Récupérer les notes pour les joueurs
 $notes = [];
 try {
-    $notesRows = $participerDao->getNotesByMatch((int)$matchId);
+    $notesRows = $participerDao->obtenirNotesParMatch((int)$matchId);
     foreach ($notesRows as $row) {
         $joueurId = $row['Id_Joueur'];
         if (!isset($notes[$joueurId])) {

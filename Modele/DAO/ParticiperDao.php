@@ -1,6 +1,6 @@
 <?php
 require_once 'ModeleDao.php';
-require_once 'Participer.php';
+require_once __DIR__ . '/../Participer.php';
 
 class ParticiperDao implements ModeleDao {
 
@@ -86,7 +86,7 @@ class ParticiperDao implements ModeleDao {
     /**
      * Récupérer tous les participants pour un match
      */
-    public function getByMatch(int $matchId): array {
+    public function obtenirParMatch(int $matchId): array {
         $sql = "SELECT * FROM Participer WHERE Id_Match = :matchId";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':matchId' => $matchId]);
@@ -96,7 +96,7 @@ class ParticiperDao implements ModeleDao {
     /**
      * Supprimer tous les participants pour un match
      */
-    public function deleteByMatch(int $matchId): bool {
+    public function supprimerParMatch(int $matchId): bool {
         $sql = "DELETE FROM Participer WHERE Id_Match = :matchId";
         $stmt = $this->pdo->prepare($sql);
             return $stmt->execute([':matchId' => $matchId]);
@@ -105,7 +105,7 @@ class ParticiperDao implements ModeleDao {
     /**
      * Ajouter un participant au match
      */
-    public function addParticipation(int $joueurId, int $matchId, string $poste, bool $titulaire, ?int $note = null): bool {
+    public function ajouterParticipation(int $joueurId, int $matchId, string $poste, bool $titulaire, ?int $note = null): bool {
         $sql = "INSERT INTO Participer (Id_Joueur, Id_Match, Poste, Titulaire_ou_pas, Note)
                 VALUES (:joueur, :match, :poste, :titulaire, :note)";
         $stmt = $this->pdo->prepare($sql);
@@ -121,7 +121,7 @@ class ParticiperDao implements ModeleDao {
     /**
      * Récupérer les commentaires pour les joueurs
      */
-    public function getCommentairesByMatch(int $matchId): array {
+    public function obtenirCommentairesParMatch(int $matchId): array {
         $sql = "SELECT c.Id_Joueur, c.Description, c.Date_ 
                 FROM Commentaire c 
                 JOIN Participer p ON c.Id_Joueur = p.Id_Joueur 
@@ -135,7 +135,7 @@ class ParticiperDao implements ModeleDao {
     /**
      * Récupérer les notes des joueurs pour un match
      */
-    public function getNotesByMatch(int $matchId): array {
+    public function obtenirNotesParMatch(int $matchId): array {
         $sql = "SELECT Id_Joueur, Note FROM Participer 
                 WHERE Id_Match = :matchId AND Note IS NOT NULL";
         $stmt = $this->pdo->prepare($sql);

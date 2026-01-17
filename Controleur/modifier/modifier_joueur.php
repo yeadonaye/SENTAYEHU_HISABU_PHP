@@ -96,19 +96,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $statut
                 );
                 $joueurDao->update($joueurObj);
-                $success = 'Joueur modifié avec succès!';
-                
-                // Update $joueur array for display
-                $joueur = [
-                    'Id_Joueur' => $id,
-                    'Num_Licence' => $numLicence,
-                    'Nom' => $nom,
-                    'Prenom' => $prenom,
-                    'Date_Naissance' => $dateNaissance_value,
-                    'Taille' => $taille_value,
-                    'Poids' => $poids_value,
-                    'Statut' => $statut
-                ];
+                // Redirect to display page (Post-Redirect-Get)
+                $script = str_replace('\\','/', $_SERVER['SCRIPT_NAME'] ?? '');
+                $parts = explode('/', trim($script, '/'));
+                $base = '/' . ($parts[0] ?? '');
+                header('Location: ' . $base . '/Vue/Afficher/liste_joueurs.php?success=modified');
+                exit;
             } catch (Exception $e) {
                 $error = 'Erreur lors de l\'enregistrement: ' . $e->getMessage();
             }

@@ -62,7 +62,7 @@
                             </div>
 
                             <div class="match-actions">
-                                <a href="saisie_feuille_match.php?id=<?php echo $match['Id_Match']; ?>" class="btn btn-sm btn-success">
+                                <a href="../Ajouter/saisie_feuille_match.php?id=<?php echo $match['Id_Match']; ?>" class="btn btn-sm btn-success">
                                     <i class="bi bi-clipboard2-data me-1"></i>Composer l'équipe
                                 </a>
                                 <a href="../Modifier/modifier_match.php?id=<?php echo $match['Id_Match']; ?>" class="btn btn-sm btn-outline-primary">
@@ -81,7 +81,7 @@
                 <i class="bi bi-calendar-x empty-state-icon"></i>
                 <h3 class="empty-state-title">Aucun match trouvé</h3>
                 <p class="empty-state-text">Planifiez votre premier match</p>
-                <a href="ajouter_match.php" class="btn btn-primary">
+                <a href="../Ajouter/ajouter_match.php" class="btn btn-primary">
                     <i class="bi bi-plus-circle me-2"></i>Planifier un Match
                 </a>
             </div>

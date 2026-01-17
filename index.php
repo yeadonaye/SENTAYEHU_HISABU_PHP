@@ -1,59 +1,11 @@
 <?php
-// auth.php moved to Modele/DAO; require it with an explicit path
-require_once __DIR__ . '/Modele/DAO/auth.php';
-requireAuth();
-
-// Database connection
+// Page d'accueil sans accès DAO/BD
 $playerCount = 0;
-$upcomingMatch = null;
+$injuredCount = 0;
+$wins = 0;
+$totalMatches = 0;
+$nextMatch = null;
 $recentComments = [];
-
-try {
-    $pdo = getDBConnection();
-    
-    // Get total number of players
-    $stmt = $pdo->query('SELECT COUNT(*) FROM Joueur');
-    $playerCount = (int)$stmt->fetchColumn();
-
-    // Get number of injured players (statut contenant 'bles' case-insensitive)
-    try {
-        $stmt = $pdo->query("SELECT COUNT(*) FROM Joueur WHERE LOWER(Statut) LIKE '%bles%'");
-        $injuredCount = (int)$stmt->fetchColumn();
-    } catch (Exception $e) {
-        $injuredCount = 0;
-    }
-
-    // Get matches stats: total and wins
-    try {
-        $stmt = $pdo->query("SELECT COUNT(*) as total, SUM(CASE WHEN Resultat = 'Victoire' OR (Score_Nous IS NOT NULL AND Score_Adverse IS NOT NULL AND Score_Nous > Score_Adverse) THEN 1 ELSE 0 END) as wins FROM `Match_`");
-        $m = $stmt->fetch(PDO::FETCH_ASSOC);
-        $totalMatches = (int)($m['total'] ?? 0);
-        $wins = (int)($m['wins'] ?? 0);
-    } catch (Exception $e) {
-        $totalMatches = 0;
-        $wins = 0;
-    }
-
-    // Get next match (SQLite compatible)
-    try {
-        $stmt = $pdo->prepare("SELECT Date_Rencontre, Heure FROM `Match_` WHERE Date_Rencontre >= date('now') ORDER BY Date_Rencontre, Heure LIMIT 1");
-        $stmt->execute();
-        $next = $stmt->fetch(PDO::FETCH_ASSOC);
-        $nextMatch = $next ?: null;
-    } catch (Exception $e) {
-        $nextMatch = null;
-    }
-
-    // Get recent comments
-    $stmt = $pdo->query('SELECT c.Description, c.Date_, j.Nom, j.Prenom 
-                         FROM Commentaire c 
-                         JOIN Joueur j ON c.Id_Joueur = j.Id_Joueur 
-                         ORDER BY c.Date_ DESC LIMIT 3');
-    $recentComments = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
-} catch(PDOException $e) {
-    $error = "Erreur de connexion à la base de données: " . $e->getMessage();
-}
 ?>
 
 <!DOCTYPE html>
@@ -69,7 +21,7 @@ try {
 </head>
 <body>
     <!-- Barre de navigation -->
-    <?php include 'Vue/partials/navbar.php'; ?>
+    <?php include 'Vue/Afficher/navbar.php'; ?>
 
     <!-- Première partie de la page d'acceuil -->
     <section class="hero-section">
@@ -108,10 +60,10 @@ try {
 
             <div class="col-md-3 col-sm-6">
                 <div class="stat-card text-center">
-                                        <div class="stat-icon">
-                                                <!-- Use repository SVG file for infirmary cross -->
-                                                <img src="Vue/img/infirmary.svg" alt="Infirmerie" style="width:48px;height:48px;" />
-                                        </div>
+                    <div class="stat-icon">
+                        <!-- Use repository SVG file for infirmary cross -->
+                        <img src="Vue/img/infirmary.svg" alt="Infirmerie" style="width:48px;height:48px;" />
+                    </div>
                     <h3 class="stat-number"><?php echo isset($injuredCount) ? $injuredCount : 0; ?></h3>
                     <p class="stat-label">Joueurs Blessés</p>
                 </div>
@@ -147,22 +99,7 @@ try {
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="footer mt-5">
-        <div class="container-fluid">
-            <div class="footer-content">
-                <div class="text-center">
-                    <h5 class="footer-title">Gestion des Joueurs</h5>
-                    <p class="footer-text">Système de gestion professionnel pour votre équipe de football</p>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <div class="container text-center">
-                    <p class="mb-0">&copy; <?php echo date('Y'); ?> Liverpool FC</p>
-                </div>
-            </div>
-        </div>
-    </footer>
+    <?php include 'Vue/Afficher/footer.php'; ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
