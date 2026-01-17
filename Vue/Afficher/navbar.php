@@ -1,9 +1,8 @@
 <?php
-// Compute a relative prefix based on current script depth (keeps links relative, no leading slash)
+// Compute a relative prefix based on directory depth of current script
 $script = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '');
-$segments = explode('/', trim($script, '/'));
-// drop app folder (first) and filename (last) to get depth inside app
-$depth = max(count($segments) - 2, 0);
+$dir = trim(dirname($script), '/');
+$depth = $dir === '' ? 0 : substr_count($dir, '/');
 $prefix = str_repeat('../', $depth);
 ?>
 <nav class="navbar navbar-expand-lg navbar-dark sticky-top navbar-custom">
