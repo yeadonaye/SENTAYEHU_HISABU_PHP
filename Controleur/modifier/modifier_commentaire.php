@@ -29,15 +29,29 @@ try {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $description = trim($_POST['description'] ?? '');
+    $dateInput = trim($_POST['date_commentaire'] ?? '');
+
     if ($description === '') {
         $error = 'Le commentaire est obligatoire';
+    }
+
+    // Utiliser la date saisie; si invalide -> erreur
+    $dateForDb = null;
+    if ($dateInput !== '') {
+        $dt = DateTime::createFromFormat('Y-m-d\TH:i', $dateInput) ?: DateTime::createFromFormat('Y-m-d', $dateInput);
+        if ($dt) {
+            $dateForDb = $dt->format('Y-m-d H:i:s');
+        } else {
+            $error = 'Date de commentaire invalide';
+        }
+    } else {
+        $dateForDb = $comment ? $comment->getDate() : date('Y-m-d H:i:s');
     }
 
     if (!$error && $comment) {
         try {
             $comment->setDescription($description);
-            // Mettre à jour la date à maintenant pour suivre la modification
-            $comment->setDate(date('Y-m-d H:i:s'));
+            $comment->setDate($dateForDb);
             $commentaireDao->update($comment);
             header('Location: /SENTAYEHU_HISABU_PHP/Vue/Afficher/afficher_commentaires.php?id=' . $comment->getIdJoueur() . '&success=1');
             exit;

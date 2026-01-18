@@ -25,6 +25,18 @@
                     <label class="form-label fw-bold" for="description">Commentaire *</label>
                     <textarea class="form-control" id="description" name="description" rows="4" required><?php echo htmlspecialchars($comment->getDescription()); ?></textarea>
                 </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold" for="date_commentaire">Date du commentaire</label>
+                    <?php
+                        $dtVal = '';
+                        $dt = DateTime::createFromFormat('Y-m-d H:i:s', $comment->getDate()) ?: DateTime::createFromFormat('Y-m-d', $comment->getDate());
+                        if ($dt) {
+                            $dtVal = $dt->format('Y-m-d\TH:i');
+                        }
+                    ?>
+                    <input type="datetime-local" class="form-control" id="date_commentaire" name="date_commentaire" value="<?php echo htmlspecialchars($_POST['date_commentaire'] ?? $dtVal); ?>">
+                    <small class="text-muted">Laisser vide pour conserver la date actuelle du commentaire.</small>
+                </div>
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn btn-primary"><i class="bi bi-save me-2"></i>Enregistrer</button>
                     <a href="../Afficher/afficher_commentaires.php?id=<?php echo $comment->getIdJoueur(); ?>" class="btn btn-secondary">Annuler</a>

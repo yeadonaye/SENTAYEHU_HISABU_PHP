@@ -32,14 +32,26 @@ try {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $description = trim($_POST['description'] ?? '');
+    $dateInput = trim($_POST['date_commentaire'] ?? '');
 
     if ($description === '') {
         $error = 'Le commentaire est obligatoire';
     }
 
+    // Parse date saisie (datetime-local ou date seule). Si vide, on prend maintenant.
+    $dateForDb = date('Y-m-d H:i:s');
+    if ($dateInput !== '') {
+        $dt = DateTime::createFromFormat('Y-m-d\TH:i', $dateInput) ?: DateTime::createFromFormat('Y-m-d', $dateInput);
+        if ($dt) {
+            $dateForDb = $dt->format('Y-m-d H:i:s');
+        } else {
+            $error = 'Date de commentaire invalide';
+        }
+    }
+
     if (!$error) {
         try {
-            $comment = new Commentaire(0, $description, date('Y-m-d H:i:s'), $joueurId);
+            $comment = new Commentaire(0, $description, $dateForDb, $joueurId);
             $commentaireDao->add($comment);
             header('Location: /Vue/Afficher/afficher_commentaires.php?id=' . $joueurId . '&success=1');
             exit;

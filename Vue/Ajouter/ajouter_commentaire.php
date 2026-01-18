@@ -25,6 +25,11 @@
                 <label class="form-label fw-bold" for="description">Commentaire *</label>
                 <textarea class="form-control" id="description" name="description" rows="4" required><?php echo htmlspecialchars($_POST['description'] ?? ''); ?></textarea>
             </div>
+            <div class="mb-3">
+                <label class="form-label fw-bold" for="date_commentaire">Date du commentaire</label>
+                <input type="datetime-local" class="form-control" id="date_commentaire" name="date_commentaire" value="<?php echo htmlspecialchars($_POST['date_commentaire'] ?? ''); ?>">
+                <small class="text-muted">Laisser vide pour utiliser la date et l'heure actuelles.</small>
+            </div>
             <div class="d-flex gap-2">
                 <button type="submit" class="btn btn-success"><i class="bi bi-save me-2"></i>Enregistrer</button>
                 <a href="../Afficher/afficher_commentaires.php?id=<?php echo $joueurId; ?>" class="btn btn-secondary">Annuler</a>
