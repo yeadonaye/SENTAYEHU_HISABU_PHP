@@ -68,10 +68,16 @@
                                         </span>
                                     </td>
                                     <td class="players-table-actions">
-                                        <a href="../Modifier/modifier_joueur.php?id=<?php echo $joueur['Id_Joueur']; ?>" class="btn btn-sm btn-outline-primary">
+                                        <a href="../Modifier/modifier_joueur.php?id=<?php echo $joueur['Id_Joueur']; ?>" class="btn btn-sm btn-outline-primary" title="Modifier">
                                             <i class="bi bi-pencil"></i>
                                         </a>
-                                        <a href="../../Controleur/suppirmer/supprimer_joueur.php?id=<?php echo $joueur['Id_Joueur']; ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce joueur ?')">
+                                        <a href="../Ajouter/ajouter_commentaire.php?id=<?php echo $joueur['Id_Joueur']; ?>" class="btn btn-sm btn-outline-success" title="Ajouter un commentaire">
+                                            <i class="bi bi-chat-left-text"></i>
+                                        </a>
+                                        <a href="afficher_commentaires.php?id=<?php echo $joueur['Id_Joueur']; ?>" class="btn btn-sm btn-outline-info" title="Voir les commentaires">
+                                            <i class="bi bi-chat-dots"></i>
+                                        </a>
+                                        <a href="../../Controleur/suppirmer/supprimer_joueur.php?id=<?php echo $joueur['Id_Joueur']; ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce joueur ?')" title="Supprimer">
                                             <i class="bi bi-trash"></i>
                                         </a>
                                     </td>
