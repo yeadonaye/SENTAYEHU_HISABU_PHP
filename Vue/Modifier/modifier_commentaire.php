@@ -29,13 +29,13 @@
                     <label class="form-label fw-bold" for="date_commentaire">Date du commentaire</label>
                     <?php
                         $dtVal = '';
-                        $dt = DateTime::createFromFormat('Y-m-d H:i:s', $comment->getDate()) ?: DateTime::createFromFormat('Y-m-d', $comment->getDate());
+                        $dt = DateTime::createFromFormat('Y-m-d', substr($comment->getDate(), 0, 10)) ?: DateTime::createFromFormat('Y-m-d H:i:s', $comment->getDate());
                         if ($dt) {
-                            $dtVal = $dt->format('Y-m-d\TH:i');
+                            $dtVal = $dt->format('d/m/Y');
                         }
                     ?>
-                    <input type="datetime-local" class="form-control" id="date_commentaire" name="date_commentaire" value="<?php echo htmlspecialchars($_POST['date_commentaire'] ?? $dtVal); ?>">
-                    <small class="text-muted">Laisser vide pour conserver la date actuelle du commentaire.</small>
+                    <input type="text" class="form-control" id="date_commentaire" name="date_commentaire" placeholder="jj/mm/aaaa" value="<?php echo htmlspecialchars($_POST['date_commentaire'] ?? $dtVal); ?>">
+                    <small class="text-muted">Format attendu : jj/mm/aaaa. Laisser vide pour conserver la date actuelle du commentaire.</small>
                 </div>
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn btn-primary"><i class="bi bi-save me-2"></i>Enregistrer</button>

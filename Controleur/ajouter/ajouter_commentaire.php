@@ -38,14 +38,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Le commentaire est obligatoire';
     }
 
-    // Parse date saisie (datetime-local ou date seule). Si vide, on prend maintenant.
-    $dateForDb = date('Y-m-d H:i:s');
+    // Parse date saisie au format jj/mm/aaaa (ou fallback ISO). Si vide, on prend la date du jour.
+    $dateForDb = date('Y-m-d');
     if ($dateInput !== '') {
-        $dt = DateTime::createFromFormat('Y-m-d\TH:i', $dateInput) ?: DateTime::createFromFormat('Y-m-d', $dateInput);
+        $dt = DateTime::createFromFormat('d/m/Y', $dateInput) ?: DateTime::createFromFormat('Y-m-d', $dateInput);
         if ($dt) {
-            $dateForDb = $dt->format('Y-m-d H:i:s');
+            $dateForDb = $dt->format('Y-m-d');
         } else {
-            $error = 'Date de commentaire invalide';
+            $error = 'Date de commentaire invalide (format jj/mm/aaaa)';
         }
     }
 

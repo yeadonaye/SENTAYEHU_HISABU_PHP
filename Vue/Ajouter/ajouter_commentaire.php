@@ -27,8 +27,8 @@
             </div>
             <div class="mb-3">
                 <label class="form-label fw-bold" for="date_commentaire">Date du commentaire</label>
-                <input type="datetime-local" class="form-control" id="date_commentaire" name="date_commentaire" value="<?php echo htmlspecialchars($_POST['date_commentaire'] ?? ''); ?>">
-                <small class="text-muted">Laisser vide pour utiliser la date et l'heure actuelles.</small>
+                <input type="text" class="form-control" id="date_commentaire" name="date_commentaire" placeholder="jj/mm/aaaa" value="<?php echo htmlspecialchars($_POST['date_commentaire'] ?? ''); ?>">
+                <small class="text-muted">Format attendu : jj/mm/aaaa. Laisser vide pour utiliser la date du jour.</small>
             </div>
             <div class="d-flex gap-2">
                 <button type="submit" class="btn btn-success"><i class="bi bi-save me-2"></i>Enregistrer</button>

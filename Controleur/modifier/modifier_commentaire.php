@@ -35,17 +35,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Le commentaire est obligatoire';
     }
 
-    // Utiliser la date saisie; si invalide -> erreur
-    $dateForDb = null;
+    // Utiliser uniquement la date (sans heure) au format jj/mm/aaaa. Si vide, conserver la valeur actuelle ou la date du jour.
+    $dateForDb = $comment ? substr($comment->getDate(), 0, 10) : date('Y-m-d');
     if ($dateInput !== '') {
-        $dt = DateTime::createFromFormat('Y-m-d\TH:i', $dateInput) ?: DateTime::createFromFormat('Y-m-d', $dateInput);
+        $dt = DateTime::createFromFormat('d/m/Y', $dateInput) ?: DateTime::createFromFormat('Y-m-d', $dateInput);
         if ($dt) {
-            $dateForDb = $dt->format('Y-m-d H:i:s');
+            $dateForDb = $dt->format('Y-m-d');
         } else {
-            $error = 'Date de commentaire invalide';
+            $error = 'Date de commentaire invalide (format jj/mm/aaaa)';
         }
-    } else {
-        $dateForDb = $comment ? $comment->getDate() : date('Y-m-d H:i:s');
     }
 
     if (!$error && $comment) {
