@@ -3,10 +3,8 @@ require_once __DIR__ . '/../../Modele/DAO/auth.php';
 require_once __DIR__ . '/../../Modele/DAO/MatchDao.php';
 requireAuth();
 
-// Compute application base (first path segment) for reliable redirects
-$script = str_replace('\\','/', $_SERVER['SCRIPT_NAME'] ?? '');
-$parts = explode('/', trim($script, '/'));
-$base = '/' . ($parts[0] ?? '');
+// Base absolue fixe pour les redirections
+$base = '/SENTAYEHU_HISABU_PHP';
 
 $pdo = getDBConnection();
 $matchDao = new MatchDao($pdo);

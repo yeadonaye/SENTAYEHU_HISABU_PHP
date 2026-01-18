@@ -4,11 +4,6 @@ require_once __DIR__ . '/../../Modele/DAO/MatchDao.php';
 require_once __DIR__ . '/../../Modele/Match.php';
 requireAuth();
 
-// Compute application base (first path segment) for reliable redirects
-$script = str_replace('\\','/', $_SERVER['SCRIPT_NAME'] ?? '');
-$parts = explode('/', trim($script, '/'));
-$base = '/' . ($parts[0] ?? '');
-
 $pdo = getDBConnection();
 $matchDao = new MatchDao($pdo);
 $match = [];
@@ -30,7 +25,8 @@ if (!$id) {
                 'Heure' => $matchObj->getHeure(),
                 'Nom_Equipe_Adverse' => $matchObj->getNomEquipeAdverse(),
                 'Lieu' => $matchObj->getLieu(),
-                'Resultat' => $matchObj->getResultat()
+                'Score_Adversaire' => $matchObj->getScoreAdversaire(),
+                'Score_Nous' => $matchObj->getScoreNous()
             ];
         } else {
             $error = 'Match non trouvé';
@@ -57,22 +53,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Les champs avec * sont obligatoires';
     } else {
         try {
-            // Créer le résultat au format "3-2" si les scores sont fournis
-            $resultat = '';
-            if ($scoreNous !== '' && $scoreAdverse !== '') {
-                $sN = (int)$scoreNous;
-                $sA = (int)$scoreAdverse;
-                $resultat = $sN . '-' . $sA;
-            }
-
             // Modification
             $matchObj = new Match_(
-                (int)$id,
+                $id,
                 $dateRencontre,
                 $heure,
                 $nomEquipeAdverse,
                 $lieu,
-                $resultat
+                $scoreAdverse,
+                $scoreNous
             );
             $matchDao->update($matchObj);
             $success = 'Match modifié avec succès!';
@@ -84,7 +73,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'Heure' => $heure,
                 'Nom_Equipe_Adverse' => $nomEquipeAdverse,
                 'Lieu' => $lieu,
-                'Resultat' => $resultat
+                'Score_Adversaire' => $scoreAdverse,
+                'Score_Nous' => $scoreNous
             ];
         } catch (Exception $e) {
             $error = 'Erreur lors de l\'enregistrement: ' . $e->getMessage();

@@ -23,7 +23,8 @@
                     $row['Heure'],
                     $row['Nom_Equipe_Adverse'],
                     $row['Lieu'],
-                    $row['Resultat'] ?? ''
+                    $row['Score_Adversaire'] ?? '',
+                    $row['Score_Nous'] ?? ''
                 );
             }
             return $matchs;
@@ -45,22 +46,24 @@
                 $row['Heure'],
                 $row['Nom_Equipe_Adverse'],
                 $row['Lieu'],
-                $row['Resultat'] ?? ''
+                $row['Score_Adversaire'] ?? '',
+                $row['Score_Nous'] ?? ''
             );
         }
 
         public function add(object $obj): bool{
             if (!($obj instanceof Match_)) return false;
             
-            $sql = "INSERT INTO `Match_` (Nom_Equipe_Adverse, Date_Rencontre, Heure, Lieu, Resultat) 
-                    VALUES (:nom, :date, :heure, :lieu, :resultat)";
+            $sql = "INSERT INTO `Match_` (Nom_Equipe_Adverse, Date_Rencontre, Heure, Lieu, Score_Adversaire, Score_Nous) 
+                    VALUES (:nom, :date, :heure, :lieu, :score_adversaire, :score_nous)";
             $stmt = $this->pdo->prepare($sql);
             return $stmt->execute([
                 ':nom' => $obj->getNomEquipeAdverse(),
                 ':date' => $obj->getDateRencontre(),
                 ':heure' => $obj->getHeure(),
                 ':lieu' => $obj->getLieu(),
-                ':resultat' => $obj->getResultat()
+                ':score_adversaire' => $obj->getScoreAdversaire(),
+                ':score_nous' => $obj->getScoreNous()
             ]);
         }
 
@@ -72,7 +75,8 @@
                         Date_Rencontre = :date,
                         Heure = :heure,
                         Lieu = :lieu,
-                        Resultat = :resultat
+                        Score_Adversaire = :score_adversaire,
+                        Score_Nous = :score_nous
                     WHERE Id_Match = :id";
             $stmt = $this->pdo->prepare($sql);
             return $stmt->execute([
@@ -80,7 +84,8 @@
                 ':date' => $obj->getDateRencontre(),
                 ':heure' => $obj->getHeure(),
                 ':lieu' => $obj->getLieu(),
-                ':resultat' => $obj->getResultat(),
+                ':score_adversaire' => $obj->getScoreAdversaire(),
+                ':score_nous' => $obj->getScoreNous(),
                 ':id' => $obj->getIdMatch()
             ]);
         }
@@ -116,13 +121,13 @@
             $sql = "
                 SELECT 
                     COUNT(*) as total,
-                    SUM(CASE WHEN Score_Nous > Score_Adverse THEN 1 ELSE 0 END) as victoires,
-                    SUM(CASE WHEN Score_Nous < Score_Adverse THEN 1 ELSE 0 END) as defaites,
-                    SUM(CASE WHEN Score_Nous = Score_Adverse THEN 1 ELSE 0 END) as nuls,
+                    SUM(CASE WHEN Score_Nous > Score_Adversaire THEN 1 ELSE 0 END) as victoires,
+                    SUM(CASE WHEN Score_Nous < Score_Adversaire THEN 1 ELSE 0 END) as defaites,
+                    SUM(CASE WHEN Score_Nous = Score_Adversaire THEN 1 ELSE 0 END) as nuls,
                     SUM(Score_Nous) as buts,
-                    SUM(Score_Adverse) as butsEncaisses
+                    SUM(Score_Adversaire) as butsEncaisses
                 FROM `Match_`
-                WHERE Score_Nous IS NOT NULL AND Score_Adverse IS NOT NULL
+                WHERE Score_Nous IS NOT NULL AND Score_Adversaire IS NOT NULL
             ";
             $stmt = $this->pdo->query($sql);
             return $stmt->fetch(PDO::FETCH_ASSOC) ?? [
@@ -138,7 +143,7 @@
         public function getMatchesOrderedByDate(): array {
             $sql = "
                 SELECT Id_Match FROM `Match_` 
-                WHERE (Score_Nous IS NOT NULL AND Score_Adverse IS NOT NULL) OR Resultat IS NOT NULL 
+                WHERE (Score_Nous IS NOT NULL AND Score_Adversaire IS NOT NULL) OR Resultat IS NOT NULL 
                 ORDER BY Date_Rencontre DESC, Heure DESC
             ";
             $stmt = $this->pdo->query($sql);

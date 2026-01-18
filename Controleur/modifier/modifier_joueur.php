@@ -97,9 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 );
                 $joueurDao->update($joueurObj);
                 // Redirect to display page (Post-Redirect-Get)
-                $script = str_replace('\\','/', $_SERVER['SCRIPT_NAME'] ?? '');
-                $parts = explode('/', trim($script, '/'));
-                $base = '/' . ($parts[0] ?? '');
+                $base = '/SENTAYEHU_HISABU_PHP';
                 header('Location: ' . $base . '/Vue/Afficher/liste_joueurs.php?success=modified');
                 exit;
             } catch (Exception $e) {

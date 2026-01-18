@@ -6,10 +6,8 @@ require_once __DIR__ . '/../../Modele/DAO/ParticiperDao.php';
 require_once __DIR__ . '/../../Modele/DAO/CommentaireDao.php';
 requireAuth();
 
-// Compute application base (first path segment) for reliable redirects
-$script = str_replace('\\','/', $_SERVER['SCRIPT_NAME'] ?? '');
-$parts = explode('/', trim($script, '/'));
-$base = '/' . ($parts[0] ?? '');
+// Base absolue fixe pour les redirections
+$base = '/SENTAYEHU_HISABU_PHP';
 
 $pdo = getDBConnection();
 $matchDao = new MatchDao($pdo);
@@ -41,7 +39,8 @@ try {
         'Heure' => $matchObj->getHeure(),
         'Nom_Equipe_Adverse' => $matchObj->getNomEquipeAdverse(),
         'Lieu' => $matchObj->getLieu(),
-        'Resultat' => $matchObj->getResultat()
+        'Score_Adversaire' => $matchObj->getScoreAdversaire(),
+        'Score_Nous' => $matchObj->getScoreNous()
     ];
 } catch (Exception $e) {
     header('Location: ' . $base . '/Vue/Afficher/afficher_match.php');

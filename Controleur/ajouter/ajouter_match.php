@@ -4,10 +4,8 @@ require_once __DIR__ . '/../../Modele/DAO/MatchDao.php';
 require_once __DIR__ . '/../../Modele/Match.php';
 requireAuth();
 
-// Compute application base (first path segment) for reliable redirects (e.g. /SENTAYEHU_HISABU_PHP)
-$script = str_replace('\\','/', $_SERVER['SCRIPT_NAME'] ?? '');
-$parts = explode('/', trim($script, '/'));
-$base = '/' . ($parts[0] ?? '');
+// Base absolue fixe pour les redirections
+$base = '/SENTAYEHU_HISABU_PHP';
 
 $pdo = getDBConnection();
 $matchDao = new MatchDao($pdo);
@@ -97,7 +95,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $heure,
                     $nomEquipeAdverse,
                     $lieu,
-                    $resultat
+                    $scoreAdversaire,
+                    $scoreNous
                 );
                 $matchDao->update($matchObj);
                 // Redirect to reload fresh data from DB (Post-Redirect-Get)
@@ -111,7 +110,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $heure,
                     $nomEquipeAdverse,
                     $lieu,
-                    $resultat
+                    $scoreAdversaire,
+                    $scoreNous
                 );
                 $matchDao->add($matchObj);
                 // Redirection automatique vers la liste des matchs
@@ -133,7 +133,8 @@ if ($match) {
         'Date_Rencontre' => $toFrDate($match->getDateRencontre()),
         'Heure' => $normalizeTime($match->getHeure()),
         'Lieu' => $match->getLieu(),
-        'Resultat' => $match->getResultat()
+        'Score_Adversaire' => $match->getScoreAdversaire(),
+        'Score_Nous' => $match->getScoreNous()
     ];
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Keep user input on validation errors
@@ -143,7 +144,8 @@ if ($match) {
         'Date_Rencontre' => $dateRencontre ?? '',
         'Heure' => $heure ?? '',
         'Lieu' => $lieu ?? '',
-        'Resultat' => ''
+        'Score_Adversaire' => $scoreAdverse ?? '',
+        'Score_Nous' => $scoreNous ?? ''
     ];
 }
 ?>
