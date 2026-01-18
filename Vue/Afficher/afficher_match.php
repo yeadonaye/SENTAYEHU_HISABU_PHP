@@ -13,6 +13,11 @@
 <body>
     <?php include 'navbar.php'; ?>
     <div class="container-fluid">
+        <div class="mb-4 mt-4">
+            <a href="../Ajouter/ajouter_match.php" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-2"></i>Planifier un Match
+            </a>
+        </div>
         <?php if (!empty($matchs)): ?>
             <div class="match-cards-grid">
                 <?php foreach ($matchs as $match): ?>
