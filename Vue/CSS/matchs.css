@@ -369,7 +369,7 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 300px));
     gap: 1rem;
-    justify-content: start;
+    justify-content: center;
 }
 
 /* Joueur Card */
