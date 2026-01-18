@@ -4,9 +4,6 @@ require_once __DIR__ . '/../../Modele/DAO/MatchDao.php';
 require_once __DIR__ . '/../../Modele/Match.php';
 requireAuth();
 
-// Base absolue fixe pour les redirections
-$base = '/SENTAYEHU_HISABU_PHP';
-
 $pdo = getDBConnection();
 $matchDao = new MatchDao($pdo);
 $match = null;
@@ -105,7 +102,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 // Ajout
                 $matchObj = new Match_(
-                    0, // ID temporaire
+                    $id,
                     $dateSql,
                     $heure,
                     $nomEquipeAdverse,
@@ -115,7 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 );
                 $matchDao->add($matchObj);
                 // Redirection automatique vers la liste des matchs
-                header('Location: ' . $base . '/Vue/Afficher/afficher_match.php');
+                header('Location: /Vue/Afficher/afficher_match.php');
                 exit;
             }
         } catch (Exception $e) {

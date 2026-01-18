@@ -6,9 +6,6 @@ require_once __DIR__ . '/../../Modele/DAO/ParticiperDao.php';
 require_once __DIR__ . '/../../Modele/DAO/CommentaireDao.php';
 requireAuth();
 
-// Base absolue fixe pour les redirections
-$base = '/SENTAYEHU_HISABU_PHP';
-
 $pdo = getDBConnection();
 $matchDao = new MatchDao($pdo);
 $joueurDao = new JoueurDao($pdo);

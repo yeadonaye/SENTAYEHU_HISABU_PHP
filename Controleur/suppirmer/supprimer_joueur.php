@@ -3,9 +3,6 @@ require_once __DIR__ . '/../../Modele/DAO/auth.php';
 require_once __DIR__ . '/../../Modele/DAO/JoueurDao.php';
 requireAuth();
 
-// Base absolue fixe pour les redirections
-$base = '/SENTAYEHU_HISABU_PHP';
-
 $pdo = getDBConnection();
 $joueurDao = new JoueurDao($pdo);
 $id = $_GET['id'] ?? null;

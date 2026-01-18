@@ -4,9 +4,6 @@ require_once __DIR__ . '/../../Modele/DAO/JoueurDao.php';
 require_once __DIR__ . '/../../Modele/Joueur.php';
 requireAuth();
 
-// Base absolue fixe pour les redirections
-$base = '/SENTAYEHU_HISABU_PHP';
-
 $pdo = getDBConnection();
 $joueurDao = new JoueurDao($pdo);
 $joueur = []; // Initialize as empty array for template compatibility
