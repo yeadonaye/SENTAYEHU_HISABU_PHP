@@ -4,6 +4,9 @@ require_once __DIR__ . '/../../Modele/DAO/MatchDao.php';
 require_once __DIR__ . '/../../Modele/Match.php';
 requireAuth();
 
+// Base absolue pour les redirections
+$base = '/SENTAYEHU_HISABU_PHP';
+
 $pdo = getDBConnection();
 $matchDao = new MatchDao($pdo);
 $match = null;
@@ -56,8 +59,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $dateRencontre = $_POST['dateRencontre'] ?? '';
     $heure = $_POST['heure'] ?? '';
     $lieu = $_POST['lieu'] ?? '';
-    $scoreNous = $_POST['scoreNous'] ?? 0;
-    $scoreAdverse = $_POST['scoreAdverse'] ?? 0;
+    $scoreNous = $_POST['scoreNous'] ?? '';
+    $scoreAdverse = $_POST['scoreAdverse'] ?? '';
+    // Les scores par défaut à 0 si laissés vides
+    $scoreNousInt = ($scoreNous === '' ? 0 : (int)$scoreNous);
+    $scoreAdverseInt = ($scoreAdverse === '' ? 0 : (int)$scoreAdverse);
 
     if (empty($nomEquipeAdverse) || empty($dateRencontre) || empty($heure)) {
         $error = 'Les champs avec * sont obligatoires';
@@ -79,9 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Créer le résultat au format "3-2" si les scores sont fournis
             $resultat = '';
             if ($scoreNous !== '' && $scoreAdverse !== '') {
-                $sN = (int)$scoreNous;
-                $sA = (int)$scoreAdverse;
-                $resultat = $sN . '-' . $sA;
+                $resultat = $scoreNousInt . '-' . $scoreAdverseInt;
             }
 
             if ($id) {
@@ -92,8 +96,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $heure,
                     $nomEquipeAdverse,
                     $lieu,
-                    $scoreAdversaire,
-                    $scoreNous
+                    $scoreAdverseInt,
+                    $scoreNousInt
                 );
                 $matchDao->update($matchObj);
                 // Redirect to reload fresh data from DB (Post-Redirect-Get)
@@ -102,17 +106,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 // Ajout
                 $matchObj = new Match_(
-                    $id,
+                    0,
                     $dateSql,
                     $heure,
                     $nomEquipeAdverse,
                     $lieu,
-                    $scoreAdversaire,
-                    $scoreNous
+                    $scoreAdverseInt,
+                    $scoreNousInt
                 );
                 $matchDao->add($matchObj);
                 // Redirection automatique vers la liste des matchs
-                header('Location: /Vue/Afficher/afficher_match.php');
+                header('Location: ' . $base . '/Vue/Afficher/afficher_match.php');
                 exit;
             }
         } catch (Exception $e) {
@@ -141,8 +145,8 @@ if ($match) {
         'Date_Rencontre' => $dateRencontre ?? '',
         'Heure' => $heure ?? '',
         'Lieu' => $lieu ?? '',
-        'Score_Adversaire' => $scoreAdverse ?? '',
-        'Score_Nous' => $scoreNous ?? ''
+        'Score_Adversaire' => $scoreAdverse,
+        'Score_Nous' => $scoreNous
     ];
 }
 ?>
