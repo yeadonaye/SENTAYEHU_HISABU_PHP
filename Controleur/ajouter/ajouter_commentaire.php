@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $comment = new Commentaire(0, $description, $dateForDb, $joueurId);
             $commentaireDao->add($comment);
-            header('Location: /SENTAYEHU_HISABU_PHP/Vue/Afficher/afficher_commentaires.php?id=' . $joueurId . '&success=1');
+            header('Location: /SENTAYEHU_HISABU_PHP/Vue/Afficher/liste_joueurs.php?success=1');
             exit;
         } catch (Exception $e) {
             $error = "Erreur lors de l'enregistrement du commentaire";
