@@ -24,7 +24,7 @@ DB_HOST=mysql-yeadonaye.alwaysdata.net
 DB_PORT=3306
 DB_NAME=yeadonaye_bd_gestion_equipe
 DB_USER=yeadonaye
-DB_PASS=votre_mot_de_passe_securise
+DB_PASS=votre_mot_de_passe_securise_ici
 DB_CHARSET=utf8mb4
 ```
 
