@@ -192,7 +192,7 @@
 
             <!-- ACTIONS -->
             <div style="display: flex; gap: 1rem; justify-content: space-between; margin-top: 2rem;">
-                <a href="calendrier.php" class="btn btn-secondary">
+                <a href="afficher_match.php" class="btn btn-secondary">
                     <i class="bi bi-arrow-left"></i> Retour
                 </a>
                 <button type="submit" class="btn btn-primary" id="submit-btn">
