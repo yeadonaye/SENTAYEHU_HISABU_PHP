@@ -8,7 +8,6 @@ Application de gestion d'une équipe de football développée en PHP. L'applicat
 
 - **HISABU Nathan Tekeste**
 - **SENTAYEHU Yeadonaye Ashenafi**
-- **ASHENAFI Magadiyev Imam**
 
 ## 🌐 Liens
 
@@ -20,7 +19,6 @@ Application de gestion d'une équipe de football développée en PHP. L'applicat
 - **Langage** : PHP 8+
 - **Architecture** : MVC (Modèle-Vue-Contrôleur)
 - **Base de données** : MySQL via PDO
-- **Interface** : Web responsive avec Bootstrap 5
 
 ## 📁 Structure du projet
 
@@ -31,7 +29,6 @@ SENTAYEHU_HISABU_PHP/
 │   ├── ajouter        # Contrôleurs pour ajouter des données
 │   ├── modifier       # Contrôleurs pour modifier des données
 │   └── suppirmer      # Contrôleurs pour supprimer des données
-├── data               # Fichiers de base de données ou exports
 ├── Modele/
 │   └── DAO            # Classes DAO pour accès aux données
 └── Vue/
@@ -56,3 +53,7 @@ SENTAYEHU_HISABU_PHP/
 - Les dates doivent être saisies au format `jj/mm/aaaa`
 - L'accès à l'application nécessite une authentification
 - L'application utilise le pattern MVC pour séparer la logique métier, la présentation et le contrôle des actions
+
+## Login & Mot de passe
+login : admin
+mot de passe : admin
