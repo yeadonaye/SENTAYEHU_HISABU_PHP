@@ -31,7 +31,7 @@
             </div>
             <div class="d-flex gap-2">
                 <button type="submit" class="btn btn-success"><i class="bi bi-save me-2"></i>Enregistrer</button>
-                <a href="../Afficher/afficher_commentaires.php?id=<?php echo $joueurId; ?>" class="btn btn-secondary">Annuler</a>
+                <a href="/Afficher/afficher_commentaires.php?id=<?php echo $joueurId; ?>" class="btn btn-secondary">Annuler</a>
             </div>
         </form>
     </div>
