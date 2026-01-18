@@ -56,13 +56,10 @@
                         id="idJoueur"
                         name="idJoueur"
                         value="<?php echo htmlspecialchars($joueur['Id_Joueur'] ?? ''); ?>"
-                        placeholder="<?php echo !$id ? 'Laisser vide pour auto-génération' : ''; ?>"
-                        min="1"
+                        placeholder="Entrez l'ID du joueur"
+                        min="0"
                         <?php echo $id ? 'disabled class="input-disabled"' : ''; ?>
                     >
-                    <?php if (!$id): ?>
-                    <small class="text-muted">Laisser vide pour que l'ID soit généré automatiquement</small>
-                    <?php endif; ?>
                 </div>
 
                 <div class="mb-3">
@@ -107,11 +104,14 @@
                 <div class="mb-3">
                     <label for="dateNaissance" class="form-label fw-bold">Date de Naissance</label>
                     <input 
-                        type="date" 
+                        type="text" 
                         class="form-control" 
                         id="dateNaissance" 
                         name="dateNaissance" 
                         value="<?php echo htmlspecialchars($joueur['Date_Naissance'] ?? ''); ?>"
+                        placeholder="jj/mm/aaaa"
+                        pattern="\d{2}/\d{2}/\d{4}"
+                        inputmode="numeric"
                     >
                 </div>
 
@@ -170,19 +170,6 @@
     </div>
 
     <!-- Footer -->
-    <footer class="footer mt-5">
-        <div class="footer-content">
-            <div class="text-center">
-                <h5 class="footer-title">Gestion des Joueurs</h5>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <div class="container text-center">
-                <p class="mb-0">&copy; <?php echo date('Y'); ?> Gestion des Joueurs. Tous droits réservés.</p>
-            </div>
-        </div>
-    </footer>
-
     <?php include '../Afficher/footer.php'; ?>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

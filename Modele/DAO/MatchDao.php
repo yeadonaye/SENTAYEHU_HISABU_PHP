@@ -143,7 +143,6 @@
         public function getMatchesOrderedByDate(): array {
             $sql = "
                 SELECT Id_Match FROM `Match_` 
-                WHERE (Score_Nous IS NOT NULL AND Score_Adversaire IS NOT NULL) OR Resultat IS NOT NULL 
                 ORDER BY Date_Rencontre DESC, Heure DESC
             ";
             $stmt = $this->pdo->query($sql);

@@ -11,6 +11,19 @@ $statuts = ['Actif', 'Blessé'];
 $error = '';
 $success = '';
 
+// Helpers de date
+$toFrDate = static function (?string $date) {
+    if (!$date) return '';
+    $d = DateTime::createFromFormat('Y-m-d', $date);
+    return $d ? $d->format('d/m/Y') : $date;
+};
+
+$toDbDate = static function (?string $dateFr) {
+    if (!$dateFr) return '';
+    $d = DateTime::createFromFormat('d/m/Y', $dateFr);
+    return $d ? $d->format('Y-m-d') : '';
+};
+
 $id = $_GET['id'] ?? null;
 
 if ($id) {
@@ -23,7 +36,7 @@ if ($id) {
                 'Num_Licence' => $joueurObj->getNumLicence(),
                 'Nom' => $joueurObj->getNom(),
                 'Prenom' => $joueurObj->getPrenom(),
-                'Date_Naissance' => $joueurObj->getDateNaissance(),
+                'Date_Naissance' => $toFrDate($joueurObj->getDateNaissance()),
                 'Taille' => $joueurObj->getTaille(),
                 'Poids' => $joueurObj->getPoids(),
                 'Statut' => $joueurObj->getStatut()
@@ -107,9 +120,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Convert values to proper types
                 $taille_value = !empty($taille) ? (float)$taille : 0.0;
                 $poids_value = !empty($poids) ? (int)$poids : 0;
-                $dateNaissance_value = !empty($dateNaissance) ? $dateNaissance : '';
+                $dateNaissance_value = !empty($dateNaissance) ? $toDbDate($dateNaissance) : '';
+                if ($dateNaissance !== '' && $dateNaissance_value === '') {
+                    $error = 'Date de naissance invalide (format jj/mm/aaaa)';
+                }
                 
-                if ($id) {
+                if (!$error && $id) {
                     // Modification
                     $joueurObj = new Joueur(
                         (int)$id,
@@ -123,7 +139,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     );
                     $joueurDao->update($joueurObj);
                     $success = 'Joueur modifié avec succès!';
-                } else {
+                } elseif (!$error) {
                     // Ajout - utiliser l'ID personnalisé ou 0 pour auto-génération
                     $idToUse = !empty($idJoueur) ? (int)$idJoueur : 0;
                     $joueurObj = new Joueur(

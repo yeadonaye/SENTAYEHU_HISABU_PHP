@@ -262,8 +262,7 @@ class JoueurDao implements ModeleDao {
         $sql = "SELECT COUNT(DISTINCT p.Id_Match) FROM Participer p 
                 JOIN `Match_` m ON p.Id_Match = m.Id_Match 
                 WHERE p.Id_Joueur = :id AND 
-                ((m.Resultat = 'Victoire') OR 
-                (m.Score_Nous IS NOT NULL AND m.Score_Adverse IS NOT NULL AND m.Score_Nous > m.Score_Adverse))";
+                (m.Score_Nous IS NOT NULL AND m.Score_Adversaire IS NOT NULL AND m.Score_Nous > m.Score_Adversaire)";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':id' => $joueurId]);
         $wins = (int)$stmt->fetchColumn();
