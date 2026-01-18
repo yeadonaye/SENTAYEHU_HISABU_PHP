@@ -3,12 +3,12 @@
 require_once __DIR__ . '/../Modele/DAO/auth.php';
 
 if (isAuthenticated()) {
-    header('Location: /SENTAYEHU_HISABU_PHP/index.php');
+    header('Location: /index.php');
     exit;
 }
 
 $error = '';
-$redirect = $_GET['redirect'] ?? '/SENTAYEHU_HISABU_PHP/index.php';
+$redirect = $_GET['redirect'] ?? '/index.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $identifiant = $_POST['identifiant'] ?? '';
