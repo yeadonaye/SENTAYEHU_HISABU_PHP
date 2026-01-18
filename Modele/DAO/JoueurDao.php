@@ -141,10 +141,10 @@ class JoueurDao implements ModeleDao {
     // Méthodes supplémentaires
 
     /**
-     * Récupère tous les joueurs actifs (non blessés)
+      * Récupère tous les joueurs actifs (non blessés / non suspendus / non absents)
      */
     public function getActifs(): array {
-        $sql = "SELECT * FROM Joueur WHERE Statut != 'Blessé' ORDER BY Nom, Prenom";
+          $sql = "SELECT * FROM Joueur WHERE Statut NOT IN ('Blessé', 'Suspendue', 'Absent') ORDER BY Nom, Prenom";
         $stmt = $this->pdo->query($sql);
         
         $joueurs = [];

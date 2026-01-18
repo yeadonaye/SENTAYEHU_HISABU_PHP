@@ -53,15 +53,23 @@
                     <?php foreach ($joueurs as $joueur):
                         $joueurId = $joueur['Id_Joueur'];
                         $isTitulaire = isset($composition[$joueurId]) && $composition[$joueurId]['Titulaire_ou_pas'];
-                        $isBlessé = stripos($joueur['Statut'], 'bless') !== false;
+                        $isIndispo = stripos($joueur['Statut'], 'bless') !== false || stripos($joueur['Statut'], 'suspend') !== false || stripos($joueur['Statut'], 'absent') !== false;
+                        $badge = '';
+                        if (stripos($joueur['Statut'], 'bless') !== false) {
+                            $badge = 'BLESSÉ';
+                        } elseif (stripos($joueur['Statut'], 'suspend') !== false) {
+                            $badge = 'SUSPENDU';
+                        } elseif (stripos($joueur['Statut'], 'absent') !== false) {
+                            $badge = 'ABSENT';
+                        }
                     ?>
-                            <div class="joueur-card <?php echo $isBlessé ? 'injured' : ''; ?>" onclick="<?php echo !$isBlessé ? "toggleJoueur(this, 'titulaires', " . $joueurId . ")" : 'return false;'; ?>" <?php echo $isBlessé ? 'style="cursor: not-allowed;"' : ''; ?>>
+                            <div class="joueur-card <?php echo $isIndispo ? 'injured' : ''; ?>" onclick="<?php echo !$isIndispo ? "toggleJoueur(this, 'titulaires', " . $joueurId . ")" : 'return false;'; ?>" <?php echo $isIndispo ? 'style="cursor: not-allowed;"' : ''; ?>>
                                 <div class="flex-between">
                                     <input type="checkbox" name="titulaires[]" value="<?php echo $joueurId; ?>" 
-                                        <?php echo $isTitulaire ? 'checked' : ''; ?> <?php echo $isBlessé ? 'disabled' : ''; ?>>
+                                        <?php echo $isTitulaire ? 'checked' : ''; ?> <?php echo $isIndispo ? 'disabled' : ''; ?>>
                                     <strong><?php echo htmlspecialchars($joueur['Nom'] . ' ' . $joueur['Prenom']); ?></strong>
-                                    <?php if ($isBlessé): ?>
-                                        <span class="injured-badge">BLESSÉ</span>
+                                    <?php if ($isIndispo): ?>
+                                        <span class="injured-badge"><?php echo $badge; ?></span>
                                     <?php endif; ?>
                                 </div>
 
@@ -118,15 +126,23 @@
                     <?php foreach ($joueurs as $joueur):
                         $joueurId = $joueur['Id_Joueur'];
                         $isRemplacant = isset($composition[$joueurId]) && !$composition[$joueurId]['Titulaire_ou_pas'];
-                        $isBlessé = stripos($joueur['Statut'], 'bless') !== false;
+                        $isIndispo = stripos($joueur['Statut'], 'bless') !== false || stripos($joueur['Statut'], 'suspend') !== false || stripos($joueur['Statut'], 'absent') !== false;
+                        $badge = '';
+                        if (stripos($joueur['Statut'], 'bless') !== false) {
+                            $badge = 'BLESSÉ';
+                        } elseif (stripos($joueur['Statut'], 'suspend') !== false) {
+                            $badge = 'SUSPENDU';
+                        } elseif (stripos($joueur['Statut'], 'absent') !== false) {
+                            $badge = 'ABSENT';
+                        }
                     ?>
-                            <div class="joueur-card <?php echo $isBlessé ? 'injured' : ''; ?>" onclick="<?php echo !$isBlessé ? "toggleJoueur(this, 'remplacants', " . $joueurId . ")" : 'return false;'; ?>" <?php echo $isBlessé ? 'style="cursor: not-allowed;"' : ''; ?>>
+                            <div class="joueur-card <?php echo $isIndispo ? 'injured' : ''; ?>" onclick="<?php echo !$isIndispo ? "toggleJoueur(this, 'remplacants', " . $joueurId . ")" : 'return false;'; ?>" <?php echo $isIndispo ? 'style="cursor: not-allowed;"' : ''; ?>>
                                 <div class="flex-between">
                                     <input type="checkbox" name="remplacants[]" value="<?php echo $joueurId; ?>" 
-                                        <?php echo $isRemplacant ? 'checked' : ''; ?> <?php echo $isBlessé ? 'disabled' : ''; ?>>
+                                        <?php echo $isRemplacant ? 'checked' : ''; ?> <?php echo $isIndispo ? 'disabled' : ''; ?>>
                                     <strong><?php echo htmlspecialchars($joueur['Nom'] . ' ' . $joueur['Prenom']); ?></strong>
-                                    <?php if ($isBlessé): ?>
-                                        <span class="injured-badge">BLESSÉ</span>
+                                    <?php if ($isIndispo): ?>
+                                        <span class="injured-badge"><?php echo $badge; ?></span>
                                     <?php endif; ?>
                                 </div>
 

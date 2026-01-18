@@ -7,7 +7,7 @@ requireAuth();
 $pdo = getDBConnection();
 $joueurDao = new JoueurDao($pdo);
 $joueur = []; // Initialize as empty array for template compatibility
-$statuts = ['Actif', 'Blessé'];
+$statuts = ['Actif', 'Blessé', 'Suspendue', 'Absent'];
 $error = '';
 $success = '';
 
