@@ -14,9 +14,8 @@ class CommentaireDao implements ModeleDao {
     public function getAll(): array {
         $sql = 'SELECT * FROM Commentaire ORDER BY Id_Commentaire';
         $stmt = $this->pdo->query($sql);
-_
-        $commentaires = [];
 
+        $commentaires = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $commentaires[] = new Commentaire(
                 $row['idCommentaire'],
