@@ -79,7 +79,7 @@
                     <h3 class="stat-number">
                         <?php
                         if (!empty($nextMatch)) {
-                            echo date('d/m/Y H:i', strtotime($nextMatch['Date_Rencontre'] . ' ' . ($nextMatch['Heure'] ?? '00:00:00')));
+                            echo date('d/m/y H:i', strtotime($nextMatch['Date_Rencontre'] . ' ' . ($nextMatch['Heure'] ?? '00:00:00')));
                         } else {
                             echo 'Aucun';
                         }
