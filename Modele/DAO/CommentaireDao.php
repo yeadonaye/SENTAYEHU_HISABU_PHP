@@ -14,7 +14,6 @@ class CommentaireDao implements ModeleDao {
     public function getAll(): array {
         $sql = 'SELECT * FROM Commentaire ORDER BY Id_Commentaire';
         $stmt = $this->pdo->query($sql);
-_
         $commentaires = [];
 
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -77,7 +76,7 @@ _
 
         return $stmt->execute([
             ':description' => $obj->getDescription(),
-            ':date_' => $obj->getDate() ?: date('Y-m-d'),
+            ':date_' => $obj->getDate(),
             ':idJoueur' => $obj->getIdJoueur()
         ]);
     }
@@ -95,7 +94,7 @@ _
 
         return $stmt->execute([
             ':description' => $obj->getDescription(),
-            ':date_' => $obj->getDate() ?: date('Y-m-d'),
+            ':date_' => $obj->getDate(),
             ':idJoueur' => $obj->getIdJoueur(),
             ':id' => $obj->getIdCommentaire()
         ]);
