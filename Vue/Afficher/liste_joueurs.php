@@ -60,7 +60,7 @@
                                     <td class="players-table-name"><?php echo htmlspecialchars($joueur['Nom']); ?></td>
                                     <td><?php echo htmlspecialchars($joueur['Prenom']); ?></td>
                                     <td><?php echo $joueur['Date_Naissance'] ? (new DateTime($joueur['Date_Naissance']))->format('d/m/Y') : '-'; ?></td>
-                                    <td><?php echo htmlspecialchars($joueur['Taille'] ?? '-'); ?> cm</td>
+                                    <td><?php echo htmlspecialchars($joueur['Taille'] ?? '-'); ?> m</td>
                                     <td><?php echo htmlspecialchars($joueur['Poids'] ?? '-'); ?> kg</td>
                                     <td>
                                         <span class="status-badge <?php echo (stripos($joueur['Statut'], 'bles') !== false) ? 'status-injured' : 'status-active'; ?>">

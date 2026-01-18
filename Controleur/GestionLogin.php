@@ -1,6 +1,6 @@
 <?php
 // auth.php lives in Modele/DAO
-require_once __DIR__ . '/Modele/DAO/auth.php';
+require_once __DIR__ . '/../Modele/DAO/auth.php';
 
 if (isAuthenticated()) {
     header('Location: index.php');
