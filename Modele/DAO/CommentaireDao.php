@@ -12,9 +12,9 @@ class CommentaireDao implements ModeleDao {
     }
 
     public function getAll(): array {
-        $sql = 'SELECT * FROM Commentaire ORDER BY idCommentaire';
+        $sql = 'SELECT * FROM Commentaire ORDER BY Id_Commentaire';
         $stmt = $this->pdo->query($sql);
-
+_
         $commentaires = [];
 
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -30,7 +30,7 @@ class CommentaireDao implements ModeleDao {
     }
 
     public function getById(int $id): ?Commentaire {
-        $sql = "SELECT * FROM Commentaire WHERE idCommentaire = :id";
+        $sql = "SELECT * FROM Commentaire WHERE Id_Commentaire = :id";
         $stmt = $this->pdo->prepare($sql);
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         $stmt->execute();
@@ -47,7 +47,7 @@ class CommentaireDao implements ModeleDao {
     }
 
     public function getByJoueur(int $id): array {
-        $sql = "SELECT * FROM Commentaire WHERE idJoueur = :id";
+        $sql = "SELECT * FROM Commentaire WHERE IdJoueur = :id";
         $stmt = $this->pdo->prepare($sql);
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         $stmt->execute();
@@ -66,12 +66,11 @@ class CommentaireDao implements ModeleDao {
         return $commentaires;
     }
 
-    // ✅ FIXED INSERT
     public function add(object $obj): bool {
         if (!$obj instanceof Commentaire) return false;
 
         $sql = "INSERT INTO Commentaire
-                (description, date_, idJoueur)
+                (Description, Date_Commentaire, Id_Joueur)
                 VALUES(:description, :date_, :idJoueur)";
 
         $stmt = $this->pdo->prepare($sql);
@@ -83,15 +82,14 @@ class CommentaireDao implements ModeleDao {
         ]);
     }
 
-    // ✅ FIXED UPDATE
     public function update(object $obj): bool {
         if (!$obj instanceof Commentaire) return false;
 
         $sql = "UPDATE Commentaire SET 
-                    description = :description,
-                    date_ = :date_,
-                    idJoueur = :idJoueur
-                WHERE idCommentaire = :id";
+                    Description = :description,
+                    Date_Commentaire = :date_,
+                    Id_Joueur = :idJoueur
+                WHERE Id_Commentaire = :id";
 
         $stmt = $this->pdo->prepare($sql);
 
@@ -106,7 +104,7 @@ class CommentaireDao implements ModeleDao {
     public function delete(object $obj): bool {
         if (!$obj instanceof Commentaire) return false;
 
-        $sql = "DELETE FROM Commentaire WHERE idCommentaire = :id";
+        $sql = "DELETE FROM Commentaire WHERE Id_Commentaire = :id";
         $stmt = $this->pdo->prepare($sql);
 
         return $stmt->execute([
