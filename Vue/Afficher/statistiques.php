@@ -77,7 +77,46 @@
             </div>
         </div>
 
-        <!-- Performance Details -->
+        <!-- Statistiques par Joueur -->
+        <div class="container my-5">
+            <div class="section-card">
+                <div class="section-header">
+                    <h2 class="section-title"><i class="bi bi-people"></i> Statistiques par Joueur</h2>
+                </div>
+                <div class="section-body">
+                    <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Nom</th>
+                                <th>Statut</th>
+                                <th>Titulaires</th>
+                                <th>Remplaçants</th>
+                                <th>Moyenne notes</th>
+                                <th>% Victoires (lorsqu'il a joué)</th>
+                                <th>Sélections consécutives</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($players as $pl): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($pl['Nom'] . ' ' . $pl['Prenom']); ?></td>
+                                    <td><?php echo htmlspecialchars($pl['Statut'] ?? ''); ?></td>
+                                    <td><?php echo (int)($pl['starts'] ?? 0); ?></td>
+                                    <td><?php echo (int)($pl['subs'] ?? 0); ?></td>
+                                    <td><?php echo $pl['avgNote'] !== null ? $pl['avgNote'] . '/5' : '-'; ?></td>
+                                    <td><?php echo $pl['winPercentWhenParticipated'] !== null ? $pl['winPercentWhenParticipated'] . '%' : '-'; ?></td>
+                                    <td><?php echo (int)($pl['consecutiveSelections'] ?? 0); ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance de l'Équipe -->
         <div class="row g-4 mb-4">
             <div class="col-12">
                 <div class="section-card">
@@ -106,45 +145,6 @@
             </div>
         </div>
 
-    <!-- Per-player table -->
-    <div class="container my-5">
-        <div class="section-card">
-            <div class="section-header">
-                <h2 class="section-title"><i class="bi bi-people"></i> Statistiques par Joueur</h2>
-            </div>
-            <div class="section-body">
-                <div class="table-responsive">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Nom</th>
-                            <th>Statut</th>
-                            <th>Titulaires</th>
-                            <th>Remplaçants</th>
-                            <th>Moyenne notes</th>
-                            <th>% Victoires (lorsqu'il a joué)</th>
-                            <th>Sélections consécutives</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($players as $pl): ?>
-                            <tr>
-                                <td><?php echo htmlspecialchars($pl['Nom'] . ' ' . $pl['Prenom']); ?></td>
-                                <td><?php echo htmlspecialchars($pl['Statut'] ?? ''); ?></td>
-                                <td><?php echo (int)($pl['starts'] ?? 0); ?></td>
-                                <td><?php echo (int)($pl['subs'] ?? 0); ?></td>
-                                <td><?php echo $pl['avgNote'] !== null ? $pl['avgNote'] . '/5' : '-'; ?></td>
-                                <td><?php echo $pl['winPercentWhenParticipated'] !== null ? $pl['winPercentWhenParticipated'] . '%' : '-'; ?></td>
-                                <td><?php echo (int)($pl['consecutiveSelections'] ?? 0); ?></td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
         <!-- Buts Stats -->
         <div class="row g-4 mb-4">
             <div class="col-lg-12">
@@ -153,38 +153,32 @@
                         <h2 class="section-title"><i class="bi bi-target"></i> Buts</h2>
                     </div>
                     <div class="section-body">
-                        <div class="goals-stat">
-                            <div class="goals-stat-header">
-                                <span class="goals-label">Buts Marqués</span>
-                                <span class="goals-number scored"><?php echo $stats['totalButs']; ?></span>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="stat-card text-center">
+                                    <div class="stat-icon">
+                                        <i class="bi bi-bullseye"></i>
+                                    </div>
+                                    <h3 class="stat-number text-success"><?php echo $stats['totalButs']; ?></h3>
+                                    <p class="stat-label">Buts marqués</p>
+                                </div>
                             </div>
-                            <div class="progress-bar-wrapper">
-                                <div class="progress-bar-filled"></div>
+                            <div class="col-md-6">
+                                <div class="stat-card text-center">
+                                    <div class="stat-icon">
+                                        <i class="bi bi-shield-exclamation"></i>
+                                    </div>
+                                    <h3 class="stat-number text-danger"><?php echo $stats['butsEncaisses']; ?></h3>
+                                    <p class="stat-label">Buts encaissés</p>
+                                </div>
                             </div>
-                        </div>
-
-                        <div class="goals-stat">
-                            <div class="goals-stat-header">
-                                <span class="goals-label">Buts Encaissés</span>
-                                <span class="goals-number conceded"><?php echo $stats['butsEncaisses']; ?></span>
-                            </div>
-                            <div class="progress-bar-wrapper">
-                                <div class="progress-bar-filled conceded" style="width: <?php echo $progressEncaissesPct; ?>%;"></div>
-                            </div>
-                        </div>
-
-                        <div class="goals-average">
-                            <p class="goals-average-label">Moyenne par Match</p>
-                            <p class="goals-average-value">
-                                <?php echo $butsMoyenneParMatch; ?> buts/match
-                            </p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Quick Actions -->
+        <!-- Actions Rapides -->
         <div class="row g-4">
             <div class="col-12">
                 <div class="section-card">
@@ -193,17 +187,17 @@
                     </div>
                     <div class="section-body">
                         <div class="quick-actions-grid">
-                            <a href="liste_joueurs.php" class="action-card action-card-blue">
+                            <a href="/Vue/Ajouter/ajouter_joueur.php" class="action-card action-card-blue">
                                 <i class="bi bi-person-plus action-card-icon"></i>
                                 <strong>Ajouter un Joueur</strong>
                             </a>
 
-                            <a href="../matchs/calendrier.php" class="action-card action-card-green">
+                            <a href="/Vue/Ajouter/ajouter_match.php" class="action-card action-card-green">
                                 <i class="bi bi-calendar-plus action-card-icon"></i>
                                 <strong>Planifier un Match</strong>
                             </a>
 
-                            <a href="liste_joueurs.php" class="action-card action-card-purple">
+                            <a href="/Vue/Afficher/liste_joueurs.php" class="action-card action-card-purple">
                                 <i class="bi bi-people action-card-icon"></i>
                                 <strong>Voir les Joueurs</strong>
                             </a>
