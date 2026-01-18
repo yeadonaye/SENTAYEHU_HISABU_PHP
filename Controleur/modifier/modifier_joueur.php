@@ -7,7 +7,7 @@ requireAuth();
 $pdo = getDBConnection();
 $joueurDao = new JoueurDao($pdo);
 $joueur = [];
-$statuts = ['Actif', 'Blessé'];
+$statuts = ['Actif', 'Blessé', 'Suspendue', 'Absent'];
 $error = '';
 $success = '';
 

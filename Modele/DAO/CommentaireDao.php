@@ -14,14 +14,14 @@ class CommentaireDao implements ModeleDao {
     public function getAll(): array {
         $sql = 'SELECT * FROM Commentaire ORDER BY Id_Commentaire';
         $stmt = $this->pdo->query($sql);
-        $commentaires = [];
 
+        $commentaires = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $commentaires[] = new Commentaire(
-                $row['idCommentaire'],
-                $row['description'],
-                $row['date_'],
-                $row['idJoueur']
+                $row['Id_Commentaire'],
+                $row['Description'],
+                $row['Date_Commentaire'],
+                $row['Id_Joueur']
             );
         }
 
@@ -38,15 +38,15 @@ class CommentaireDao implements ModeleDao {
         if (!$row) return null;
 
         return new Commentaire(
-            $row['idCommentaire'],
-            $row['description'],
-            $row['date_'],
-            $row['idJoueur']
+            $row['Id_Commentaire'],
+            $row['Description'],
+            $row['Date_Commentaire'],
+            $row['Id_Joueur']
         );
     }
 
     public function getByJoueur(int $id): array {
-        $sql = "SELECT * FROM Commentaire WHERE IdJoueur = :id";
+        $sql = "SELECT * FROM Commentaire WHERE Id_Joueur = :id";
         $stmt = $this->pdo->prepare($sql);
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         $stmt->execute();
@@ -55,10 +55,10 @@ class CommentaireDao implements ModeleDao {
 
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $commentaires[] = new Commentaire(
-                $row['idCommentaire'],
-                $row['description'],
-                $row['date_'],
-                $row['idJoueur']
+                $row['Id_Commentaire'],
+                $row['Description'],
+                $row['Date_Commentaire'],
+                $row['Id_Joueur']
             );
         }
 
@@ -76,7 +76,7 @@ class CommentaireDao implements ModeleDao {
 
         return $stmt->execute([
             ':description' => $obj->getDescription(),
-            ':date_' => $obj->getDate(),
+            ':date_' => $obj->getDate() ?: date('Y-m-d'),
             ':idJoueur' => $obj->getIdJoueur()
         ]);
     }
@@ -94,7 +94,7 @@ class CommentaireDao implements ModeleDao {
 
         return $stmt->execute([
             ':description' => $obj->getDescription(),
-            ':date_' => $obj->getDate(),
+            ':date_' => $obj->getDate() ?: date('Y-m-d'),
             ':idJoueur' => $obj->getIdJoueur(),
             ':id' => $obj->getIdCommentaire()
         ]);

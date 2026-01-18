@@ -28,14 +28,15 @@ CREATE TABLE Joueur (
     UNIQUE(Num_Licence)
 );
 
--- Table Match_ (le nom est échappé car c'est un mot réservé en SQL)
+-- Table Match_ 
 CREATE TABLE `Match_` (
     Id_Match INT AUTO_INCREMENT,
     Date_Rencontre DATE,
     Heure TIME,
     Nom_Equipe_Adverse VARCHAR(50),
     Lieu VARCHAR(50),
-    Resultat VARCHAR(50),
+    Score_Adversaire INT,
+    Score_Nous INT,,
     PRIMARY KEY(Id_Match)
 );
 
@@ -62,27 +63,3 @@ CREATE TABLE Participer (
     FOREIGN KEY(Id_Joueur) REFERENCES Joueur(Id_Joueur) ON DELETE CASCADE,
     FOREIGN KEY(Id_Match) REFERENCES `Match_`(Id_Match) ON DELETE CASCADE
 );
-
--- Insertion de données de test
--- Joueurs
-INSERT INTO Joueur (Num_Licence, Nom, Prenom, Date_Naissance, Taille, Poids, Statut) VALUES
-(1001, 'Dupont', 'Jean', '1995-05-15', 1.80, 75.5, 'Actif'),
-(1002, 'Martin', 'Pierre', '1998-08-22', 1.75, 70.2, 'Actif'),
-(1003, 'Durand', 'Luc', '2000-03-10', 1.85, 78.0, 'Blessé');
-
--- Matchs
-INSERT INTO `Match_` (Date_Rencontre, Heure, Nom_Equipe_Adverse, Lieu, Resultat) VALUES
-('2025-11-20', '18:00:00', 'Les Champions FC', 'Stade Municipal', '3-2'),
-('2025-11-27', '20:30:00', 'Les Titans', 'Stade Olympique', '1-1');
-
--- Participations
-INSERT INTO Participer (Id_Joueur, Id_Match, Poste, Note, Titulaire_ou_pas) VALUES
-(1, 1, 'Attaquant', 3, TRUE),
-(2, 1, 'Milieu', 2, TRUE),
-(3, 1, 'Défenseur', 5, FALSE),
-(1, 2, 'Attaquant', 4, TRUE);
-
--- Commentaires
-INSERT INTO Commentaire (Description, Date_, Id_Joueur) VALUES
-('Très bon match, excellente performance offensive', '2025-11-21', 1),
-('Doit travailler sa défense', '2025-11-21', 3);

@@ -17,14 +17,14 @@ $success = isset($_GET['success']) ? 'Commentaire ajouté avec succès!' : '';
 
 $joueurId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 if ($joueurId <= 0) {
-    header('Location: /Vue/Afficher/liste_joueurs.php');
+    header('Location: /SENTAYEHU_HISABU_PHP/Vue/Afficher/liste_joueurs.php');
     exit;
 }
 
 try {
     $joueur = $joueurDao->getById($joueurId);
     if (!$joueur) {
-        header('Location: /Vue/Afficher/liste_joueurs.php');
+        header('Location: /SENTAYEHU_HISABU_PHP/Vue/Afficher/liste_joueurs.php');
         exit;
     }
 
