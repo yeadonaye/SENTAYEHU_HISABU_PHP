@@ -1,15 +1,4 @@
-<?php
-require_once __DIR__ . '/Modele/DAO/auth.php';
-requireAuth();
-
-// Page d'accueil sans accès DAO/BD
-$playerCount = 0;
-$injuredCount = 0;
-$wins = 0;
-$totalMatches = 0;
-$nextMatch = null;
-$recentComments = [];
-?>
+<?php include __DIR__ . '/Controleur/afficher/index.php'; ?>
 
 <!DOCTYPE html>
 <html lang="fr">
