@@ -36,7 +36,7 @@ function authenticate($identifiant, $password) {
  */
 function requireAuth() {
     if (!isAuthenticated()) {
-        header('Location: /SENTAYEHU_HISABU_PHP/login.php?redirect=' . urlencode($_SERVER['REQUEST_URI']));
+        header('Location: /login.php?redirect=' . urlencode($_SERVER['REQUEST_URI']));
         exit;
     }
 }
@@ -55,13 +55,12 @@ function logout() {
  * Connexion à la base de données SQLite
  */
 function getDBConnection() {
-    // If a MySQL configuration is provided (DB_TYPE === 'mysql'), connect to MySQL (Alwaysdata)
     if (defined('DB_TYPE') && DB_TYPE === 'mysql') {
-        $host = defined('DB_HOST') ? DB_HOST : 'localhost';
+        $host = defined('DB_HOST') ? DB_HOST : 'mysql-yeadonaye.alwaysdata.net';
         $port = defined('DB_PORT') ? DB_PORT : 3306;
-        $dbname = defined('DB_NAME') ? DB_NAME : '';
-        $user = defined('DB_USER') ? DB_USER : '';
-        $pass = defined('DB_PASS') ? DB_PASS : '';
+        $dbname = defined('DB_NAME') ? DB_NAME : 'yeadonaye_bd_gestion_equipe';
+        $user = defined('DB_USER') ? DB_USER : 'yeadonaye';
+        $pass = defined('DB_PASS') ? DB_PASS : 'admin@gestionFoot';
         $charset = defined('DB_CHARSET') ? DB_CHARSET : 'utf8mb4';
 
         if (empty($dbname) || empty($user)) {

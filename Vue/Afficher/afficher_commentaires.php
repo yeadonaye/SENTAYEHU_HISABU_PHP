@@ -20,10 +20,10 @@
                 <p class="text-muted mb-0">Joueur : <strong><?php echo htmlspecialchars($joueur?->getNom() . ' ' . $joueur?->getPrenom()); ?></strong></p>
             </div>
             <div class="d-flex gap-2">
-                <a class="btn btn-success" href="/SENTAYEHU_HISABU_PHP/Vue/Ajouter/ajouter_commentaire.php?id=<?php echo $joueurId; ?>">
+                <a class="btn btn-success" href="/Vue/Ajouter/ajouter_commentaire.php?id=<?php echo $joueurId; ?>">
                     <i class="bi bi-plus-circle me-2"></i>Ajouter un commentaire
                 </a>
-                <a class="btn btn-secondary" href="/SENTAYEHU_HISABU_PHP/Vue/Afficher/liste_joueurs.php">
+                <a class="btn btn-secondary" href="/Vue/Afficher/liste_joueurs.php">
                     <i class="bi bi-arrow-left me-2"></i>Retour
                 </a>
             </div>

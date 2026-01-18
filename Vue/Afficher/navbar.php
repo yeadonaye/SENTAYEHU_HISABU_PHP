@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../../Modele/DAO/auth.php';
 requireAuth();
 ?>
-<link rel="icon" type="image/png" href="/SENTAYEHU_HISABU_PHP/Vue/img/logo.png">
+<link rel="icon" type="image/png" href="/Vue/img/logo.png">
 <nav class="navbar navbar-expand-lg navbar-dark sticky-top navbar-custom">
     <div class="container-fluid">
         <a class="navbar-brand fw-bold" href="/index.php"><i class="bi bi-shield-check"></i> Gestion des Joueurs</a>
