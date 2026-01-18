@@ -16,14 +16,14 @@ $success = '';
 
 $joueurId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 if ($joueurId <= 0) {
-    header('Location: /Vue/Afficher/liste_joueurs.php');
+    header('Location: /SENTAYEHU_HISABU_PHP/Vue/Afficher/liste_joueurs.php');
     exit;
 }
 
 try {
     $joueur = $joueurDao->getById($joueurId);
     if (!$joueur) {
-        header('Location: /Vue/Afficher/liste_joueurs.php');
+        header('Location: /SENTAYEHU_HISABU_PHP/Vue/Afficher/liste_joueurs.php');
         exit;
     }
 } catch (Exception $e) {
@@ -53,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $comment = new Commentaire(0, $description, $dateForDb, $joueurId);
             $commentaireDao->add($comment);
-            header('Location: /Vue/Afficher/afficher_commentaires.php?id=' . $joueurId . '&success=1');
+            header('Location: /SENTAYEHU_HISABU_PHP/Vue/Afficher/afficher_commentaires.php?id=' . $joueurId . '&success=1');
             exit;
         } catch (Exception $e) {
             $error = "Erreur lors de l'enregistrement du commentaire";

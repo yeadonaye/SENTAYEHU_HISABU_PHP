@@ -1,3 +1,7 @@
+<?php
+require_once __DIR__ . '/../../Modele/DAO/auth.php';
+requireAuth();
+?>
 <nav class="navbar navbar-expand-lg navbar-dark sticky-top navbar-custom">
     <div class="container-fluid">
         <a class="navbar-brand fw-bold" href="/index.php"><i class="bi bi-shield-check"></i> Gestion des Joueurs</a>
