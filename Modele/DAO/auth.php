@@ -56,15 +56,15 @@ function logout() {
  */
 function getDBConnection() {
     if (defined('DB_TYPE') && DB_TYPE === 'mysql') {
-        $host = defined('DB_HOST') ? DB_HOST : 'mysql-yeadonaye.alwaysdata.net';
-        $port = defined('DB_PORT') ? DB_PORT : 3306;
-        $dbname = defined('DB_NAME') ? DB_NAME : 'yeadonaye_bd_gestion_equipe';
-        $user = defined('DB_USER') ? DB_USER : 'yeadonaye';
-        $pass = defined('DB_PASS') ? DB_PASS : 'admin@gestionFoot';
-        $charset = defined('DB_CHARSET') ? DB_CHARSET : 'utf8mb4';
+        $host = DB_HOST;
+        $port = DB_PORT;
+        $dbname = DB_NAME;
+        $user = DB_USER;
+        $pass = DB_PASS;
+        $charset = DB_CHARSET;
 
         if (empty($dbname) || empty($user)) {
-            die('Configuration MySQL manquante : vérifie `config.php`.');
+            die('Configuration MySQL manquante : vérifie `config.php` ou définissez les variables d\'environnement.');
         }
 
         $dsn = "mysql:host={$host};port={$port};dbname={$dbname};charset={$charset}";
