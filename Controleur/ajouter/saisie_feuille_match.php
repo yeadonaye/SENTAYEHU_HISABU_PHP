@@ -18,7 +18,7 @@ $success = '';
 // Récupérer l'ID du match
 $matchId = $_GET['id'] ?? null;
 if (!$matchId) {
-    header('Location: ' . $base . '/Vue/Afficher/afficher_match.php');
+    header('Location: /Vue/Afficher/afficher_match.php');
     exit;
 }
 
@@ -26,7 +26,7 @@ if (!$matchId) {
 try {
     $matchObj = $matchDao->getById((int)$matchId);
     if (!$matchObj) {
-        header('Location: ' . $base . '/Vue/Afficher/afficher_match.php');
+        header('Location: /Vue/Afficher/afficher_match.php');
         exit;
     }
     
@@ -40,7 +40,7 @@ try {
         'Score_Nous' => $matchObj->getScoreNous()
     ];
 } catch (Exception $e) {
-    header('Location: ' . $base . '/Vue/Afficher/afficher_match.php');
+    header('Location: /Vue/Afficher/afficher_match.php');
     exit;
 }
 

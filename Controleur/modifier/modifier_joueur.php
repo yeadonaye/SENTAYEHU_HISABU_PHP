@@ -96,9 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $statut
                 );
                 $joueurDao->update($joueurObj);
-                // Redirect to display page (Post-Redirect-Get)
-                $base = '/SENTAYEHU_HISABU_PHP';
-                header('Location: ' . $base . '/Vue/Afficher/liste_joueurs.php?success=modified');
+                header('Location: /SENTAYEHU_HISABU_PHP/Vue/Afficher/liste_joueurs.php?success=modified');
                 exit;
             } catch (Exception $e) {
                 $error = 'Erreur lors de l\'enregistrement: ' . $e->getMessage();

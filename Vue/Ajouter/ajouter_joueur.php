@@ -1,12 +1,5 @@
 <?php include '../../Controleur/ajouter/ajouter_joueur.php'; ?>
 
-<?php
-// Compute base path for assets (e.g. /SENTAYEHU_HISABU_PHP)
-$script = str_replace('\\','/', $_SERVER['SCRIPT_NAME'] ?? '');
-$parts = explode('/', trim($script, '/'));
-$base = '/' . ($parts[0] ?? '');
-?>
-
 
 <!DOCTYPE html>
 <html lang="fr">
@@ -16,8 +9,8 @@ $base = '/' . ($parts[0] ?? '');
     <title><?php echo $id ? 'Modifier un Joueur' : 'Ajouter un Joueur'; ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="<?php echo $base; ?>/Vue/CSS/common.css">
-    <link rel="stylesheet" href="<?php echo $base; ?>/Vue/CSS/joueurs.css">
+    <link rel="stylesheet" href="/Vue/CSS/common.css">
+    <link rel="stylesheet" href="/Vue/CSS/joueurs.css">
 </head>
 <body>
     <?php include '../Afficher/navbar.php'; ?>
@@ -31,7 +24,7 @@ $base = '/' . ($parts[0] ?? '');
                         <?php echo $id ? 'Modifier un Joueur' : 'Ajouter un Joueur'; ?>
                     </h1>
                 </div>
-                <a href="<?php echo $base; ?>/Vue/Afficher/liste_joueurs.php" class="btn btn-light btn-retour">
+                <a href="/Vue/Afficher/liste_joueurs.php" class="btn btn-light btn-retour">
                     <i class="bi bi-arrow-left me-2"></i>Retour
                 </a>
             </div>
@@ -168,7 +161,7 @@ $base = '/' . ($parts[0] ?? '');
                         <i class="bi bi-check-circle me-2"></i>
                         <?php echo $id ? 'Modifier' : 'Ajouter'; ?>
                     </button>
-                    <a href="<?php echo $base; ?>/Vue/Afficher/liste_joueurs.php" class="btn btn-secondary">
+                    <a href="/Vue/Afficher/liste_joueurs.php" class="btn btn-secondary">
                         <i class="bi bi-x-circle me-2"></i>Annuler
                     </a>
                 </div>

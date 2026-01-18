@@ -1,7 +1,6 @@
 <?php
 include '../../Controleur/ajouter/ajouter_match.php';
-// Les données doivent être injectées par le contrôleur
-$base = $base ?? '';
+
 $match = $match_display ?? [];
 $id = $match['Id_Match'] ?? ($id ?? null);
 $error = $error ?? '';
@@ -31,7 +30,7 @@ $success = $success ?? '';
                         <?php echo $id ? 'Modifier un Match' : 'Planifier un Match'; ?>
                     </h1>
                 </div>
-                <a href="<?php echo $base; ?>/Vue/Afficher/afficher_match.php" class="btn btn-light btn-retour">
+                <a href="/Vue/Afficher/afficher_match.php" class="btn btn-light btn-retour">
                     <i class="bi bi-arrow-left me-2"></i>Retour
                 </a>
             </div>
@@ -157,7 +156,7 @@ $success = $success ?? '';
                         <i class="bi bi-check-circle me-2"></i>
                         <?php echo $id ? 'Modifier' : 'Ajouter'; ?>
                     </button>
-                    <a href="<?php echo $base; ?>/Vue/Afficher/afficher_match.php" class="btn btn-secondary">
+                    <a href="/Vue/Afficher/afficher_match.php" class="btn btn-secondary">
                         <i class="bi bi-x-circle me-2"></i>Annuler
                     </a>
                 </div>

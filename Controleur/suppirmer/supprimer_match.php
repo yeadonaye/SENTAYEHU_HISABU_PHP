@@ -18,6 +18,6 @@ if ($id) {
     }
 }
 
-header('Location: ' . $base . '/Vue/Afficher/afficher_match.php');
+header('Location: /Vue/Afficher/afficher_match.php');
 exit;
 ?>

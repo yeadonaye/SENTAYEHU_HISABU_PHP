@@ -37,8 +37,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($description === '') {
         $error = 'Le commentaire est obligatoire';
     }
-
-    // Parse date saisie au format jj/mm/aaaa (ou fallback ISO). Si vide, on prend la date du jour.
     $dateForDb = date('Y-m-d');
     if ($dateInput !== '') {
         $dt = DateTime::createFromFormat('d/m/Y', $dateInput) ?: DateTime::createFromFormat('Y-m-d', $dateInput);

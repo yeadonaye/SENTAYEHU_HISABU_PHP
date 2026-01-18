@@ -138,7 +138,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     );
                     $joueurDao->add($joueurObj);
                     // Redirection automatique vers la liste des joueurs
-                    header('Location: ' . $base . '/Vue/Afficher/liste_joueurs.php');
+                    header('Location: /Vue/Afficher/liste_joueurs.php');
                     exit;
                 }
             } catch (Exception $e) {

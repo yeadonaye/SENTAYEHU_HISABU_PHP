@@ -2,10 +2,7 @@
 require_once __DIR__ . '/../../Modele/DAO/auth.php';
 require_once __DIR__ . '/../../Modele/DAO/MatchDao.php';
 require_once __DIR__ . '/../../Modele/Match.php';
-requireAuth();
-
-// Base absolue pour les redirections
-$base = '/SENTAYEHU_HISABU_PHP';
+requireAuth(); 
 
 $pdo = getDBConnection();
 $matchDao = new MatchDao($pdo);
@@ -101,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 );
                 $matchDao->update($matchObj);
                 // Redirect to reload fresh data from DB (Post-Redirect-Get)
-                header('Location: ' . $base . '/Vue/Ajouter/ajouter_match.php?id=' . $id . '&success=modified');
+                header('Location: /Vue/Ajouter/ajouter_match.php?id=' . $id . '&success=modified');
                 exit;
             } else {
                 // Ajout
@@ -116,7 +113,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 );
                 $matchDao->add($matchObj);
                 // Redirection automatique vers la liste des matchs
-                header('Location: ' . $base . '/Vue/Afficher/afficher_match.php');
+                header('Location: /Vue/Afficher/afficher_match.php');
                 exit;
             }
         } catch (Exception $e) {
