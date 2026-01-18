@@ -81,21 +81,23 @@
         // ---------------------------------
         // INSERT
         // ---------------------------------
-        public function add(object $obj): bool{
+
+        public function add(object $obj): bool {
             if (!$obj instanceof Commentaire) return false;
 
-            $sql = "INSERT INTO Commentaire
-                    (description, date_, idJoueur)
-                    VALUES(:description, :date_, :idJoueur)";
+            $sql = "INSERT INTO commentaire
+                    (description, date_commentaire, id_joueur)
+                    VALUES (:description, :date, :idJoueur)";
 
             $stmt = $this->pdo->prepare($sql);
 
             return $stmt->execute([
                 ':description' => $obj->getDescription(),
-                ':date_' => $obj->getDate(),
+                ':date' => $obj->getDate(),
                 ':idJoueur' => $obj->getIdJoueur()
             ]);
         }
+
 
         // ---------------------------------
         // UPDATE
