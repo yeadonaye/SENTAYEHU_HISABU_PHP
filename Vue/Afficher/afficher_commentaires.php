@@ -47,7 +47,7 @@
                             <small class="text-muted ms-3">
                                 <?php 
                                     $dt = DateTime::createFromFormat('Y-m-d H:i:s', $com->getDate()) ?: DateTime::createFromFormat('Y-m-d', $com->getDate());
-                                    echo $dt ? $dt->format('d/m/Y H:i') : htmlspecialchars($com->getDate());
+                                    echo $dt ? $dt->format('d/m/Y') : htmlspecialchars($com->getDate());
                                 ?>
                             </small>
                         </div>
