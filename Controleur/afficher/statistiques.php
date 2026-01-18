@@ -62,7 +62,6 @@ try {
             'Nom' => $joueur['Nom'] ?? '',
             'Prenom' => $joueur['Prenom'] ?? '',
             'Statut' => $joueur['Statut'] ?? '',
-            'Poste' => $joueur['Poste'] ?? '',
             'starts' => $joueurDao->compterTitularisations($idp),
             'subs' => $joueurDao->compterRemplacements($idp),
             'avgNote' => $joueurDao->obtenirNoteMoyenne($idp),

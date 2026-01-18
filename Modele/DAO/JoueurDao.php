@@ -177,7 +177,7 @@ class JoueurDao implements ModeleDao {
      * Récupère tous les joueurs avec leurs stats
      */
     public function getTousAvecStatistiques(): array {
-        $sql = "SELECT Id_Joueur, Num_Licence, Nom, Prenom, Statut, Poste FROM Joueur ORDER BY Nom, Prenom";
+        $sql = "SELECT Id_Joueur, Num_Licence, Nom, Prenom, Statut FROM Joueur ORDER BY Nom, Prenom";
         $stmt = $this->pdo->query($sql);
         
         $joueurs = [];

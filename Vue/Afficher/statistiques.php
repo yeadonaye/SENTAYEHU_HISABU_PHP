@@ -119,7 +119,6 @@
                         <tr>
                             <th>Nom</th>
                             <th>Statut</th>
-                            <th>Poste préféré</th>
                             <th>Titulaires</th>
                             <th>Remplaçants</th>
                             <th>Moyenne notes</th>
@@ -132,7 +131,6 @@
                             <tr>
                                 <td><?php echo htmlspecialchars($pl['Nom'] . ' ' . $pl['Prenom']); ?></td>
                                 <td><?php echo htmlspecialchars($pl['Statut'] ?? ''); ?></td>
-                                <td><?php echo htmlspecialchars($pl['Poste'] ?? ''); ?></td>
                                 <td><?php echo (int)($pl['starts'] ?? 0); ?></td>
                                 <td><?php echo (int)($pl['subs'] ?? 0); ?></td>
                                 <td><?php echo $pl['avgNote'] !== null ? $pl['avgNote'] . '/5' : '-'; ?></td>
