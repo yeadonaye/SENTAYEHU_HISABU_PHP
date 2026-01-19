@@ -55,5 +55,5 @@ SENTAYEHU_HISABU_PHP/
 - L'application utilise le pattern MVC pour séparer la logique métier, la présentation et le contrôle des actions
 
 ## Login & Mot de passe
-login : admin
-mot de passe : admin
+- Login : admin
+- Mot de passe : admin
