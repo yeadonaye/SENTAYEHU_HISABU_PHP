@@ -49,7 +49,7 @@
                                 <div class="match-score-vs">vs</div>
                                 <div class="match-score-team">
                                     <p>Adversaires</p>
-                                    <p><?php echo htmlspecialchars($match['Score_Adverse'] ?? '-'); ?></p>
+                                    <p><?php echo htmlspecialchars($match['Score_Adversaire'] ?? '-'); ?></p>
                                 </div>
                             </div>
 

@@ -16,9 +16,9 @@
             $this->heure = $heure;
             $this->nomEquipeAdverse = $nomEquipeAdverse;
             $this->lieu = $lieu;
-            $this->score_nous = $score_nous;
             $this->score_adversaire = $score_adversaire;
-        }
+            $this->score_nous = $score_nous;
+            }
 
         //Getters
         public function getIdMatch(): int{
