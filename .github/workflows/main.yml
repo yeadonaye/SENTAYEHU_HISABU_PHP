@@ -3,7 +3,7 @@ name: Deploy to Alwaysdata
 on:
   push:
     branches:
-      - main  # Le déploiement se lance quand vous pushez sur main
+      - main
 
 jobs:
   deploy:
@@ -11,18 +11,17 @@ jobs:
 
     steps:
       - name: 🚚 Checkout du code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4 # Version plus récente
 
-      - name: 🚀 Déploiement via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+      - name: 🚀 Déploiement via FTPS (Sécurisé)
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ftp-yeadonaye.alwaysdata.net
           username: ${{ secrets.AD_USER }}
           password: ${{ secrets.AD_PASSWORD }}
-          protocol: ftp
+          protocol: ftps           # <--- On change ftp par ftps
           port: 21
           local-dir: ./
-          # Sur Alwaysdata, le dossier web par défaut est /www/
-          server-dir: /www/
-          # Optionnel : supprime les fichiers sur le serveur qui ne sont plus dans le repo
-          dangerous-clean-slate: false
+          server-dir: /www/        # <--- Vérifiez bien ce dossier chez Alwaysdata
+          # Cette option est souvent nécessaire pour le FTPS sur GitHub Actions
+          security: loose
