@@ -1,24 +1,28 @@
 name: Deploy to Alwaysdata
 
+# Trigger this workflow on push to main branch
 on:
   push:
     branches:
-      - main  # trigger deployment when you push to main branch
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout your repo
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # Step 2: Deploy via SFTP to Alwaysdata
       - name: Deploy via FTP/SFTP
-        uses: SamKirkland/FTP-Deploy-Action@v4
+        uses: SamKirkland/FTP-Deploy-Action@v5
         with:
-          server: ftp.alwaysdata.com        # Your Alwaysdata FTP server
-          username: ${{ secrets.AD_USER }} # Your Alwaysdata username
-          password: ${{ secrets.AD_PASSWORD }} # Your Alwaysdata password
-          local-dir: ./                     # Folder to upload (your repo root)
-          server-dir: /yeadonaye/           # Remote folder where your site is hosted
-          protocol: sftp                    # SFTP is recommended
+          server: ftp.alwaysdata.com             # Alwaysdata FTP server
+          username: ${{ secrets.AD_USER }}      # Your Alwaysdata username (set in GitHub secrets)
+          password: ${{ secrets.AD_PASSWORD }}  # Your Alwaysdata password (set in GitHub secrets)
+          local-dir: ./                          # Folder in your repo to upload
+          server-dir: /home/yourusername/www/yeadonaye/  # Change to your actual Alwaysdata web folder
+          protocol: sftp                         # Use SFTP
+          dry-run: false                         # Set true first if you want to test without uploading
