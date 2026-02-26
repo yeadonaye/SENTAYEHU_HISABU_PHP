@@ -1,0 +1,24 @@
+name: Deploy to Alwaysdata
+
+on:
+  push:
+    branches:
+      - main  # trigger deployment when you push to main branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Deploy via FTP/SFTP
+        uses: SamKirkland/FTP-Deploy-Action@v4
+        with:
+          server: ftp.alwaysdata.com        # Your Alwaysdata FTP server
+          username: ${{ secrets.AD_USER }} # Your Alwaysdata username
+          password: ${{ secrets.AD_PASSWORD }} # Your Alwaysdata password
+          local-dir: ./                     # Folder to upload (your repo root)
+          server-dir: /yeadonaye/           # Remote folder where your site is hosted
+          protocol: sftp                    # SFTP is recommended
