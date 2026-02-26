@@ -22,5 +22,5 @@ jobs:
           protocol: ftps
           port: 21
           local-dir: ./
-          server-dir: /www/SENTAYEHU_HISABU_PHP/        # <--- Vérifiez bien ce dossier chez Alwaysdata
+          server-dir: /www/        # <--- Vérifiez bien ce dossier chez Alwaysdata
           security: loose
