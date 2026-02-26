@@ -49,20 +49,6 @@
         <div class="form-container">
             <form method="POST" action="">
                 <div class="mb-3">
-                    <label for="idJoueur" class="form-label fw-bold">ID du Joueur</label>
-                    <input
-                        type="number"
-                        class="form-control"
-                        id="idJoueur"
-                        name="idJoueur"
-                        value="<?php echo htmlspecialchars($joueur['Id_Joueur'] ?? ''); ?>"
-                        placeholder="Entrez l'ID du joueur"
-                        min="0"
-                        <?php echo $id ? 'disabled class="input-disabled"' : ''; ?>
-                    >
-                </div>
-
-                <div class="mb-3">
                     <label for="numLicence" class="form-label fw-bold">Numéro de Licence *</label>
                     <input
                         type="text"

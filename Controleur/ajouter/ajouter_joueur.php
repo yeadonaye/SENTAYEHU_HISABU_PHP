@@ -32,7 +32,6 @@ if ($id) {
         if ($joueurObj) {
             // Convert object to array for template
             $joueur = [
-                'Id_Joueur' => $joueurObj->getIdJoueur(),
                 'Num_Licence' => $joueurObj->getNumLicence(),
                 'Nom' => $joueurObj->getNom(),
                 'Prenom' => $joueurObj->getPrenom(),
@@ -48,7 +47,6 @@ if ($id) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $idJoueur = $_POST['idJoueur'] ?? '';
     $numLicence = $_POST['numLicence'] ?? '';
     $nom = $_POST['nom'] ?? '';
     $prenom = $_POST['prenom'] ?? '';
@@ -85,23 +83,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Le numéro de licence doit contenir uniquement des chiffres, lettres et tirets.';
         }
 
-        // Validate custom ID if provided for new players
-        if (!$error && !$id && !empty($idJoueur)) {
-            if (!is_numeric($idJoueur) || (int)$idJoueur <= 0) {
-                $error = 'L\'ID du joueur doit être un nombre positif.';
-            } else {
-                // Check if ID already exists
-                try {
-                    $existingById = $joueurDao->getById((int)$idJoueur);
-                    if ($existingById) {
-                        $error = 'Cet ID est déjà utilisé par un autre joueur.';
-                    }
-                } catch (Exception $e) {
-                    // ID doesn't exist, which is good
-                }
-            }
-        }
-
         // Check uniqueness constraints
         if (!$error) {
             try {
@@ -128,7 +109,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (!$error && $id) {
                     // Modification
                     $joueurObj = new Joueur(
-                        (int)$id,
                         (int)$numLicence,
                         $nom,
                         $prenom,
@@ -141,9 +121,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $success = 'Joueur modifié avec succès!';
                 } elseif (!$error) {
                     // Ajout - utiliser l'ID personnalisé ou 0 pour auto-génération
-                    $idToUse = !empty($idJoueur) ? (int)$idJoueur : 0;
                     $joueurObj = new Joueur(
-                        $idToUse,
                         (int)$numLicence,
                         $nom,
                         $prenom,

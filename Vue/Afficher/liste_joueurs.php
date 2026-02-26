@@ -41,7 +41,6 @@
                     <table class="players-table">
                         <thead>
                             <tr class="players-table-header">
-                                <th>Id_Joueur</th>
                                 <th>Numéro de Licence</th>
                                 <th>Nom</th>
                                 <th>Prénom</th>
@@ -55,7 +54,6 @@
                         <tbody>
                             <?php foreach ($joueurs as $joueur): ?>
                                 <tr class="players-table-row">
-                                    <td class="players-table-id"><?php echo htmlspecialchars($joueur['Id_Joueur']); ?></td>
                                     <td><?php echo htmlspecialchars($joueur['Num_Licence'] ?? '-'); ?></td>
                                     <td class="players-table-name"><?php echo htmlspecialchars($joueur['Nom']); ?></td>
                                     <td><?php echo htmlspecialchars($joueur['Prenom']); ?></td>
