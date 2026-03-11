@@ -10,17 +10,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 🚚 Checkout du code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: 🚀 Déploiement via FTPS (Sécurisé)
+      - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ftp-liverpool.alwaysdata.net
           username: ${{ secrets.LIVERPOOL_AD_USER }}
           password: ${{ secrets.LIVERPOOL_AD_PASSWORD }}
-          protocol: ftps
+          protocol: ftp
           port: 21
           local-dir: ./
-          server-dir: /www/        # <--- Vérifiez bien ce dossier chez Alwaysdata
-          security: loose
+          server-dir: /www/
+          log-level: verbose
