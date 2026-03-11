@@ -16,9 +16,9 @@ jobs:
       - name: 🚀 Déploiement via FTPS (Sécurisé)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          server: ftp-yeadonaye.alwaysdata.net
-          username: ${{ secrets.AD_USER }}
-          password: ${{ secrets.AD_PASSWORD }}
+          server: ftp-liverpool.alwaysdata.net
+          username: ${{ secrets.LIVERPOOL_AD_USER }}
+          password: ${{ secrets.LIVERPOOL_AD_PASSWORD }}
           protocol: ftps
           port: 21
           local-dir: ./
