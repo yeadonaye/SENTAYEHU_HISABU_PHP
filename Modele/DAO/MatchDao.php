@@ -23,6 +23,7 @@
                     $row['Heure'],
                     $row['Nom_Equipe_Adverse'],
                     $row['Lieu'],
+                    $row['Resultat'] ?? '',
                     $row['Score_Adversaire'] ?? '',
                     $row['Score_Nous'] ?? ''
                 );
@@ -46,6 +47,7 @@
                 $row['Heure'],
                 $row['Nom_Equipe_Adverse'],
                 $row['Lieu'],
+                $row['Resultat'] ?? '',
                 $row['Score_Adversaire'] ?? '',
                 $row['Score_Nous'] ?? ''
             );
@@ -54,14 +56,15 @@
         public function add(object $obj): bool{
             if (!($obj instanceof Match_)) return false;
             
-            $sql = "INSERT INTO `Match_` (Nom_Equipe_Adverse, Date_Rencontre, Heure, Lieu, Score_Adversaire, Score_Nous) 
-                    VALUES (:nom, :date, :heure, :lieu, :score_adversaire, :score_nous)";
+            $sql = "INSERT INTO `Match_` (Nom_Equipe_Adverse, Date_Rencontre, Heure, Lieu, Resultat, Score_Adversaire, Score_Nous) 
+                    VALUES (:nom, :date, :heure, :lieu, :resultat, :score_adversaire, :score_nous)";
             $stmt = $this->pdo->prepare($sql);
             return $stmt->execute([
                 ':nom' => $obj->getNomEquipeAdverse(),
                 ':date' => $obj->getDateRencontre(),
                 ':heure' => $obj->getHeure(),
                 ':lieu' => $obj->getLieu(),
+                ':resultat' => $obj->getResultat(),
                 ':score_adversaire' => $obj->getScoreAdversaire(),
                 ':score_nous' => $obj->getScoreNous()
             ]);
@@ -75,6 +78,7 @@
                         Date_Rencontre = :date,
                         Heure = :heure,
                         Lieu = :lieu,
+                        Resultat = :resultat,
                         Score_Adversaire = :score_adversaire,
                         Score_Nous = :score_nous
                     WHERE Id_Match = :id";
@@ -86,6 +90,7 @@
                 ':date' => $obj->getDateRencontre(),
                 ':heure' => $obj->getHeure(),
                 ':lieu' => $obj->getLieu(),
+                ':resultat' => $obj->getResultat(),
                 ':score_adversaire' => $obj->getScoreAdversaire(),
                 ':score_nous' => $obj->getScoreNous(),
                 ':id' => $obj->getIdMatch()

@@ -7,6 +7,7 @@ requireAuth();
 $pdo = getDBConnection();
 $matchDao = new MatchDao($pdo);
 $match = null;
+$resultats = ['Victoire', 'Nul', 'Défaite'];
 $error = '';
 $success = '';
 
@@ -56,6 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $dateRencontre = $_POST['dateRencontre'] ?? '';
     $heure = $_POST['heure'] ?? '';
     $lieu = $_POST['lieu'] ?? '';
+    $resultat = $_POST['resultat'] ?? '';
     $scoreNous = $_POST['scoreNous'] ?? '';
     $scoreAdverse = $_POST['scoreAdverse'] ?? '';
     // Les scores par défaut à 0 si laissés vides
@@ -64,6 +66,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (empty($nomEquipeAdverse) || empty($dateRencontre) || empty($heure)) {
         $error = 'Les champs avec * sont obligatoires';
+    }
+
+    if (!$error && !in_array($resultat, $resultats, true)) {
+        $error = 'Résultat invalide';
     }
 
     // Validate date format dd/mm/yyyy
@@ -77,14 +83,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Heure invalide (format 24h HH:MM)';
     }
 
+    if (!$error && (($scoreNous === '') xor ($scoreAdverse === ''))) {
+        $error = 'Veuillez saisir les deux scores ou laisser les deux vides';
+    }
+
+    if (!$error && $scoreNous !== '' && $scoreAdverse !== '') {
+        $expectedResultat = 'Nul';
+        if ($scoreNousInt > $scoreAdverseInt) {
+            $expectedResultat = 'Victoire';
+        } elseif ($scoreNousInt < $scoreAdverseInt) {
+            $expectedResultat = 'Défaite';
+        }
+
+        if ($resultat !== $expectedResultat) {
+            $error = 'Résultat incohérent avec les scores saisis';
+        }
+    }
+
     if (!$error) {
         try {
-            // Créer le résultat au format "3-2" si les scores sont fournis
-            $resultat = '';
-            if ($scoreNous !== '' && $scoreAdverse !== '') {
-                $resultat = $scoreNousInt . '-' . $scoreAdverseInt;
-            }
-
             if ($id) {
                 // Modification
                 $matchObj = new Match_(
@@ -93,6 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $heure,
                     $nomEquipeAdverse,
                     $lieu,
+                    $resultat,
                     $scoreAdverseInt,
                     $scoreNousInt
                 );
@@ -108,6 +126,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $heure,
                     $nomEquipeAdverse,
                     $lieu,
+                    $resultat,
                     $scoreAdverseInt,
                     $scoreNousInt
                 );
@@ -131,6 +150,7 @@ if ($match) {
         'Date_Rencontre' => $toFrDate($match->getDateRencontre()),
         'Heure' => $normalizeTime($match->getHeure()),
         'Lieu' => $match->getLieu(),
+        'Resultat' => $match->getResultat(),
         'Score_Adversaire' => $match->getScoreAdversaire(),
         'Score_Nous' => $match->getScoreNous()
     ];
@@ -142,6 +162,7 @@ if ($match) {
         'Date_Rencontre' => $dateRencontre ?? '',
         'Heure' => $heure ?? '',
         'Lieu' => $lieu ?? '',
+        'Resultat' => $resultat ?? '',
         'Score_Adversaire' => $scoreAdverse,
         'Score_Nous' => $scoreNous
     ];

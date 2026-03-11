@@ -6,16 +6,18 @@
         private string $heure;
         private string $nomEquipeAdverse;
         private string $lieu;
+        private string $resultat;
         private int $score_adversaire;
         private int $score_nous;
 
         //Definition du contructeur
-        public function __construct(int $idMatch, string $dateRencontre, string $heure, string $nomEquipeAdverse, string $lieu, int $score_adversaire, int $score_nous) {
+        public function __construct(int $idMatch, string $dateRencontre, string $heure, string $nomEquipeAdverse, string $lieu, string $resultat, int $score_adversaire, int $score_nous) {
             $this->idMatch = $idMatch;
             $this->dateRencontre = $dateRencontre;
             $this->heure = $heure;
             $this->nomEquipeAdverse = $nomEquipeAdverse;
             $this->lieu = $lieu;
+            $this->resultat = $resultat;
             $this->score_adversaire = $score_adversaire;
             $this->score_nous = $score_nous;
             }
@@ -41,6 +43,10 @@
             return $this->lieu;
         }
 
+        public function getResultat(): string{
+            return $this->resultat;
+        }
+
         public function getScoreAdversaire(): int{
             return $this->score_adversaire;
         }
@@ -64,6 +70,10 @@
 
         public function setLieu(string $lieu): void{
             $this->lieu = $lieu;
+        }
+
+        public function setResultat(string $resultat): void{
+            $this->resultat = $resultat;
         }
 
         public function setScoreAdversaire(int $score_adversaire): void{

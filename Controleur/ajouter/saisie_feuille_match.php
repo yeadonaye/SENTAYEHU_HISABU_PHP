@@ -36,6 +36,7 @@ try {
         'Heure' => $matchObj->getHeure(),
         'Nom_Equipe_Adverse' => $matchObj->getNomEquipeAdverse(),
         'Lieu' => $matchObj->getLieu(),
+        'Resultat' => $matchObj->getResultat(),
         'Score_Adversaire' => $matchObj->getScoreAdversaire(),
         'Score_Nous' => $matchObj->getScoreNous()
     ];

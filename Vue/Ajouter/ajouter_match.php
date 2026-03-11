@@ -111,20 +111,27 @@ $success = $success ?? '';
 
                 <div class="row">
                     <div class="col-md-6 mb-3">
+                        <label for="resultat" class="form-label fw-bold">Résultat</label>
+                        <select class="form-control" id="resultat" name="resultat" required>
+                            <option value="">Sélectionner le résultat du match</option>
+                                <?php foreach ($resultats as $resultat): ?>
+                                    <option value="<?php echo htmlspecialchars($resultat); ?>" <?php echo ($match['Resultat'] ?? '') === $resultat ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars($resultat); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
                         <label for="scoreNous" class="form-label fw-bold">Notre Score</label>
                         <input 
                             type="number" 
                             class="form-control score-input" 
                             id="scoreNous" 
                             name="scoreNous" 
-                            value="<?php 
-                                $scoreNous = '';
-                                if (isset($match['Resultat']) && !empty($match['Resultat'])) {
-                                    $scores = explode('-', $match['Resultat']);
-                                    $scoreNous = $scores[0] ?? '';
-                                }
-                                echo htmlspecialchars($scoreNous);
-                            ?>"
+                            value="<?php echo htmlspecialchars($match['Score_Nous'] ?? ''); ?>"
                             min="0"
                             placeholder="0"
                         >
@@ -137,14 +144,7 @@ $success = $success ?? '';
                             class="form-control score-input" 
                             id="scoreAdverse" 
                             name="scoreAdverse" 
-                            value="<?php 
-                                $scoreAdverse = '';
-                                if (isset($match['Resultat']) && !empty($match['Resultat'])) {
-                                    $scores = explode('-', $match['Resultat']);
-                                    $scoreAdverse = $scores[1] ?? '';
-                                }
-                                echo htmlspecialchars($scoreAdverse);
-                            ?>"
+                            value="<?php echo htmlspecialchars($match['Score_Adversaire'] ?? ''); ?>"
                             min="0"
                             placeholder="0"
                         >

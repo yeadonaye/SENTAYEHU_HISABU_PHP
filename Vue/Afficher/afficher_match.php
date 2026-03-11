@@ -53,6 +53,11 @@
                                 </div>
                             </div>
 
+                            <div class="match-composition">
+                                <i class="bi bi-flag-fill" style="color: #C8102E;"></i>
+                                Résultat: <strong><?php echo htmlspecialchars($match['Resultat'] ?? 'Non renseigné'); ?></strong>
+                            </div>
+
                             <div class="match-location">
                                 <i class="bi bi-geo-alt"></i><?php echo htmlspecialchars($match['Lieu'] ?? 'Lieu non spécifié'); ?>
                             </div>
