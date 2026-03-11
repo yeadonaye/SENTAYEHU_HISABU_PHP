@@ -11,7 +11,7 @@ jobs:
 
     steps:
       - name: 🚚 Checkout du code
-        uses: actions/checkout@v4 # Version plus récente
+        uses: actions/checkout@v4
 
       - name: 🚀 Déploiement via FTPS (Sécurisé)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
@@ -19,9 +19,8 @@ jobs:
           server: ftp-yeadonaye.alwaysdata.net
           username: ${{ secrets.AD_USER }}
           password: ${{ secrets.AD_PASSWORD }}
-          protocol: ftps           # <--- On change ftp par ftps
+          protocol: ftps
           port: 21
           local-dir: ./
           server-dir: /www/        # <--- Vérifiez bien ce dossier chez Alwaysdata
-          # Cette option est souvent nécessaire pour le FTPS sur GitHub Actions
           security: loose
