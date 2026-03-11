@@ -4,16 +4,18 @@ on:
   push:
     branches:
       - main
+      - yado/test/resultat
 
 jobs:
-  deploy:
+
+  deploy-liverpool:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Déploiement 1 : Liverpool
       - name: Deploy to Liverpool Alwaysdata
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -26,7 +28,15 @@ jobs:
           server-dir: /www/
           security: loose
 
-      # Déploiement 2 : Yeadonaye
+
+  deploy-yeadonaye:
+    if: github.ref == 'refs/heads/yado/test/resultat'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Deploy to Yeadonaye Alwaysdata
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
