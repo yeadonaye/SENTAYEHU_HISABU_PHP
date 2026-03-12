@@ -112,7 +112,7 @@ $success = $success ?? '';
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label for="resultat" class="form-label fw-bold">Résultat</label>
-                        <select class="form-control" id="resultat" name="resultat" required>
+                        <select class="form-control" id="resultat" name="resultat">
                             <option value="">Sélectionner le résultat du match</option>
                                 <?php foreach ($resultats as $resultat): ?>
                                     <option value="<?php echo htmlspecialchars($resultat); ?>" <?php echo ($match['Resultat'] ?? '') === $resultat ? 'selected' : ''; ?>>
@@ -184,34 +184,44 @@ $success = $success ?? '';
             const heureInput = document.getElementById('heure').value;
             const scoreNous = document.getElementById('scoreNous');
             const scoreAdverse = document.getElementById('scoreAdverse');
-            
-            const parsedDate = parseDateFr(dateInput);
-            if (!parsedDate || !heureInput) {
+            const resultatSelect = document.getElementById('resultat');
+
+            const disableAll = () => {
                 scoreNous.disabled = true;
                 scoreAdverse.disabled = true;
-                return;
-            }
+                resultatSelect.disabled = true;
+                resultatSelect.value = '';
+                resultatSelect.removeAttribute('required');
+            };
+
+            const parsedDate = parseDateFr(dateInput);
+            if (!parsedDate || !heureInput) { disableAll(); return; }
 
             const [h, m] = heureInput.split(':').map(Number);
-            if (Number.isNaN(h) || Number.isNaN(m)) {
-                scoreNous.disabled = true;
-                scoreAdverse.disabled = true;
-                return;
-            }
+            if (Number.isNaN(h) || Number.isNaN(m)) { disableAll(); return; }
+
             parsedDate.setHours(h, m, 0, 0);
             const now = new Date();
-            
-            // Désactiver les scores si le match est dans le futur
+
             if (parsedDate > now) {
+                // Match futur : désactiver résultat et scores
                 scoreNous.disabled = true;
                 scoreAdverse.disabled = true;
                 scoreNous.title = 'Les scores ne peuvent être saisis que si le match est terminé';
                 scoreAdverse.title = 'Les scores ne peuvent être saisis que si le match est terminé';
+                resultatSelect.disabled = true;
+                resultatSelect.value = '';
+                resultatSelect.title = 'Le résultat ne peut être saisi que si le match est terminé';
+                resultatSelect.removeAttribute('required');
             } else {
+                // Match passé : activer résultat et scores
                 scoreNous.disabled = false;
                 scoreAdverse.disabled = false;
                 scoreNous.title = '';
                 scoreAdverse.title = '';
+                resultatSelect.disabled = false;
+                resultatSelect.title = '';
+                resultatSelect.setAttribute('required', 'required');
             }
         }
         

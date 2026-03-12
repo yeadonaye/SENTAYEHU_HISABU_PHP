@@ -68,10 +68,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Les champs avec * sont obligatoires';
     }
 
-    if (!$error && !in_array($resultat, $resultats, true)) {
-        $error = 'Résultat invalide';
-    }
-
     // Validate date format dd/mm/yyyy
     $dateSql = $toDbDate($dateRencontre);
     if (!$error && !$dateSql) {
@@ -83,20 +79,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Heure invalide (format 24h HH:MM)';
     }
 
-    if (!$error && (($scoreNous === '') xor ($scoreAdverse === ''))) {
-        $error = 'Veuillez saisir les deux scores ou laisser les deux vides';
+    // Déterminer si le match est passé ou futur
+    $matchIsPast = false;
+    if (!$error) {
+        $matchDatetime = new DateTime($dateSql . ' ' . $heure . ':00');
+        $matchIsPast = $matchDatetime <= new DateTime();
     }
 
-    if (!$error && $scoreNous !== '' && $scoreAdverse !== '') {
-        $expectedResultat = 'Nul';
-        if ($scoreNousInt > $scoreAdverseInt) {
-            $expectedResultat = 'Victoire';
-        } elseif ($scoreNousInt < $scoreAdverseInt) {
-            $expectedResultat = 'Défaite';
-        }
+    if (!$error) {
+        if (!$matchIsPast) {
+            // Match futur : résultat et scores interdits
+            if ($resultat !== '') {
+                $error = 'Impossible de saisir un résultat pour un match futur';
+            } elseif ($scoreNous !== '' || $scoreAdverse !== '') {
+                $error = 'Impossible de saisir des scores pour un match futur';
+            }
+        } else {
+            // Match passé : résultat obligatoire et cohérent avec les scores
+            if (!in_array($resultat, $resultats, true)) {
+                $error = 'Le résultat est obligatoire pour un match déjà joué';
+            }
 
-        if ($resultat !== $expectedResultat) {
-            $error = 'Résultat incohérent avec les scores saisis';
+            if (!$error && (($scoreNous === '') xor ($scoreAdverse === ''))) {
+                $error = 'Veuillez saisir les deux scores ou laisser les deux vides';
+            }
+
+            if (!$error && $scoreNous !== '' && $scoreAdverse !== '') {
+                $expectedResultat = 'Nul';
+                if ($scoreNousInt > $scoreAdverseInt) {
+                    $expectedResultat = 'Victoire';
+                } elseif ($scoreNousInt < $scoreAdverseInt) {
+                    $expectedResultat = 'Défaite';
+                }
+
+                if ($resultat !== $expectedResultat) {
+                    $error = 'Résultat incohérent avec les scores saisis';
+                }
+            }
         }
     }
 
