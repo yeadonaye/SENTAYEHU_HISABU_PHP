@@ -46,5 +46,5 @@ jobs:
           protocol: ftps
           port: 21
           local-dir: ./
-          server-dir: /www/
+          server-dir: /www/SENTAYEHU_HISABU_PHP/
           security: loose
