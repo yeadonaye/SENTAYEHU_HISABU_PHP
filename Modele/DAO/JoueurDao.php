@@ -15,7 +15,7 @@ class JoueurDao implements ModeleDao {
     // Récupère tous les joueurs de la bd (non supprimés) 
     // Soft Delete : on ne supprimer pas vraiment les joueurs, on les marque comme supprimés et ca nous aide à garder les stats etc.
     public function getAll(): array{
-        $sql = "SELECT * FROM Joueur WHERE deleted = 0 ORDER BY Nom";
+        $sql = "SELECT * FROM Joueur WHERE COALESCE(deleted, 0) = 0 ORDER BY Nom";
         $stmt = $this->pdo->query($sql);
 
         $joueurs = [];
@@ -37,7 +37,7 @@ class JoueurDao implements ModeleDao {
 
     // Récupère un joueur par son id (non supprimé)
     public function getById(int $id): ?Joueur{  
-        $sql = "SELECT * FROM Joueur WHERE Id_Joueur = :id AND deleted = 0";
+        $sql = "SELECT * FROM Joueur WHERE Id_Joueur = :id AND COALESCE(deleted, 0) = 0";
         $stmt = $this->pdo->prepare($sql);
 
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
@@ -121,7 +121,7 @@ class JoueurDao implements ModeleDao {
       * Récupère tous les joueurs actifs (non blessés / non suspendus / non absents / non supprimés)
      */
     public function getActifs(): array {
-          $sql = "SELECT * FROM Joueur WHERE deleted = 0 AND Statut NOT IN ('Blessé', 'Suspendue', 'Absent') ORDER BY Nom, Prenom";
+            $sql = "SELECT * FROM Joueur WHERE COALESCE(deleted, 0) = 0 AND Statut NOT IN ('Blessé', 'Suspendue', 'Absent') ORDER BY Nom, Prenom";
         $stmt = $this->pdo->query($sql);
         
         $joueurs = [];
@@ -144,7 +144,7 @@ class JoueurDao implements ModeleDao {
      * Récupère le nombre total de joueurs (non supprimés)
      */
     public function compterTotalJoueurs(): int {
-        $sql = "SELECT COUNT(*) as count FROM Joueur WHERE deleted = 0";
+        $sql = "SELECT COUNT(*) as count FROM Joueur WHERE COALESCE(deleted, 0) = 0";
         $stmt = $this->pdo->query($sql);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         return (int)($result['count'] ?? 0);
@@ -171,7 +171,7 @@ class JoueurDao implements ModeleDao {
                     LIMIT 1
                 ) AS Poste
             FROM Joueur j
-            WHERE j.deleted = 0
+            WHERE COALESCE(j.deleted, 0) = 0
             ORDER BY j.Nom, j.Prenom
         ";
         $stmt = $this->pdo->query($sql);

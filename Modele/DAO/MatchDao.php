@@ -12,7 +12,7 @@
         }
 
         public function getAll(): array{
-            $sql = "SELECT * FROM `Match_` WHERE deleted = 0 ORDER BY Date_Rencontre DESC, Heure DESC";
+            $sql = "SELECT * FROM `Match_` WHERE COALESCE(deleted, 0) = 0 ORDER BY Date_Rencontre DESC, Heure DESC";
             $stmt = $this->pdo->query($sql);
             
             $matchs = [];
@@ -24,15 +24,15 @@
                     $row['Nom_Equipe_Adverse'],
                     $row['Lieu'],
                     $row['Resultat'] ?? '',
-                    $row['Score_Adversaire'] ?? '',
-                    $row['Score_Nous'] ?? ''
+                    isset($row['Score_Adversaire']) ? (int)$row['Score_Adversaire'] : null,
+                    isset($row['Score_Nous']) ? (int)$row['Score_Nous'] : null
                 );
             }
             return $matchs;
         }
 
         public function getById(int $id): ?Match_{
-            $sql = "SELECT * FROM `Match_` WHERE Id_Match = :id AND deleted = 0";
+            $sql = "SELECT * FROM `Match_` WHERE Id_Match = :id AND COALESCE(deleted, 0) = 0";
             $stmt = $this->pdo->prepare($sql);
             $stmt->bindValue(':id', $id, PDO::PARAM_INT);
             $stmt->execute();
@@ -48,8 +48,8 @@
                 $row['Nom_Equipe_Adverse'],
                 $row['Lieu'],
                 $row['Resultat'] ?? '',
-                $row['Score_Adversaire'] ?? '',
-                $row['Score_Nous'] ?? ''
+                isset($row['Score_Adversaire']) ? (int)$row['Score_Adversaire'] : null,
+                isset($row['Score_Nous']) ? (int)$row['Score_Nous'] : null
             );
         }
 
@@ -134,7 +134,7 @@
                     SUM(Score_Nous) as buts,
                     SUM(Score_Adversaire) as butsEncaisses
                 FROM `Match_`
-                WHERE deleted = 0 AND Score_Nous IS NOT NULL AND Score_Adversaire IS NOT NULL
+                WHERE COALESCE(deleted, 0) = 0 AND Score_Nous IS NOT NULL AND Score_Adversaire IS NOT NULL
             ";
             $stmt = $this->pdo->query($sql);
             return $stmt->fetch(PDO::FETCH_ASSOC) ?? [
@@ -150,7 +150,7 @@
         public function getMatchesOrderedByDate(): array {
             $sql = "
                 SELECT Id_Match FROM `Match_` 
-                WHERE deleted = 0
+                WHERE COALESCE(deleted, 0) = 0
                 ORDER BY Date_Rencontre DESC, Heure DESC
             ";
             $stmt = $this->pdo->query($sql);

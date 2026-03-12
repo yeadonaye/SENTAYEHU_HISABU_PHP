@@ -4,14 +4,14 @@ class Joueur {
     private int $numLicence;
     private string $nom;
     private string $prenom;
-    private string $dateNaissance;
-    private float $taille;
-    private int $poids;
+    private ?string $dateNaissance;
+    private ?float $taille;
+    private ?int $poids;
     private string $statut;
     private int $deleted;
 
     public function __construct(int $idJoueur, int $numLicence, string $nom, string $prenom, 
-    string $dateNaissance, float $taille, int $poids, string $statut, int $deleted = 0){
+    ?string $dateNaissance, ?float $taille, ?int $poids, string $statut, int $deleted = 0){
         $this->idJoueur = $idJoueur;
         $this->numLicence = $numLicence;
         $this->nom = $nom;
@@ -41,15 +41,15 @@ class Joueur {
         return $this->prenom;
     }
 
-    public function getDateNaissance(): string {
+    public function getDateNaissance(): ?string {
         return $this->dateNaissance;
     }
 
-    public function getTaille(): float {
+    public function getTaille(): ?float {
         return $this->taille;
     }
 
-    public function getPoids(): int {
+    public function getPoids(): ?int {
         return $this->poids;
     }
     public function getStatut(): string {
@@ -73,15 +73,15 @@ class Joueur {
         $this->prenom = $prenom;
     }
 
-    public function setDateNaissance(string $dateNaissance): void {
+    public function setDateNaissance(?string $dateNaissance): void {
         $this->dateNaissance = $dateNaissance;
     }
 
-    public function setTaille(float $taille): void {
+    public function setTaille(?float $taille): void {
         $this->taille = $taille;
     }
 
-    public function setPoids(int $poids): void {
+    public function setPoids(?int $poids): void {
         $this->poids = $poids;
     }
 
