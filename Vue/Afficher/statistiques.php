@@ -98,17 +98,23 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach ($players as $pl): ?>
+                            <?php if (!empty($players)): ?>
+                                <?php foreach ($players as $pl): ?>
+                                    <tr>
+                                        <td><?php echo htmlspecialchars($pl['Nom'] . ' ' . $pl['Prenom']); ?></td>
+                                        <td><?php echo htmlspecialchars($pl['Statut'] ?? ''); ?></td>
+                                        <td><?php echo (int)($pl['starts'] ?? 0); ?></td>
+                                        <td><?php echo (int)($pl['subs'] ?? 0); ?></td>
+                                        <td><?php echo $pl['avgNote'] !== null ? $pl['avgNote'] . '/5' : '-'; ?></td>
+                                        <td><?php echo $pl['winPercentWhenParticipated'] !== null ? $pl['winPercentWhenParticipated'] . '%' : '-'; ?></td>
+                                        <td><?php echo (int)($pl['consecutiveSelections'] ?? 0); ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php else: ?>
                                 <tr>
-                                    <td><?php echo htmlspecialchars($pl['Nom'] . ' ' . $pl['Prenom']); ?></td>
-                                    <td><?php echo htmlspecialchars($pl['Statut'] ?? ''); ?></td>
-                                    <td><?php echo (int)($pl['starts'] ?? 0); ?></td>
-                                    <td><?php echo (int)($pl['subs'] ?? 0); ?></td>
-                                    <td><?php echo $pl['avgNote'] !== null ? $pl['avgNote'] . '/5' : '-'; ?></td>
-                                    <td><?php echo $pl['winPercentWhenParticipated'] !== null ? $pl['winPercentWhenParticipated'] . '%' : '-'; ?></td>
-                                    <td><?php echo (int)($pl['consecutiveSelections'] ?? 0); ?></td>
+                                    <td colspan="7" class="text-center text-muted">Aucune statistique joueur disponible pour le moment.</td>
                                 </tr>
-                            <?php endforeach; ?>
+                            <?php endif; ?>
                         </tbody>
                     </table>
                     </div>

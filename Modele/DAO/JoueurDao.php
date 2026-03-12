@@ -121,7 +121,7 @@ class JoueurDao implements ModeleDao {
       * Récupère tous les joueurs actifs (non blessés / non suspendus / non absents / non supprimés)
      */
     public function getActifs(): array {
-            $sql = "SELECT * FROM Joueur WHERE COALESCE(deleted, 0) = 0 AND Statut NOT IN ('Blessé', 'Suspendue', 'Absent') ORDER BY Nom, Prenom";
+            $sql = "SELECT * FROM Joueur WHERE COALESCE(deleted, 0) = 0 AND Statut NOT IN ('Blessé', 'Suspendu', 'Suspendue', 'Absent') ORDER BY Nom, Prenom";
         $stmt = $this->pdo->query($sql);
         
         $joueurs = [];
@@ -188,7 +188,7 @@ class JoueurDao implements ModeleDao {
      */
     public function compterTitularisations(int $joueurId): int {
         $sql = "SELECT COUNT(*) FROM Participer p JOIN `Match_` m ON p.Id_Match = m.Id_Match 
-                WHERE p.Id_Joueur = :id AND p.Titulaire_ou_pas = 1 AND m.deleted = 0";
+            WHERE p.Id_Joueur = :id AND p.Titulaire_ou_pas = 1 AND COALESCE(m.deleted, 0) = 0";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':id' => $joueurId]);
         return (int)$stmt->fetchColumn();
@@ -199,7 +199,7 @@ class JoueurDao implements ModeleDao {
      */
     public function compterRemplacements(int $joueurId): int {
         $sql = "SELECT COUNT(*) FROM Participer p JOIN `Match_` m ON p.Id_Match = m.Id_Match 
-                WHERE p.Id_Joueur = :id AND p.Titulaire_ou_pas = 0 AND m.deleted = 0";
+            WHERE p.Id_Joueur = :id AND p.Titulaire_ou_pas = 0 AND COALESCE(m.deleted, 0) = 0";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':id' => $joueurId]);
         return (int)$stmt->fetchColumn();
@@ -223,7 +223,7 @@ class JoueurDao implements ModeleDao {
     public function compterParticipations(int $joueurId): int {
         $sql = "SELECT COUNT(DISTINCT p.Id_Match) FROM Participer p 
                 JOIN `Match_` m ON p.Id_Match = m.Id_Match 
-                WHERE p.Id_Joueur = :id AND m.deleted = 0";
+            WHERE p.Id_Joueur = :id AND COALESCE(m.deleted, 0) = 0";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':id' => $joueurId]);
         return (int)$stmt->fetchColumn();
@@ -239,7 +239,7 @@ class JoueurDao implements ModeleDao {
         
         $sql = "SELECT COUNT(DISTINCT p.Id_Match) FROM Participer p 
                 JOIN `Match_` m ON p.Id_Match = m.Id_Match 
-                WHERE p.Id_Joueur = :id AND m.deleted = 0 AND
+            WHERE p.Id_Joueur = :id AND COALESCE(m.deleted, 0) = 0 AND
                 (m.Score_Nous IS NOT NULL AND m.Score_Adversaire IS NOT NULL AND m.Score_Nous > m.Score_Adversaire)";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':id' => $joueurId]);
