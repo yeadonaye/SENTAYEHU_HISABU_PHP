@@ -49,13 +49,13 @@ class JoueurDao implements ModeleDao {
 
         return new Joueur(
             $row['Id_Joueur'],
-                $row['Num_Licence'],
-                $row['Nom'],
-                $row['Prenom'],
-                $row['Date_Naissance'],
-                $row['Taille'],
-                $row['Poids'],
-                $row['Statut']
+            $row['Num_Licence'],
+            $row['Nom'],
+            $row['Prenom'],
+            $row['Date_Naissance'],
+            $row['Taille'],
+            $row['Poids'],
+            $row['Statut']
         );
     }
 
@@ -113,29 +113,6 @@ class JoueurDao implements ModeleDao {
         $stmt = $this->pdo->prepare($sql);
 
         return $stmt->execute([':id' => $obj->getIdJoueur()]);
-    }
-
-    // Recupere un joueur par son numéro de licence (non supprimé)
-    public function getByNumLicence(string $numLicence): ?Joueur { // ?Joueur pour indiquer aue l'objet peut etre null
-        $sql = "SELECT * FROM Joueur WHERE Num_Licence = :numLicence AND deleted = 0";
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->bindValue(':numLicence', $numLicence);
-        $stmt->execute();
-        
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        if (!$row) return null;
-        
-        return new Joueur(
-            $row['Id_Joueur'],
-            $row['Num_Licence'],
-            $row['Nom'],
-            $row['Prenom'],
-            $row['Date_Naissance'],
-            $row['Taille'],
-            $row['Poids'],
-            $row['Statut']
-        );
     }
 
     // Méthodes supplémentaires

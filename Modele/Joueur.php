@@ -8,9 +8,10 @@ class Joueur {
     private float $taille;
     private int $poids;
     private string $statut;
+    private int $deleted;
 
     public function __construct(int $idJoueur, int $numLicence, string $nom, string $prenom, 
-    string $dateNaissance, float $taille, int $poids, string $statut){
+    string $dateNaissance, float $taille, int $poids, string $statut, int $deleted = 0){
         $this->idJoueur = $idJoueur;
         $this->numLicence = $numLicence;
         $this->nom = $nom;
@@ -19,6 +20,7 @@ class Joueur {
         $this->taille = $taille;
         $this->poids = $poids;
         $this->statut = $statut;
+        $this->deleted = $deleted;
     }
 
     // getters
@@ -53,6 +55,9 @@ class Joueur {
     public function getStatut(): string {
         return $this->statut;
     }
+    public function isDeleted(): bool {
+        return $this->deleted === 1;
+    }
 
     //setters
 
@@ -82,6 +87,10 @@ class Joueur {
 
     public function setStatut(string $statut): void {
         $this->statut = $statut;
+    }
+
+    public function setDeleted(int $deleted): void {
+        $this->deleted = $deleted;
     }
 
 }

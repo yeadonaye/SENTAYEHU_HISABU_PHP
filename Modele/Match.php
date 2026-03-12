@@ -9,9 +9,10 @@
         private string $resultat;
         private int $score_adversaire;
         private int $score_nous;
+        private int $deleted;
 
         //Definition du contructeur
-        public function __construct(int $idMatch, string $dateRencontre, string $heure, string $nomEquipeAdverse, string $lieu, string $resultat, int $score_adversaire, int $score_nous) {
+        public function __construct(int $idMatch, string $dateRencontre, string $heure, string $nomEquipeAdverse, string $lieu, string $resultat, int $score_adversaire, int $score_nous, int $deleted = 0) {
             $this->idMatch = $idMatch;
             $this->dateRencontre = $dateRencontre;
             $this->heure = $heure;
@@ -20,6 +21,7 @@
             $this->resultat = $resultat;
             $this->score_adversaire = $score_adversaire;
             $this->score_nous = $score_nous;
+            $this->deleted = $deleted;
             }
 
         //Getters
@@ -55,6 +57,10 @@
             return $this->score_nous;
         }
 
+        public function isDeleted(): bool{
+            return $this->deleted === 1;
+        }
+
         //Setters
         public function setDateRencontre(string $date): void{
             $this->dateRencontre = $date;
@@ -82,6 +88,10 @@
 
         public function setScoreNous(int $score_nous): void{
             $this->score_nous = $score_nous;
+        }
+
+        public function setDeleted(int $deleted): void {
+            $this->deleted = $deleted;
         }
     }
 ?>
