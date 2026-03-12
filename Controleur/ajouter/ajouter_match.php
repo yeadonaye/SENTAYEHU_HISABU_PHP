@@ -8,6 +8,7 @@ $pdo = getDBConnection();
 $matchDao = new MatchDao($pdo);
 $match = null;
 $resultats = ['Victoire', 'Nul', 'Défaite'];
+$lieu = ['Domicile', 'Extérieur'];
 $error = '';
 $success = '';
 

@@ -97,16 +97,18 @@ $success = $success ?? '';
                     </div>
                 </div>
 
-                <div class="mb-3">
-                    <label for="lieu" class="form-label fw-bold">Lieu</label>
-                    <input 
-                        type="text" 
-                        class="form-control" 
-                        id="lieu" 
-                        name="lieu" 
-                        value="<?php echo htmlspecialchars($match['Lieu'] ?? ''); ?>"
-                        placeholder="Lieu du match"
-                    >
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="Lieu" class="form-label fw-bold">Lieu</label>
+                        <select class="form-control" id="lieu" name="lieu">
+                            <option value="">Sélectionner le lieu du match</option>
+                            <?php foreach ($lieu as $l): ?>
+                                <option value="<?php echo htmlspecialchars($l); ?>" <?php echo ($match['Lieu'] ?? '') === $l ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($l);?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="row">
