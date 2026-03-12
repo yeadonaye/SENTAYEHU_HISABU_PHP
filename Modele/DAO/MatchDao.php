@@ -12,7 +12,7 @@
         }
 
         public function getAll(): array{
-            $sql = "SELECT * FROM `Match_` ORDER BY Date_Rencontre DESC, Heure DESC";
+            $sql = "SELECT * FROM `Match_` WHERE deleted = 0 ORDER BY Date_Rencontre DESC, Heure DESC";
             $stmt = $this->pdo->query($sql);
             
             $matchs = [];
@@ -32,7 +32,7 @@
         }
 
         public function getById(int $id): ?Match_{
-            $sql = "SELECT * FROM `Match_` WHERE Id_Match = :id";
+            $sql = "SELECT * FROM `Match_` WHERE Id_Match = :id AND deleted = 0";
             $stmt = $this->pdo->prepare($sql);
             $stmt->bindValue(':id', $id, PDO::PARAM_INT);
             $stmt->execute();
@@ -99,7 +99,7 @@
 
         public function delete(object $obj): bool{
             if (!($obj instanceof Match_)) return false;
-            $sql = "DELETE FROM `Match_` WHERE Id_Match = :id";
+            $sql = "UPDATE `Match_` SET deleted = 1 WHERE Id_Match = :id";
             $stmt = $this->pdo->prepare($sql);
             return $stmt->execute([':id' => $obj->getIdMatch()]);
         }
@@ -134,7 +134,7 @@
                     SUM(Score_Nous) as buts,
                     SUM(Score_Adversaire) as butsEncaisses
                 FROM `Match_`
-                WHERE Score_Nous IS NOT NULL AND Score_Adversaire IS NOT NULL
+                WHERE deleted = 0 AND Score_Nous IS NOT NULL AND Score_Adversaire IS NOT NULL
             ";
             $stmt = $this->pdo->query($sql);
             return $stmt->fetch(PDO::FETCH_ASSOC) ?? [
@@ -150,6 +150,7 @@
         public function getMatchesOrderedByDate(): array {
             $sql = "
                 SELECT Id_Match FROM `Match_` 
+                WHERE deleted = 0
                 ORDER BY Date_Rencontre DESC, Heure DESC
             ";
             $stmt = $this->pdo->query($sql);

@@ -12,9 +12,10 @@ class JoueurDao implements ModeleDao {
         $this->pdo = $pdo;
     }
 
-    // Récupère tous les joueurs de la bd
+    // Récupère tous les joueurs de la bd (non supprimés) 
+    // Soft Delete : on ne supprimer pas vraiment les joueurs, on les marque comme supprimés et ca nous aide à garder les stats etc.
     public function getAll(): array{
-        $sql = "SELECT * FROM Joueur ORDER BY Nom";
+        $sql = "SELECT * FROM Joueur WHERE deleted = 0 ORDER BY Nom";
         $stmt = $this->pdo->query($sql);
 
         $joueurs = [];
@@ -34,9 +35,9 @@ class JoueurDao implements ModeleDao {
         return $joueurs;
     }
 
-    // Récupère un joueur par son id
+    // Récupère un joueur par son id (non supprimé)
     public function getById(int $id): ?Joueur{  
-        $sql = "SELECT * FROM Joueur where Id_Joueur = :id ";
+        $sql = "SELECT * FROM Joueur WHERE Id_Joueur = :id AND deleted = 0";
         $stmt = $this->pdo->prepare($sql);
 
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
@@ -105,18 +106,18 @@ class JoueurDao implements ModeleDao {
         
     }
 
-    // supprime un joueur parmi la liste
+    // Soft delete: marque un joueur comme supprimé
     public function delete(object $obj): bool{
         if(!$obj instanceof Joueur) return false;
-        $sql = "DELETE FROM Joueur WHERE Id_Joueur = :id";
+        $sql = "UPDATE Joueur SET deleted = 1 WHERE Id_Joueur = :id";
         $stmt = $this->pdo->prepare($sql);
 
         return $stmt->execute([':id' => $obj->getIdJoueur()]);
     }
 
-    // Recupere un joueur par son numéro de licence
+    // Recupere un joueur par son numéro de licence (non supprimé)
     public function getByNumLicence(string $numLicence): ?Joueur { // ?Joueur pour indiquer aue l'objet peut etre null
-        $sql = "SELECT * FROM Joueur WHERE Num_Licence = :numLicence";
+        $sql = "SELECT * FROM Joueur WHERE Num_Licence = :numLicence AND deleted = 0";
         $stmt = $this->pdo->prepare($sql);
         $stmt->bindValue(':numLicence', $numLicence);
         $stmt->execute();
@@ -140,10 +141,10 @@ class JoueurDao implements ModeleDao {
     // Méthodes supplémentaires
 
     /**
-      * Récupère tous les joueurs actifs (non blessés / non suspendus / non absents)
+      * Récupère tous les joueurs actifs (non blessés / non suspendus / non absents / non supprimés)
      */
     public function getActifs(): array {
-          $sql = "SELECT * FROM Joueur WHERE Statut NOT IN ('Blessé', 'Suspendue', 'Absent') ORDER BY Nom, Prenom";
+          $sql = "SELECT * FROM Joueur WHERE deleted = 0 AND Statut NOT IN ('Blessé', 'Suspendue', 'Absent') ORDER BY Nom, Prenom";
         $stmt = $this->pdo->query($sql);
         
         $joueurs = [];
@@ -163,17 +164,17 @@ class JoueurDao implements ModeleDao {
     }
 
     /**
-     * Récupère le nombre total de joueurs
+     * Récupère le nombre total de joueurs (non supprimés)
      */
     public function compterTotalJoueurs(): int {
-        $sql = "SELECT COUNT(*) as count FROM Joueur";
+        $sql = "SELECT COUNT(*) as count FROM Joueur WHERE deleted = 0";
         $stmt = $this->pdo->query($sql);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         return (int)($result['count'] ?? 0);
     }
 
     /**
-     * Récupère tous les joueurs avec leurs stats
+     * Récupère tous les joueurs avec leurs stats (non supprimés)
      */
     public function getTousAvecStatistiques(): array {
         // Poste préféré: poste le plus fréquent dans Participer pour ce joueur
@@ -193,6 +194,7 @@ class JoueurDao implements ModeleDao {
                     LIMIT 1
                 ) AS Poste
             FROM Joueur j
+            WHERE j.deleted = 0
             ORDER BY j.Nom, j.Prenom
         ";
         $stmt = $this->pdo->query($sql);
@@ -209,7 +211,7 @@ class JoueurDao implements ModeleDao {
      */
     public function compterTitularisations(int $joueurId): int {
         $sql = "SELECT COUNT(*) FROM Participer p JOIN `Match_` m ON p.Id_Match = m.Id_Match 
-                WHERE p.Id_Joueur = :id AND p.Titulaire_ou_pas = 1";
+                WHERE p.Id_Joueur = :id AND p.Titulaire_ou_pas = 1 AND m.deleted = 0";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':id' => $joueurId]);
         return (int)$stmt->fetchColumn();
@@ -220,7 +222,7 @@ class JoueurDao implements ModeleDao {
      */
     public function compterRemplacements(int $joueurId): int {
         $sql = "SELECT COUNT(*) FROM Participer p JOIN `Match_` m ON p.Id_Match = m.Id_Match 
-                WHERE p.Id_Joueur = :id AND p.Titulaire_ou_pas = 0";
+                WHERE p.Id_Joueur = :id AND p.Titulaire_ou_pas = 0 AND m.deleted = 0";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':id' => $joueurId]);
         return (int)$stmt->fetchColumn();
@@ -244,7 +246,7 @@ class JoueurDao implements ModeleDao {
     public function compterParticipations(int $joueurId): int {
         $sql = "SELECT COUNT(DISTINCT p.Id_Match) FROM Participer p 
                 JOIN `Match_` m ON p.Id_Match = m.Id_Match 
-                WHERE p.Id_Joueur = :id";
+                WHERE p.Id_Joueur = :id AND m.deleted = 0";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':id' => $joueurId]);
         return (int)$stmt->fetchColumn();
@@ -260,7 +262,7 @@ class JoueurDao implements ModeleDao {
         
         $sql = "SELECT COUNT(DISTINCT p.Id_Match) FROM Participer p 
                 JOIN `Match_` m ON p.Id_Match = m.Id_Match 
-                WHERE p.Id_Joueur = :id AND 
+                WHERE p.Id_Joueur = :id AND m.deleted = 0 AND
                 (m.Score_Nous IS NOT NULL AND m.Score_Adversaire IS NOT NULL AND m.Score_Nous > m.Score_Adversaire)";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':id' => $joueurId]);

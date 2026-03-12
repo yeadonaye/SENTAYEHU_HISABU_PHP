@@ -24,6 +24,7 @@ CREATE TABLE Joueur (
     Taille DECIMAL(15,2),
     Poids DECIMAL(15,2),
     Statut VARCHAR(50),
+    deleted INT DEFAULT 0,
     PRIMARY KEY(Id_Joueur),
     UNIQUE(Num_Licence)
 );
@@ -38,6 +39,7 @@ CREATE TABLE `Match_` (
     Resultat VARCHAR(20),
     Score_Adversaire INT,
     Score_Nous INT,
+    deleted INT DEFAULT 0,
     PRIMARY KEY(Id_Match)
 );
 
