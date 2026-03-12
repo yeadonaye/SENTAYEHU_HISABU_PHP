@@ -18,9 +18,22 @@
                 <i class="bi bi-plus-circle me-2"></i>Planifier un Match
             </a>
         </div>
+        <?php if (isset($_GET['error']) && $_GET['error'] === 'match_passe'): ?>
+            <div class="alert alert-warning" role="alert">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                Impossible de composer l'équipe pour un match passé.
+            </div>
+        <?php endif; ?>
         <?php if (!empty($matchs)): ?>
             <div class="match-cards-grid">
                 <?php foreach ($matchs as $match): ?>
+                    <?php
+                        $matchDateTime = DateTime::createFromFormat('Y-m-d H:i:s', $match['Date_Rencontre'] . ' ' . ($match['Heure'] ?? '00:00:00'));
+                        if (!$matchDateTime) {
+                            $matchDateTime = DateTime::createFromFormat('Y-m-d H:i', $match['Date_Rencontre'] . ' ' . substr((string)($match['Heure'] ?? '00:00'), 0, 5));
+                        }
+                        $isPastMatch = $matchDateTime ? ($matchDateTime < new DateTime()) : false;
+                    ?>
                     <div class="match-card">
                         <div class="match-card-header">
                             <div>
@@ -72,9 +85,15 @@
                             </div>
 
                             <div class="match-actions">
-                                <a href="../Ajouter/saisie_feuille_match.php?id=<?php echo $match['Id_Match']; ?>" class="btn btn-sm btn-success">
-                                    <i class="bi bi-clipboard2-data me-1"></i>Composer l'équipe
-                                </a>
+                                <?php if ($isPastMatch): ?>
+                                    <button type="button" class="btn btn-sm btn-secondary" disabled title="Match passé: composition verrouillée">
+                                        <i class="bi bi-lock me-1"></i>Composer l'équipe
+                                    </button>
+                                <?php else: ?>
+                                    <a href="../Ajouter/saisie_feuille_match.php?id=<?php echo $match['Id_Match']; ?>" class="btn btn-sm btn-success">
+                                        <i class="bi bi-clipboard2-data me-1"></i>Composer l'équipe
+                                    </a>
+                                <?php endif; ?>
                                 <a href="../Modifier/modifier_match.php?id=<?php echo $match['Id_Match']; ?>" class="btn btn-sm btn-outline-primary">
                                     <i class="bi bi-pencil me-1"></i>Modifier
                                 </a>
