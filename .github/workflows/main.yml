@@ -4,23 +4,47 @@ on:
   push:
     branches:
       - main
+      - yado/test/resultat
 
 jobs:
-  deploy:
+
+  deploy-liverpool:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
     steps:
-      - name: 🚚 Checkout du code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: 🚀 Déploiement via FTPS (Sécurisé)
+      - name: Deploy to Liverpool Alwaysdata
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          server: ftp-yeadonaye.alwaysdata.net
-          username: ${{ secrets.AD_USER }}
-          password: ${{ secrets.AD_PASSWORD }}
+          server: ftp-liverpool.alwaysdata.net
+          username: ${{ secrets.LIVERPOOL_AD_USER }}
+          password: ${{ secrets.LIVERPOOL_AD_PASSWORD }}
           protocol: ftps
           port: 21
           local-dir: ./
-          server-dir: /www/        # <--- Vérifiez bien ce dossier chez Alwaysdata
+          server-dir: /www/
+          security: loose
+
+
+  deploy-yeadonaye:
+    if: github.ref == 'refs/heads/yado/test/resultat'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Yeadonaye Alwaysdata
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ftp-yeadonaye.alwaysdata.net
+          username: ${{ secrets.YEADONAYE_AD_USER }}
+          password: ${{ secrets.YEADONAYE_AD_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./
+          server-dir: /www/SENTAYEHU_HISABU_PHP/
           security: loose
