@@ -17,6 +17,6 @@ define('DB_PORT', (int)(getenv('DB_PORT') ?: 3306));                // port MySQ
 define('DB_NAME', getenv('DB_NAME') ?: $defaultDbName);             // nom de la BD par défaut
 define('DB_USER', getenv('DB_USER') ?: $defaultUser);               // utilisateur par défaut
 define('DB_PASS', getenv('DB_PASS') ?: $defaultPass);               // mot de passe par défaut vide
-define('DB_CHARSET', getenv('DB_CHARSET') ?: 'utf8mb4_unicode_ci'); // charset par défaut
+define('DB_CHARSET', getenv('DB_CHARSET') ?: 'utf8mb4');            // charset par défaut
 ?>
 
