@@ -230,39 +230,58 @@ class JoueurDao implements ModeleDao {
     }
 
     /**
-     * Récupère le pourcentage de victoires quand le joueur a participé
+     * Récupère le pourcentage de victoires quand le joueur a participé (matchs passés uniquement)
      */
     public function pourcentageVictoiresLorsParticipation(int $joueurId): ?float {
-        $participations = $this->compterParticipations($joueurId);
+        // Compter les participations aux matchs passés
+        $sqlCount = "SELECT COUNT(DISTINCT p.Id_Match) FROM Participer p 
+                     JOIN `Match_` m ON p.Id_Match = m.Id_Match 
+                     WHERE p.Id_Joueur = :id AND COALESCE(m.deleted, 0) = 0 AND m.Date_Rencontre < CURDATE()";
+        $stmtCount = $this->pdo->prepare($sqlCount);
+        $stmtCount->execute([':id' => $joueurId]);
+        $participations = (int)$stmtCount->fetchColumn();
         
         if ($participations === 0) return null;
         
-        $sql = "SELECT COUNT(DISTINCT p.Id_Match) FROM Participer p 
-                JOIN `Match_` m ON p.Id_Match = m.Id_Match 
-            WHERE p.Id_Joueur = :id AND COALESCE(m.deleted, 0) = 0 AND
-                (m.Score_Nous IS NOT NULL AND m.Score_Adversaire IS NOT NULL AND m.Score_Nous > m.Score_Adversaire)";
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute([':id' => $joueurId]);
-        $wins = (int)$stmt->fetchColumn();
+        // Compter les victoires lors des matchs passés
+        $sqlWins = "SELECT COUNT(DISTINCT p.Id_Match) FROM Participer p 
+                    JOIN `Match_` m ON p.Id_Match = m.Id_Match 
+                    WHERE p.Id_Joueur = :id AND COALESCE(m.deleted, 0) = 0 AND m.Date_Rencontre < CURDATE() AND
+                    (m.Score_Nous IS NOT NULL AND m.Score_Adversaire IS NOT NULL AND m.Score_Nous > m.Score_Adversaire)";
+        $stmtWins = $this->pdo->prepare($sqlWins);
+        $stmtWins->execute([':id' => $joueurId]);
+        $wins = (int)$stmtWins->fetchColumn();
         
         return round(($wins / $participations) * 100, 1);
     }
 
     /**
-     * Récupère le nombre de sélections consécutives pour un joueur
+     * Récupère le nombre de sélections consécutives pour un joueur (matchs passés uniquement, du plus récent en arrière)
      */
     public function compterSelectionsConsecutives(int $joueurId, array $matchesOrdered): int {
-        $consecutive = 0;
-        $sql = "SELECT COUNT(*) FROM Participer WHERE Id_Match = :mid AND Id_Joueur = :id";
-        $stmt = $this->pdo->prepare($sql);
+        if (empty($matchesOrdered)) return 0;
         
-        foreach ($matchesOrdered as $matchId) {
-            $stmt->execute([':mid' => $matchId, ':id' => $joueurId]);
-            $count = (int)$stmt->fetchColumn();
+        // Filtrer les matchs du passé uniquement et garder l'ordre DESC (plus récents d'abord)
+        $sql = "SELECT Id_Match FROM `Match_` 
+                WHERE COALESCE(deleted, 0) = 0 AND Date_Rencontre < CURDATE()
+                ORDER BY Date_Rencontre DESC, Heure DESC";
+        $stmt = $this->pdo->query($sql);
+        $pastMatches = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        
+        if (empty($pastMatches)) return 0;
+        
+        $consecutive = 0;
+        $sqlCheck = "SELECT COUNT(*) FROM Participer WHERE Id_Match = :mid AND Id_Joueur = :id";
+        $stmtCheck = $this->pdo->prepare($sqlCheck);
+        
+        // Itérer sur les matchs passés du plus récent au plus ancien
+        foreach ($pastMatches as $matchId) {
+            $stmtCheck->execute([':mid' => $matchId, ':id' => $joueurId]);
+            $count = (int)$stmtCheck->fetchColumn();
             if ($count > 0) {
                 $consecutive++;
             } else {
-                break;
+                break;  // S'arrêter à la première absence
             }
         }
         
