@@ -3,12 +3,16 @@
 require_once __DIR__ . '/../Modele/DAO/auth.php';
 
 if (isAuthenticated()) {
-    header('Location: /index.php');
+    header('Location: ' . appUrl('index.php'));
     exit;
 }
 
 $error = '';
-$redirect = $_GET['redirect'] ?? '/index.php';
+$redirect = $_GET['redirect'] ?? appUrl('index.php');
+
+if (!is_string($redirect) || $redirect === '' || preg_match('/^https?:\/\//i', $redirect)) {
+    $redirect = appUrl('index.php');
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $identifiant = $_POST['identifiant'] ?? '';

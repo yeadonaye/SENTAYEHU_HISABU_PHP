@@ -18,6 +18,6 @@ if ($id) {
     }
 }
 
-header('Location: /Vue/Afficher/liste_joueurs.php');
+header('Location: ' . appUrl('Vue/Afficher/liste_joueurs.php'));
 exit;
 ?>

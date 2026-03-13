@@ -32,11 +32,58 @@ function authenticate($identifiant, $password) {
 }
 
 /**
+ * Chemin web de base de l'application (ex: /SENTAYEHU_HISABU_PHP)
+ */
+function appBasePath(): string {
+    static $basePath = null;
+
+    if ($basePath !== null) {
+        return $basePath;
+    }
+
+    $projectRoot = realpath(__DIR__ . '/../../');
+    $documentRoot = isset($_SERVER['DOCUMENT_ROOT']) ? realpath($_SERVER['DOCUMENT_ROOT']) : false;
+
+    if ($projectRoot && $documentRoot) {
+        $projectRootNorm = str_replace('\\', '/', $projectRoot);
+        $documentRootNorm = str_replace('\\', '/', $documentRoot);
+
+        if (stripos($projectRootNorm, $documentRootNorm) === 0) {
+            $relative = substr($projectRootNorm, strlen($documentRootNorm));
+            if ($relative === '' || $relative === '/') {
+                $basePath = '';
+            } else {
+                $basePath = '/' . trim($relative, '/');
+            }
+            return $basePath;
+        }
+    }
+
+    $basePath = '';
+    return $basePath;
+}
+
+/**
+ * Construit une URL absolue à partir de la racine de l'application.
+ */
+function appUrl(string $path = ''): string {
+    $path = ltrim($path, '/');
+    $base = appBasePath();
+
+    if ($path === '') {
+        return $base === '' ? '/' : $base . '/';
+    }
+
+    return $base === '' ? '/' . $path : $base . '/' . $path;
+}
+
+/**
  * Rediriger vers la page de login si non authentifié
  */
 function requireAuth() {
     if (!isAuthenticated()) {
-        header('Location: /login.php?redirect=' . urlencode($_SERVER['REQUEST_URI']));
+        $currentUri = $_SERVER['REQUEST_URI'] ?? appUrl('index.php');
+        header('Location: ' . appUrl('login.php?redirect=' . urlencode($currentUri)));
         exit;
     }
 }
@@ -47,7 +94,7 @@ function requireAuth() {
 function logout() {
     $_SESSION['authenticated'] = false;
     session_destroy();
-    header('Location: login.php');
+    header('Location: ' . appUrl('login.php'));
     exit;
 }
 
