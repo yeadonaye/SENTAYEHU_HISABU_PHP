@@ -41,6 +41,14 @@
 		}
 	}
 
+	function requireAuthJWT() {
+		$token = get_bearer_token();
+
+		if (!$token || !is_jwt_valid($token, "secret_key")) {
+			deliver_response(401, "Unauthorized");
+		}
+	}
+
 	function base64url_encode($data) {
 		return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
 	}
