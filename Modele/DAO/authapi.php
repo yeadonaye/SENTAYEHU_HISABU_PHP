@@ -4,32 +4,32 @@
     global $linkpdo;
     //Il faut accepter que les réquêtes de méthode POST
 
-    function seConnecter(){
-        if ($_SERVER['REQUEST_METHOD'] === 'POST'){
-            //Récupérer le contenu JSON envoyé
-            $json = file_get_contents('php://input', TRUE);
-            $data = json_decode($json);
 
-            if (!empty($data->login) && !empty($data->password)){
-                $user = isValidUser($data->login, $data->password, $linkpdo);
+    if ($_SERVER['REQUEST_METHOD'] === 'POST'){
+        //Récupérer le contenu JSON envoyé
+        $json = file_get_contents('php://input', TRUE);
+        $data = json_decode($json);
 
-                if ($user) {
-                    $login = $data->login;
-                    $role = $user['role'];
-                    
-                    $headers = array('alg'=>'HS256', 'typ'=>'JWT');
-                    $payload = array('login'=>$login, 'role'=>$role, 'exp'=>(time() + 3600));
+        if (!empty($data->login) && !empty($data->password)){
+            $user = isValidUser($data->login, $data->password, $linkpdo);
 
-                    $jwt = generate_jwt($headers, $payload, "secret_key");
-                    deliver_response('200', 'Authentification réussie', $jwt);
-                } else {
-                    deliver_response('400', 'Login et/ou mot de passe incorrectes', null);
-                }
+            if ($user) {
+                $login = $data->login;
+                $role = $user['role'];
+                
+                $headers = array('alg'=>'HS256', 'typ'=>'JWT');
+                $payload = array('login'=>$login, 'role'=>$role, 'exp'=>(time() + 3600));
+
+                $jwt = generate_jwt($headers, $payload, "secret_key");
+                deliver_response('200', 'Authentification réussie', $jwt);
             } else {
-                deliver_response('400', 'Les champs login et password sont obligatoires', null);
+                deliver_response('400', 'Login et/ou mot de passe incorrectes', null);
             }
+        } else {
+            deliver_response('400', 'Les champs login et password sont obligatoires', null);
         }
     }
+
 
     function isValidUser($login, $password, $linkpdo) {
         $query = "SELECT password, role FROM authentification WHERE login = :login"; 
