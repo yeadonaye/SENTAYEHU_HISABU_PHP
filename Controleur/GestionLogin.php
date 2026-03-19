@@ -8,7 +8,7 @@ if (is_jwt_valid($jwt, $secret)) {
 }
 */
 
-seConnecter();
+$error = seConnecter();
 
 
 ?>

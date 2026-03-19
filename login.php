@@ -32,14 +32,14 @@ require_once __DIR__ . '/Controleur/GestionLogin.php';
 
         <form method="POST" action="">
             <div class="form-group">
-                <label for="identifiant" class="form-label">Identifiant</label>
+                <label for="login" class="form-label">Login</label>
                 <input
                     type="text"
                     class="form-control"
-                    id="identifiant"
-                    name="identifiant"
+                    id="login"
+                    name="login"
                     placeholder="Entrez l'identifiant"
-                    value="<?php echo htmlspecialchars($_POST['identifiant'] ?? ''); ?>"
+                    value="<?php echo htmlspecialchars($_POST['login'] ?? ''); ?>"
                     required
                     autofocus
                 >
