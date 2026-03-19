@@ -3,20 +3,23 @@ require_once __DIR__ . '/../Modele/DAO/authapi.php';
 require_once __DIR__ . '/../Modele/DAO/jwt_utils.php';
 
 $secret = "secret_key";
-$jwt = $_COOKIE['jwt'] ?? null; // get token from cookie
+$error = null;
 
-// If JWT is already valid, redirect immediately
+// Handle POST login
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $jwt = seConnecter(); // return JWT if login succeeded
 
+    if ($jwt) {
+        // set cookie
+        setcookie('jwt', $jwt, time() + 3600, "/", "", false, true);
 
-// Otherwise, try to log in
-$error = seConnecter(); // returns null if login succeeded
-
-// If login succeeded, $error is null, and the JWT has been generated
-if ($error === null) {
-    // Redirect to the main page
-    header('Location: /index.php');
-    exit;
+        // Redirect to index.php immediately
+        header('Location: /index.php');
+        exit;
+    } else {
+        $error = 'Login ou mot de passe incorrect';
+    }
 }
 
-// If $error is not null, the login form will be shown with the error
+// Show login form here if $error is set
 ?>
