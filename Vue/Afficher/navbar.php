@@ -1,7 +1,4 @@
-<?php
-require_once __DIR__ . '/../../Modele/DAO/auth.php';
-requireAuth();
-?>
+
 <link rel="icon" type="image/png" href="/Vue/img/logo.png">
 <nav class="navbar navbar-expand-lg navbar-dark sticky-top navbar-custom">
     <div class="container-fluid">
