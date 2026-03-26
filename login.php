@@ -1,6 +1,6 @@
 <?php
     session_start();
-    require_once 'ApiClient.php';
+    require_once 'routeClient.php';
 
     $error = null;
 
@@ -16,7 +16,7 @@
             if ($response['status_code'] == 200 && !empty($response['data'])) {
 
                 // Stocker le token dans la session
-                $_SESSION['token'] = $response['data'];
+                $_SESSION['token'] = $response['data']; // on récupère que le JWT ici
                 $_SESSION['login'] = $login;
 
                 // Redirection vers le dashboard après une connexion réussie

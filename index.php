@@ -1,7 +1,13 @@
 <?php 
 session_start();
 
-if (!isset($_SESSION['token'])) {
+require 'jwt_utils.php'; // Pour pouvoir vérifier la validité du token
+
+// Et il faut aussi trouver un moyen pour ne pas mettre le secret en dur dans le code, mais pour l'instant je le laisse ici pour voir si ca fonctionne bien
+$secret_key = "secret_key"; // Doit être le même que celui utilisé pour générer le JWT
+
+if (!isset($_SESSION['token']) || !is_jwt_valid($_SESSION['token'], $secret_key)) {
+    session_destroy(); // Détruire la session pour supprimer le token invalide, car ca sert à rien de le garder
     header("Location: login.php");
     exit;
 }
