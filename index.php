@@ -1,18 +1,41 @@
-<?php 
+<?php
 session_start();
+require_once 'routeClient.php';
 
-require 'jwt_utils.php'; // Pour pouvoir vérifier la validité du token
-
-// Et il faut aussi trouver un moyen pour ne pas mettre le secret en dur dans le code, mais pour l'instant je le laisse ici pour voir si ca fonctionne bien
-$secret_key = "secret_key"; // Doit être le même que celui utilisé pour générer le JWT
-
-if (!isset($_SESSION['token']) || !is_jwt_valid($_SESSION['token'], $secret_key)) {
-    session_destroy(); // Détruire la session pour supprimer le token invalide, car ca sert à rien de le garder
-    header("Location: login.php");
+if (!isset($_SESSION['token'])) {
+    header('Location: login.php');
     exit;
 }
 
-include __DIR__ . '/Controleur/afficher/index.php';
+$token = $_SESSION['token'];
+
+// Récupérer les stats via l'API
+$response      = routeClient::getStatistiques($token);
+$stats         = $response['data']['stats']   ?? [];
+$players       = $response['data']['players'] ?? [];
+
+// Mapper les variables utilisées dans le HTML
+$playerCount   = $stats['totalJoueurs']  ?? 0;
+$injuredCount  = 0;
+foreach ($players as $p) {
+    if (stripos($p['Statut'] ?? '', 'bles') !== false) $injuredCount++;
+}
+$wins          = $stats['victoires']     ?? 0;
+$totalMatches  = $stats['totalMatchs']   ?? 0;
+
+// Prochain match
+$matchResponse = routeClient::getMatchs($token);
+$matchs        = $matchResponse['data']  ?? [];
+$nextMatch     = null;
+$now           = new DateTime();
+foreach ($matchs as $m) {
+    $matchDate = new DateTime($m['Date_Rencontre'] . ' ' . ($m['Heure'] ?? '00:00:00'));
+    if ($matchDate > $now) {
+        if (!$nextMatch || $matchDate < new DateTime($nextMatch['Date_Rencontre'])) {
+            $nextMatch = $m;
+        }
+    }
+}
 ?>
 
 <!DOCTYPE html>
