@@ -12,6 +12,6 @@ if ($id) {
     routeClient::deleteJoueur($id, $_SESSION['token']);
 }
 
-header('Location: liste_joueurs.php');
+header('Location: ../Afficher/liste_joueurs.php');
 exit;
 ?>
