@@ -1,4 +1,57 @@
-<?php include '../../Controleur/ajouter/ajouter_commentaire.php'; ?>
+<?php
+// La logique de ce fichier est differente comparé aux autres, parce que nous n'avons une API destinée pour les commentaires, alors nous allons faire des appels directs aux DAOs qui ce trouve dans le backend.
+session_start();
+
+if (!isset($_SESSION['token'])) {
+    header('Location: ../../login.php');
+    exit;
+}
+
+// Connexion directe à la BDD du backend
+try {
+    $pdo = new PDO(
+        'mysql:host=mysql-yeadonaye.alwaysdata.net;dbname=yeadonaye_bd_gestion_equipe;charset=utf8',
+        'yeadonaye',
+        'admin@gestionFoot'
+    );
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    die('Erreur de connexion : ' . $e->getMessage());
+}
+
+$joueurId = $_GET['id'] ?? null;
+$error    = '';
+
+if (!$joueurId) {
+    header('Location: /Vue/Afficher/liste_joueurs.php');
+    exit;
+}
+
+// Charger le joueur
+$stmt = $pdo->prepare("SELECT Nom, Prenom FROM Joueur WHERE Id_Joueur = ?");
+$stmt->execute([(int)$joueurId]);
+$joueurData = $stmt->fetch(PDO::FETCH_ASSOC);
+
+// Soumission du formulaire
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $description     = $_POST['description']      ?? '';
+    $dateCommentaire = $_POST['date_commentaire'] ?? date('d/m/Y');
+
+    if (empty($description)) {
+        $error = 'Le commentaire est obligatoire.';
+    } else {
+        try {
+            $stmt = $pdo->prepare("INSERT INTO Commentaire (Id_Joueur, Description, Date_Commentaire) VALUES (?, ?, ?)");
+            $stmt->execute([(int)$joueurId, $description, $dateCommentaire]);
+            header('Location: /Vue/Afficher/afficher_commentaires.php?id=' . $joueurId . '&success=added');
+            exit;
+        } catch (PDOException $e) {
+            $error = 'Erreur lors de l\'enregistrement : ' . $e->getMessage();
+        }
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>

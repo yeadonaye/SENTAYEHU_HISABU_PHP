@@ -1,4 +1,43 @@
-<?php include '../../Controleur/afficher/afficher_commentaires.php'; ?>
+<?php
+session_start();
+
+if (!isset($_SESSION['token'])) {
+    header('Location: ../../login.php');
+    exit;
+}
+
+// Connexion directe à la BDD
+try {
+    $pdo = new PDO(
+        'mysql:host=mysql-yeadonaye.alwaysdata.net;dbname=yeadonaye_bd_gestion_equipe;charset=utf8',
+        'yeadonaye',
+        'admin@gestionFoot'
+    );
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    die('Erreur de connexion : ' . $e->getMessage());
+}
+
+$joueurId = $_GET['id'] ?? null;
+$error    = '';
+$success  = isset($_GET['success']) ? 'Commentaire ajouté avec succès !' : '';
+
+if (!$joueurId) {
+    header('Location: /Vue/Afficher/liste_joueurs.php');
+    exit;
+}
+
+// Charger le joueur
+$stmt = $pdo->prepare("SELECT Nom, Prenom FROM Joueur WHERE Id_Joueur = ?");
+$stmt->execute([(int)$joueurId]);
+$joueurData = $stmt->fetch(PDO::FETCH_ASSOC);
+
+// Charger les commentaires
+$stmt = $pdo->prepare("SELECT * FROM Commentaire WHERE Id_Joueur = ? ORDER BY Date_Commentaire DESC");
+$stmt->execute([(int)$joueurId]);
+$commentaires = $stmt->fetchAll(PDO::FETCH_ASSOC);
+?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -17,7 +56,7 @@
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
                 <h1 class="mb-1"><i class="bi bi-chat-dots"></i> Commentaires</h1>
-                <p class="text-muted mb-0">Joueur : <strong><?php echo htmlspecialchars($joueur?->getNom() . ' ' . $joueur?->getPrenom()); ?></strong></p>
+                <p>Joueur : <strong><?php echo htmlspecialchars(($joueurData['Nom'] ?? '') . ' ' . ($joueurData['Prenom'] ?? '')); ?></strong></p>
             </div>
             <div class="d-flex gap-2">
                 <a class="btn btn-success" href="/Vue/Ajouter/ajouter_commentaire.php?id=<?php echo $joueurId; ?>">
@@ -42,17 +81,17 @@
                     <div class="list-group-item">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
-                                <p class="mb-1"><?php echo nl2br(htmlspecialchars($com->getDescription())); ?></p>
+                                <p><?php echo nl2br(htmlspecialchars($com['Description'])); ?></p>
                             </div>
                             <small class="text-muted ms-3">
                                 <?php 
-                                    $dt = DateTime::createFromFormat('Y-m-d H:i:s', $com->getDate()) ?: DateTime::createFromFormat('Y-m-d', $com->getDate());
-                                    echo $dt ? $dt->format('d/m/Y') : htmlspecialchars($com->getDate());
+                                    $dt = DateTime::createFromFormat('Y-m-d H:i:s', $com['Date_Commentaire']) ?: DateTime::createFromFormat('Y-m-d', $com['Date_Commentaire']);
+                                    echo $dt ? $dt->format('d/m/Y') : htmlspecialchars($com['Date_Commentaire']);
                                 ?>
                             </small>
                         </div>
                         <div class="mt-2 d-flex gap-2">
-                            <a class="btn btn-sm btn-outline-primary" href="../Modifier/modifier_commentaire.php?id=<?php echo $com->getIdCommentaire(); ?>">
+                            <a class="btn btn-sm btn-outline-primary" href="../Modifier/modifier_commentaire.php?id=<?php echo $com['Id_Commentaire']; ?>">
                                 <i class="bi bi-pencil"></i> Modifier
                             </a>
                         </div>
