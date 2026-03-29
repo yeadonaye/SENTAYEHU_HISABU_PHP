@@ -134,4 +134,5 @@ class routeClient {
     public static function getStatistiques(string $token): array {
         return self::request('GET', self::BACKEND_BASE_URL . 'statistiques_api.php', null, $token);
     }
+
 }
