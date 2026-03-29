@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php include '../Afficher/navbar.php'; ?>
     <div class="container my-4">
         <h1 class="mb-3"><i class="bi bi-chat-left-text"></i> Ajouter un commentaire</h1>
-        <p class="text-muted">Joueur : <strong><?php echo htmlspecialchars($joueur?->getNom() . ' ' . $joueur?->getPrenom()); ?></strong></p>
+        <p class="text-muted">Joueur : <strong><?php echo htmlspecialchars($joueurData['Nom'] ?? '') . ' ' . htmlspecialchars($joueurData['Prenom'] ?? ''); ?></strong></p>
 
         <?php if ($error): ?>
             <div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div>
