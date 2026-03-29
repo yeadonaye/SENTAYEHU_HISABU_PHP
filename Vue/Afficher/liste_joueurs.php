@@ -72,7 +72,16 @@ $error    = ($response['status_code'] !== 200) ? ($response['status_message'] ??
                                     <td><?php echo htmlspecialchars($joueur['Num_Licence'] ?? '-'); ?></td>
                                     <td class="players-table-name"><?php echo htmlspecialchars($joueur['Nom']); ?></td>
                                     <td><?php echo htmlspecialchars($joueur['Prenom']); ?></td>
-                                    <td><?php echo $joueur['Date_Naissance'] ? (new DateTime($joueur['Date_Naissance']))->format('d/m/Y') : '-'; ?></td>
+                                    <td>
+                                    <?php
+                                    $dateNaissance = $joueur['Date_Naissance'] ?? '';
+                                    if ($dateNaissance && $dateNaissance !== '0000-00-00') {
+                                        echo (new DateTime($dateNaissance))->format('d/m/Y');
+                                    } else {
+                                        echo '-';
+                                    }
+                                    ?>
+                                    </td>
                                     <td><?php echo htmlspecialchars($joueur['Taille'] ?? '-'); ?> m</td>
                                     <td><?php echo htmlspecialchars($joueur['Poids'] ?? '-'); ?> kg</td>
                                     <td>

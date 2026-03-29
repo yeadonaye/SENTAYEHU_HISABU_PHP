@@ -11,8 +11,8 @@ $token = $_SESSION['token'];
 
 // Récupérer les stats via l'API
 $response      = routeClient::getStatistiques($token);
-$stats         = $response['data']['stats']   ?? [];
-$players       = $response['data']['players'] ?? [];
+$stats         = $response['stats']   ?? [];    
+$players       = $response['players'] ?? []; 
 
 // Mapper les variables utilisées dans le HTML
 $playerCount   = $stats['totalJoueurs']  ?? 0;
