@@ -1,4 +1,60 @@
-<?php include '../../Controleur/modifier/modifier_commentaire.php'; ?>
+<?php
+session_start();
+
+if (!isset($_SESSION['token'])) {
+    header('Location: ../../login.php');
+    exit;
+}
+
+// Connexion directe à la BDD
+try {
+    $pdo = new PDO(
+        'mysql:host=mysql-yeadonaye.alwaysdata.net;dbname=yeadonaye_bd_gestion_equipe;charset=utf8',
+        'yeadonaye',
+        'admin@gestionFoot'
+    );
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    die('Erreur de connexion : ' . $e->getMessage());
+}
+
+$id    = $_GET['id'] ?? null;
+$error = '';
+
+if (!$id) {
+    header('Location: /Vue/Afficher/liste_joueurs.php');
+    exit;
+}
+
+// Charger le commentaire
+$stmt = $pdo->prepare("SELECT * FROM Commentaire WHERE Id_Commentaire = ?");
+$stmt->execute([(int)$id]);
+$comment = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if (!$comment) {
+    $error = 'Commentaire introuvable.';
+}
+
+// Soumission du formulaire
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $comment) {
+    $description     = $_POST['description']      ?? '';
+    $dateCommentaire = $_POST['date_commentaire'] ?? $comment['Date_Commentaire'];
+
+    if (empty($description)) {
+        $error = 'Le commentaire est obligatoire.';
+    } else {
+        try {
+            $stmt = $pdo->prepare("UPDATE Commentaire SET Description = ?, Date_Commentaire = ? WHERE Id_Commentaire = ?");
+            $stmt->execute([$description, $dateCommentaire, (int)$id]);
+            header('Location: /Vue/Afficher/afficher_commentaires.php?id=' . $comment['Id_Joueur'] . '&success=modified');
+            exit;
+        } catch (PDOException $e) {
+            $error = 'Erreur lors de la modification : ' . $e->getMessage();
+        }
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -23,13 +79,13 @@
             <form method="POST" action="">
                 <div class="mb-3">
                     <label class="form-label fw-bold" for="description">Commentaire *</label>
-                    <textarea class="form-control" id="description" name="description" rows="4" required><?php echo htmlspecialchars($comment->getDescription()); ?></textarea>
+                    <textarea class="form-control" id="description" name="description" rows="4" required><?php echo htmlspecialchars($comment['Description']); ?></textarea>
                 </div>
                 <div class="mb-3">
                     <label class="form-label fw-bold" for="date_commentaire">Date du commentaire</label>
                     <?php
                         $dtVal = '';
-                        $dt = DateTime::createFromFormat('Y-m-d', substr($comment->getDate(), 0, 10)) ?: DateTime::createFromFormat('Y-m-d H:i:s', $comment->getDate());
+                        $dt = DateTime::createFromFormat('Y-m-d', substr($comment['Date_Commentaire'], 0, 10)) ?: DateTime::createFromFormat('Y-m-d H:i:s', $comment['Date_Commentaire']);
                         if ($dt) {
                             $dtVal = $dt->format('d/m/Y');
                         }
@@ -39,7 +95,7 @@
                 </div>
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn btn-primary"><i class="bi bi-save me-2"></i>Enregistrer</button>
-                    <a href="../Afficher/afficher_commentaires.php?id=<?php echo $comment->getIdJoueur(); ?>" class="btn btn-secondary">Annuler</a>
+                    <a href="../Afficher/afficher_commentaires.php?id=<?php echo $comment['Id_Joueur']; ?>" class="btn btn-secondary">Annuler</a>
                 </div>
             </form>
         <?php endif; ?>
