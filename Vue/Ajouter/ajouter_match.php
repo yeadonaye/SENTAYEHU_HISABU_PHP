@@ -1,5 +1,5 @@
 <?php
-include '../../Controleur/ajouter/ajouter_match.php';
+
 
 $match = $match_display ?? [];
 $id = $match['Id_Match'] ?? ($id ?? null);
