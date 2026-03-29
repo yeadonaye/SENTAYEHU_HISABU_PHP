@@ -90,7 +90,7 @@ $error    = ($response['status_code'] !== 200) ? ($response['status_message'] ??
                                         <a href="afficher_commentaires.php?id=<?php echo $joueur['Id_Joueur']; ?>" class="btn btn-sm btn-outline-info" title="Voir les commentaires">
                                             <i class="bi bi-chat-dots"></i>
                                         </a>
-                                        <a href="../../Controleur/suppirmer/supprimer_joueur.php?id=<?php echo $joueur['Id_Joueur']; ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce joueur ?')" title="Supprimer">
+                                        <a href="../Supprimer/supprimer_joueur.php?id=<?php echo $joueur['Id_Joueur']; ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce joueur ?')" title="Supprimer">
                                             <i class="bi bi-trash"></i>
                                         </a>
                                     </td>

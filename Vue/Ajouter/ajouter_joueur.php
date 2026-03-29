@@ -1,4 +1,52 @@
-<?php include '../../Controleur/ajouter/ajouter_joueur.php'; ?>
+<?php
+session_start();
+require_once '../../routeClient.php';
+
+if (!isset($_SESSION['token'])) {
+    header('Location: ../../login.php');
+    exit;
+}
+
+$token   = $_SESSION['token'];
+$id      = $_GET['id'] ?? null;
+$error   = '';
+$success = '';
+$joueur  = [];
+$statuts = ['Actif', 'Blessé', 'Suspendu']; // adapte selon ta BDD
+
+// Si modification, charger les données du joueur
+if ($id) {
+    $response = routeClient::getJoueurById((int)$id, $token);
+    $joueur   = $response['data'] ?? [];
+    $error    = ($response['status_code'] !== 200) ? ($response['status_message'] ?? 'Erreur') : '';
+}
+
+// Soumission du formulaire
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $data = [
+        'Num_Licence'    => $_POST['numLicence']    ?? '',
+        'Nom'            => $_POST['nom']            ?? '',
+        'Prenom'         => $_POST['prenom']         ?? '',
+        'Date_Naissance' => $_POST['dateNaissance']  ?? '',
+        'Taille'         => $_POST['taille']         ?? '',
+        'Poids'          => $_POST['poids']          ?? '',
+        'Statut'         => $_POST['statut']         ?? '',
+    ];
+
+    if ($id) {
+        $response = routeClient::updateJoueur((int)$id, $data, $token);
+    } else {
+        $response = routeClient::addJoueur($data, $token);
+    }
+
+    if ($response['status_code'] === 200 || $response['status_code'] === 201) {
+        $success = $id ? 'Joueur modifié avec succès !' : 'Joueur ajouté avec succès !';
+        $joueur  = $data; // garder les valeurs affichées
+    } else {
+        $error = $response['status_message'] ?? 'Erreur inconnue';
+    }
+}
+?>
 
 
 <!DOCTYPE html>
