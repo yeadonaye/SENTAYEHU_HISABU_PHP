@@ -1,4 +1,20 @@
-<?php include '../../Controleur/afficher/afficher_match.php'; ?>
+<?php
+session_start();
+require_once '../../routeClient.php';
+
+// Redirection si non connecté
+if (!isset($_SESSION['token'])) {
+    header('Location: ../../login.php');
+    exit;
+}
+
+$token = $_SESSION['token'];
+
+$response = routeClient::getMatchs($token);
+$matchs  = $response['data'] ?? [];
+$error    = ($response['status_code'] !== 200) ? ($response['status_message'] ?? 'Erreur inconnue') : '';
+?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
