@@ -11,8 +11,22 @@ if (!isset($_SESSION['token'])) {
 $token = $_SESSION['token'];
 
 $response = routeClient::getStatistiques($token);
-$players  = $response['data'] ?? [];
-$error    = ($response['status_code'] !== 200) ? ($response['status_message'] ?? 'Erreur inconnue') : '';
+
+// Extraction directe depuis Postman structure
+$stats   = $response['stats'] ?? [];
+$players = $response['players'] ?? [];
+$error   = $response['error'] ?? ($response['status_message'] ?? 'Erreur inconnue');
+
+// Assign variables for easier display
+$totalJoueurs       = $stats['totalJoueurs'] ?? 0;
+$totalMatchs        = $stats['totalMatchs'] ?? 0;
+$victoires          = $stats['victoires'] ?? 0;
+$defaites           = $stats['defaites'] ?? 0;
+$nuls               = $stats['nuls'] ?? 0;
+$totalButs          = $stats['totalButs'] ?? 0;
+$butsEncaisses      = $stats['butsEncaisses'] ?? 0;
+$tauxVictoire       = $stats['tauxVictoire'] ?? 0;
+$differenceButsDisplay = $stats['differenceButs'] ?? '0';
 ?>
 
 <!DOCTYPE html>
