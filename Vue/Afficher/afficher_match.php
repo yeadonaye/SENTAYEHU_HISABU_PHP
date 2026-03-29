@@ -1,4 +1,20 @@
-<?php include '../../Controleur/afficher/afficher_match.php'; ?>
+<?php
+session_start();
+require_once '../../routeClient.php';
+
+// Redirection si non connecté
+if (!isset($_SESSION['token'])) {
+    header('Location: ../../login.php');
+    exit;
+}
+
+$token = $_SESSION['token'];
+
+$response = routeClient::getMatchs($token);
+$matchs  = $response['data'] ?? [];
+$error    = ($response['status_code'] !== 200) ? ($response['status_message'] ?? 'Erreur inconnue') : '';
+?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -73,7 +89,7 @@
                                 <a href="../Modifier/modifier_match.php?id=<?php echo $match['Id_Match']; ?>" class="btn btn-sm btn-outline-primary">
                                     <i class="bi bi-pencil me-1"></i>Modifier
                                 </a>
-                                <a href="../../Controleur/suppirmer/supprimer_match.php?id=<?php echo $match['Id_Match']; ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Êtes-vous sûr?')">
+                                <a href="../Supprimer/supprimer_match.php?id=<?php echo $match['Id_Match']; ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Êtes-vous sûr?')">
                                     <i class="bi bi-trash me-1"></i>Supprimer
                                 </a>
                             </div>
