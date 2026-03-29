@@ -1,10 +1,61 @@
 <?php
+session_start();
+require_once '../../routeClient.php';
 
+// Redirection si non connecté
+if (!isset($_SESSION['token'])) {
+    header('Location: ../../login.php');
+    exit;
+}
 
-$match = $match_display ?? [];
-$id = $match['Id_Match'] ?? ($id ?? null);
-$error = $error ?? '';
-$success = $success ?? '';
+$token = $_SESSION['token'];
+$id    = $_GET['id'] ?? null;
+$error = '';
+$success = [];
+$match = [];
+
+// Si modification, charger les données du match
+if ($id) {
+    $response = routeClient::getMatchById((int)$id, $token);
+    if ($response['status_code'] === 200) {
+        $match = $response['data'] ?? [];
+    } else {
+        $error = $response['status_message'] ?? 'Erreur lors du chargement du match';
+    }
+}
+
+// Soumission du formulaire
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $resultat = '';
+    $scoreNous = $_POST['scoreNous'] ?? '';
+    $scoreAdverse = $_POST['scoreAdverse'] ?? '';
+    
+    // Générer le champ "Resultat" si les scores sont remplis
+    if ($scoreNous !== '' && $scoreAdverse !== '') {
+        $resultat = $scoreNous . '-' . $scoreAdverse;
+    }
+
+    $data = [
+        'Nom_Equipe_Adverse' => $_POST['nomEquipeAdverse'] ?? '',
+        'Date_Rencontre'     => $_POST['dateRencontre'] ?? '',
+        'Heure'              => $_POST['heure'] ?? '',
+        'Lieu'               => $_POST['lieu'] ?? '',
+        'Resultat'           => $resultat
+    ];
+
+    if ($id) {
+        $response = routeClient::updateMatch((int)$id, $data, $token);
+    } else {
+        $response = routeClient::addMatch($data, $token);
+    }
+
+    if (isset($response['status_code']) && ($response['status_code'] === 200 || $response['status_code'] === 201)) {
+        $success = $id ? 'Match modifié avec succès !' : 'Match ajouté avec succès !';
+        $match = $data; // pour garder les valeurs dans le formulaire
+    } else {
+        $error = $response['status_message'] ?? 'Erreur inconnue';
+    }
+}
 ?>
 
 <!DOCTYPE html>
