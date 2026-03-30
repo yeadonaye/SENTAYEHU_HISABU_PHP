@@ -12,7 +12,7 @@ $id      = $_GET['id'] ?? null;
 $error   = '';
 $success = '';
 $joueur  = [];
-$statuts = ['Actif', 'Blessé', 'Suspendu']; // adapte selon ta BDD
+$statuts = ['Actif', 'Blessé', 'Suspendu', 'Absent'];
 
 // Si modification, charger les données du joueur
 if ($id) {
