@@ -1,4 +1,89 @@
-<?php include '../../Controleur/ajouter/saisie_feuille_match.php'; ?>
+<?php
+session_start();
+require_once '../../routeClient.php';
+
+if (!isset($_SESSION['token'])) {
+    header('Location: ../../login.php');
+    exit;
+}
+
+$token   = $_SESSION['token'];
+$matchId = $_GET['id'] ?? null;
+$error   = '';
+$success = '';
+
+if (!$matchId) {
+    header('Location: /Vue/Afficher/afficher_match.php');
+    exit;
+}
+
+// Charger le match
+$matchResponse = routeClient::getMatchById((int)$matchId, $token);
+if ($matchResponse['status_code'] !== 200) {
+    $error = 'Match introuvable.';
+    $match = [];
+} else {
+    $match = $matchResponse['data'] ?? [];
+}
+
+// Charger les joueurs
+$joueursResponse = routeClient::getJoueurs($token);
+$joueurs         = $joueursResponse['data'] ?? [];
+
+// Charger la composition existante (si déjà saisie)
+$feuilleResponse = routeClient::getFeuilleDeMatch((int)$matchId, $token);
+$participations  = $feuilleResponse['data'] ?? [];
+
+// Transformer en tableau indexé par Id_Joueur pour faciliter l'affichage
+$composition = [];
+foreach ($participations as $p) {
+    $composition[$p['Id_Joueur']] = [
+        'Titulaire_ou_pas' => $p['Titulaire_ou_pas'],
+        'Poste'            => $p['Poste'],
+        'Note'             => $p['Note'],
+    ];
+}
+
+$postes = ['Gardien', 'Défenseur', 'Milieu', 'Attaquant'];
+$notes  = [];
+$commentaires = [];
+
+// Soumission du formulaire
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $titulaires  = [];
+    $remplacants = [];
+
+    foreach ($_POST['titulaires'] ?? [] as $joueurId) {
+        $titulaires[] = [
+            'id'    => (int)$joueurId,
+            'poste' => $_POST['poste_titulaires'][$joueurId] ?? '',
+            'note'  => $_POST['note'][$joueurId] ?? null,
+        ];
+    }
+
+    foreach ($_POST['remplacants'] ?? [] as $joueurId) {
+        $remplacants[] = [
+            'id'    => (int)$joueurId,
+            'poste' => $_POST['poste_remplacants'][$joueurId] ?? '',
+            'note'  => $_POST['note'][$joueurId] ?? null,
+        ];
+    }
+
+    $data = [
+        'matchId'     => (int)$matchId,
+        'titulaires'  => $titulaires,
+        'remplacants' => $remplacants,
+    ];
+
+    $response = routeClient::addFeuilleDeMatch($data, $token);
+
+    if ($response['status_code'] === 200 || $response['status_code'] === 201) {
+        $success = 'Feuille de match enregistrée avec succès !';
+    } else {
+        $error = $response['status_message'] ?? 'Erreur inconnue';
+    }
+}
+?>
 
 <!DOCTYPE html>
 <html lang="fr">

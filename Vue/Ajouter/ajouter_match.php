@@ -2,19 +2,18 @@
 session_start();
 require_once '../../routeClient.php';
 
-// Redirection si non connecté
 if (!isset($_SESSION['token'])) {
     header('Location: ../../login.php');
     exit;
 }
 
-$token = $_SESSION['token'];
-$id    = $_GET['id'] ?? null;
-$error = '';
-$success = [];
-$match = [];
+$token   = $_SESSION['token'];
+$id      = $_GET['id'] ?? null;
+$error   = '';
+$success = '';
+$match   = [];
 
-// Si modification, charger les données du match
+// Si modification — charger les données du match via l'API
 if ($id) {
     $response = routeClient::getMatchById((int)$id, $token);
     if ($response['status_code'] === 200) {
@@ -24,36 +23,46 @@ if ($id) {
     }
 }
 
-// Soumission du formulaire
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $resultat = '';
-    $scoreNous = $_POST['scoreNous'] ?? '';
-    $scoreAdverse = $_POST['scoreAdverse'] ?? '';
-    
-    // Générer le champ "Resultat" si les scores sont remplis
-    if ($scoreNous !== '' && $scoreAdverse !== '') {
-        $resultat = $scoreNous . '-' . $scoreAdverse;
+
+    // Conversion date jj/mm/aaaa → YYYY-MM-DD
+    $dateRaw = $_POST['dateRencontre'] ?? '';
+    $dateConverted = '';
+    if (!empty($dateRaw)) {
+        $d = DateTime::createFromFormat('d/m/Y', $dateRaw);
+        $dateConverted = $d ? $d->format('Y-m-d') : '';
     }
+
+    // Conversion heure HH:MM:SS → HH:MM
+    $heureRaw = $_POST['heure'] ?? '';
+    $heureConverted = substr($heureRaw, 0, 5); // garde seulement HH:MM
 
     $data = [
         'Nom_Equipe_Adverse' => $_POST['nomEquipeAdverse'] ?? '',
-        'Date_Rencontre'     => $_POST['dateRencontre'] ?? '',
-        'Heure'              => $_POST['heure'] ?? '',
-        'Lieu'               => $_POST['lieu'] ?? '',
-        'Resultat'           => $resultat
+        'Date_Rencontre'     => $dateConverted,
+        'Heure'              => $heureConverted,
+        'Lieu'               => $_POST['lieu']             ?? '',
+        'Resultat'           => $_POST['resultat']         ?? '',
+        'Score_Nous'         => $_POST['scoreNous']        !== '' ? (int)$_POST['scoreNous'] : 0,
+        'Score_Adversaire'   => $_POST['scoreAdverse']     !== '' ? (int)$_POST['scoreAdverse'] : 0,
     ];
 
-    if ($id) {
-        $response = routeClient::updateMatch((int)$id, $data, $token);
+    if (empty($dateConverted)) {
+        $error = 'Date invalide, format attendu : jj/mm/aaaa';
     } else {
-        $response = routeClient::addMatch($data, $token);
-    }
+        if ($id) {
+            $response = routeClient::updateMatch((int)$id, $data, $token);
+        } else {
+            $response = routeClient::addMatch($data, $token);
+        }
 
-    if (isset($response['status_code']) && ($response['status_code'] === 200 || $response['status_code'] === 201)) {
-        $success = $id ? 'Match modifié avec succès !' : 'Match ajouté avec succès !';
-        $match = $data; // pour garder les valeurs dans le formulaire
-    } else {
-        $error = $response['status_message'] ?? 'Erreur inconnue';
+        if ($response['status_code'] === 200 || $response['status_code'] === 201) {
+            $success = $id ? 'Match modifié avec succès !' : 'Match ajouté avec succès !';
+            $match   = $data;
+        } else {
+            $error = $response['status_message'] ?? 'Erreur inconnue';
+            $match = $data;
+        }
     }
 }
 ?>
@@ -160,16 +169,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     >
                 </div>
 
-                <div class="mb-3"> //On peut choisir que 'Victoire', 'Défaite' ou 'Nul' pour le résultat du match
+                <div class="mb-3">
                     <label for="resultat" class="form-label fw-bold">Résultat</label>
-                    <input 
-                        type="text" 
-                        class="form-control" 
-                        id="resultat" 
-                        name="resultat" 
-                        value="<?php echo htmlspecialchars($match['Resultat'] ?? ''); ?>"
-                        placeholder="Résultat du match"
-                    >
+                    <select class="form-control" id="resultat" name="resultat">
+                        <option value="">-- Sélectionner un résultat --</option>
+                        <option value="Victoire" <?php echo ($match['Resultat'] ?? '') === 'Victoire' ? 'selected' : ''; ?>>Victoire</option>
+                        <option value="Nul"      <?php echo ($match['Resultat'] ?? '') === 'Nul'      ? 'selected' : ''; ?>>Nul</option>
+                        <option value="Défaite"  <?php echo ($match['Resultat'] ?? '') === 'Défaite'  ? 'selected' : ''; ?>>Défaite</option>
+                    </select>
                 </div>
 
                 <div class="row">
