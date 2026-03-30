@@ -1,36 +1,46 @@
 <?php
-    session_start();
-    require_once 'routeClient.php';
+session_start();
 
-    $error = null;
+// Durée de la session : 1 heure
+$sessionDuration = 3600;
 
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+// Vérifier si la session a expiré
+if (isset($_SESSION['expire_at']) && time() > $_SESSION['expire_at']) {
+    session_destroy();
+    header('Location: login.php?expired=1');
+    exit;
+}
 
-        $login = $_POST['login'] ?? null;
-        $password = $_POST['password'] ?? null;
+require_once 'routeClient.php';
 
-        if ($login && $password) {
+$error = null;
 
-            $response = routeClient::login($login, $password);
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-            if ($response['status_code'] == 200 && !empty($response['data'])) {
+    $login    = $_POST['login']    ?? null;
+    $password = $_POST['password'] ?? null;
 
-                // Stocker le token dans la session
-                $_SESSION['token'] = $response['data']; // on récupère que le JWT ici
-                $_SESSION['login'] = $login;
+    if ($login && $password) {
 
-                // Redirection vers le dashboard après une connexion réussie
-                header("Location: index.php");
-                exit;
+        $response = routeClient::login($login, $password);
 
-            } else {
-                $error = "Identifiants incorrects";
-            }
+        if ($response['status_code'] == 200 && !empty($response['data'])) {
+
+            $_SESSION['token']     = $response['data'];
+            $_SESSION['login']     = $login;
+            $_SESSION['expire_at'] = time() + $sessionDuration; // 👈 ajouté
+
+            header("Location: index.php");
+            exit;
 
         } else {
-            $error = "Champs obligatoires";
+            $error = "Identifiants incorrects";
         }
+
+    } else {
+        $error = "Champs obligatoires";
     }
+}
 ?>
 
 <!DOCTYPE html>
@@ -53,6 +63,13 @@
             <h1>Gestion des Joueurs</h1>
             <p>Système de Gestion</p>
         </div>
+
+        <?php if (isset($_GET['expired'])): ?>
+            <div class="alert alert-warning">
+                <i class="bi bi-clock me-2"></i>
+                Votre session a expiré. Veuillez vous reconnecter.
+            </div>
+        <?php endif; ?>
 
         <?php if ($error): ?>
             <div class="alert alert-danger">
