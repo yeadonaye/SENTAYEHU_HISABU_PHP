@@ -144,7 +144,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         placeholder="Entrez le numéro de licence"
                     >
                 </div>
-
+                
+                <div class="mb-3">
+                    <label for="numLicence" class="form-label fw-bold">Numéro de Licence *</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        id="numLicence"
+                        name="numLicence"
+                        value="<?php echo htmlspecialchars($joueur['Num_Licence'] ?? ''); ?>"
+                        required
+                        maxlength="4"
+                        pattern="[A-Za-z0-9\-]{1,4}"
+                        title="Le numéro de licence doit contenir au maximum 4 caractères (lettres, chiffres ou tirets)"
+                        placeholder="Ex: A123"
+                    >
+                </div>
                 <div class="mb-3">
                     <label for="nom" class="form-label fw-bold">Nom *</label>
                     <input 
