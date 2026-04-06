@@ -1,39 +1,49 @@
 <?php
+// La logique de ce fichier est differente comparé aux autres, parce que nous n'avons une API destinée pour les commentaires, alors nous allons faire des appels directs aux DAOs qui ce trouve dans le backend.
 session_start();
-require_once '../../routeClient.php';
 
 if (!isset($_SESSION['token'])) {
     header('Location: ../../login.php');
     exit;
 }
 
-$token       = $_SESSION['token'];
-$joueurId    = $_GET['id'] ?? null;
-$error       = '';
-$success     = '';
-$commentaire = [];
+// Connexion directe à la BDD du backend
+try {
+    $pdo = new PDO(
+        'mysql:host=mysql-yeadonaye.alwaysdata.net;dbname=yeadonaye_bd_gestion_equipe;charset=utf8',
+        'yeadonaye',
+        'admin@gestionFoot'
+    );
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    die('Erreur de connexion : ' . $e->getMessage());
+}
 
-// Vérifier que l'id du joueur existe
+$joueurId = $_GET['id'] ?? null;
+$error    = '';
+
 if (!$joueurId) {
     header('Location: /Vue/Afficher/liste_joueurs.php');
     exit;
 }
 
-// Charger le joueur pour afficher son nom
-$responseJoueur = routeClient::getJoueurById((int)$joueurId, $token);
-$joueurData = [];
-if ($responseJoueur['status_code'] === 200) {
-    $joueurData = $responseJoueur['data'] ?? [];
+// Charger le joueur
+$stmt = $pdo->prepare("SELECT Nom, Prenom FROM Joueur WHERE Id_Joueur = ?");
+$stmt->execute([(int)$joueurId]);
+$joueurData = $stmt->fetch(PDO::FETCH_ASSOC);
+
+// --- Set default display date ---
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $displayDate = $_POST['date_commentaire'] ?? date('d/m/Y');
 } else {
-    $error = $responseJoueur['status_message'] ?? 'Impossible de charger le joueur';
+    $displayDate = date('d/m/Y'); // today for new comment
 }
 
 // Soumission du formulaire
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
-    $description = $_POST['description'] ?? '';
-    $dateInput   = trim($_POST['date_commentaire'] ?? '');
-    $dateForApi  = null; // On utilisera null si la date est vide
+    $description     = $_POST['description'] ?? '';
+    $dateInput       = trim($_POST['date_commentaire'] ?? '');
+    $dateForDb       = date('Y-m-d'); // default = today
 
     // Conversion jj/mm/aaaa → YYYY-MM-DD
     if (!empty($dateInput)) {
@@ -41,16 +51,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (count($parts) === 3) {
             [$jour, $mois, $annee] = $parts;
             if (checkdate((int)$mois, (int)$jour, (int)$annee)) {
-                $dateForApi = sprintf('%04d-%02d-%02d', $annee, $mois, $jour);
+                $dateForDb = sprintf('%04d-%02d-%02d', $annee, $mois, $jour);
             } else {
                 $error = 'Date invalide (format attendu : jj/mm/aaaa)';
             }
         } else {
             $error = 'Date invalide (format attendu : jj/mm/aaaa)';
         }
-    } else {
-        // Si vide, mettre aujourd'hui
-        $dateForApi = date('Y-m-d');
     }
 
     if (empty($description)) {
@@ -58,27 +65,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (!$error) {
-        $data = [
-            'Id_Joueur'        => (int)$joueurId,
-            'Description'      => $description,
-            'Date_Commentaire' => $dateForApi
-        ];
-
-        // Appel API via routeClient
-        $response = routeClient::addCommentaire($data, $token);
-
-        if ($response['status_code'] === 200 || $response['status_code'] === 201) {
-            $success = 'Commentaire ajouté avec succès !';
-            $commentaire = $data; // garder les valeurs affichées
-        } else {
-            $error = $response['status_message'] ?? 'Erreur inconnue';
-            $commentaire = $data;
+        try {
+            $stmt = $pdo->prepare("INSERT INTO Commentaire (Id_Joueur, Description, Date_Commentaire) VALUES (?, ?, ?)");
+            $stmt->execute([(int)$joueurId, $description, $dateForDb]);
+            header('Location: /Vue/Afficher/afficher_commentaires.php?id=' . $joueurId . '&success=added');
+            exit;
+        } catch (PDOException $e) {
+            $error = 'Erreur lors de l\'enregistrement : ' . $e->getMessage();
         }
     }
 }
-
-// Pour affichage du champ date en jj/mm/aaaa
-$displayDate = $_POST['date_commentaire'] ?? date('d/m/Y');
 ?>
 
 <!DOCTYPE html>
@@ -101,18 +97,15 @@ $displayDate = $_POST['date_commentaire'] ?? date('d/m/Y');
         <?php if ($error): ?>
             <div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div>
         <?php endif; ?>
-        <?php if ($success): ?>
-            <div class="alert alert-success"><?php echo htmlspecialchars($success); ?></div>
-        <?php endif; ?>
 
         <form method="POST" action="">
             <div class="mb-3">
                 <label class="form-label fw-bold" for="description">Commentaire *</label>
-                <textarea class="form-control" id="description" name="description" rows="4" required><?php echo htmlspecialchars($_POST['description'] ?? $commentaire['Description'] ?? ''); ?></textarea>
+                <textarea class="form-control" id="description" name="description" rows="4" required><?php echo htmlspecialchars($_POST['description'] ?? ''); ?></textarea>
             </div>
             <div class="mb-3">
                 <label class="form-label fw-bold" for="date_commentaire">Date du commentaire</label>
-                <input type="text" class="form-control" id="date_commentaire" name="date_commentaire" placeholder="jj/mm/aaaa" value="<?php echo htmlspecialchars($_POST['date_commentaire'] ?? $commentaire['Date_Commentaire'] ?? $displayDate); ?>">
+                <input type="text" class="form-control" id="date_commentaire" name="date_commentaire" placeholder="jj/mm/aaaa" value="<?php echo htmlspecialchars($displayDate); ?>">
             </div>
             <div class="d-flex gap-2">
                 <button type="submit" class="btn btn-success"><i class="bi bi-save me-2"></i>Enregistrer</button>
