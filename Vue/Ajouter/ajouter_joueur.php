@@ -7,6 +7,18 @@ if (!isset($_SESSION['token'])) {
     exit;
 }
 
+$token = $_SESSION['token'];
+
+// Vérification du token auprès de l'API d'auth
+$verify = routeClient::verifyToken($token);
+if ($verify['status_code'] === 401) {
+    session_destroy();
+    header('Location: ../../login.php');
+    exit;
+}
+
+$role = $verify['data']['role'] ?? $_SESSION['role'] ?? 'joueur';
+
 $token   = $_SESSION['token'];
 $id      = $_GET['id'] ?? null;
 $error   = '';
@@ -39,12 +51,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // ✅ Use converted date
+    // Use converted date
     $data = [
         'Num_Licence'    => $_POST['numLicence'] ?? '',
         'Nom'            => $_POST['nom'] ?? '',
         'Prenom'         => $_POST['prenom'] ?? '',
-        'Date_Naissance' => $dateNaissanceApi, // 🔥 FIX HERE
+        'Date_Naissance' => $dateNaissanceApi,
         'Taille'         => $_POST['taille'] ?? '',
         'Poids'          => $_POST['poids'] ?? '',
         'Statut'         => $_POST['statut'] ?? '',

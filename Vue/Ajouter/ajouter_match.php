@@ -7,6 +7,18 @@ if (!isset($_SESSION['token'])) {
     exit;
 }
 
+$token = $_SESSION['token'];
+
+// Vérification du token auprès de l'API d'auth
+$verify = routeClient::verifyToken($token);
+if ($verify['status_code'] === 401) {
+    session_destroy();
+    header('Location: ../../login.php');
+    exit;
+}
+
+$role = $verify['data']['role'] ?? $_SESSION['role'] ?? 'joueur';
+
 $token   = $_SESSION['token'];
 $id      = $_GET['id'] ?? null;
 $error   = '';
@@ -55,8 +67,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'Heure'              => $heureConverted,
         'Lieu'               => $_POST['lieu'] ?? '',
         'Resultat'           => $_POST['resultat'] ?? '',
-        'Score_Nous'         => $_POST['scoreNous'] !== '' ? (int)$_POST['scoreNous'] : 0,
-        'Score_Adversaire'   => $_POST['scoreAdverse'] !== '' ? (int)$_POST['scoreAdverse'] : 0,
+        'Score_Nous'         => isset($_POST['scoreNous']) && $_POST['scoreNous'] !== '' ? (int)$_POST['scoreNous'] : 0,
+        'Score_Adversaire'   => isset($_POST['scoreAdverse']) && $_POST['scoreAdverse'] !== '' ? (int)$_POST['scoreAdverse'] : 0,
     ];
 
     if (empty($dateConverted)) {
@@ -199,14 +211,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             class="form-control score-input" 
                             id="scoreNous" 
                             name="scoreNous" 
-                            value="<?php 
-                                $scoreNous = '';
-                                if (isset($match['Resultat']) && !empty($match['Resultat'])) {
-                                    $scores = explode('-', $match['Resultat']);
-                                    $scoreNous = $scores[0] ?? '';
-                                }
-                                echo htmlspecialchars($scoreNous);
-                            ?>"
+                            value="<?php echo htmlspecialchars($match['Score_Nous'] ?? ''); ?>"
                             min="0"
                             placeholder="0"
                         >
@@ -219,14 +224,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             class="form-control score-input" 
                             id="scoreAdverse" 
                             name="scoreAdverse" 
-                            value="<?php 
-                                $scoreAdverse = '';
-                                if (isset($match['Resultat']) && !empty($match['Resultat'])) {
-                                    $scores = explode('-', $match['Resultat']);
-                                    $scoreAdverse = $scores[1] ?? '';
-                                }
-                                echo htmlspecialchars($scoreAdverse);
-                            ?>"
+                            value="<?php echo htmlspecialchars($match['Score_Adversaire'] ?? ''); ?>"
                             min="0"
                             placeholder="0"
                         >

@@ -1,4 +1,4 @@
-<?php $role = $_SESSION['role'] ?? 'joueur'; ?> // En fonction du role de la personne connectée, on affiche ou pas les liens vers cetaines pages
+<?php $role = $_SESSION['role'] ?? 'joueur'; // En fonction du role de la personne connectée, on affiche ou pas les liens vers cetaines pages?>
 <ul class="navbar-nav ms-auto">
     <li class="nav-item">
         <a class="nav-link" href="/index.php"><i class="bi bi-house-door"></i> Accueil</a>

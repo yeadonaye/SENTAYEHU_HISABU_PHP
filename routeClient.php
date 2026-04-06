@@ -2,11 +2,12 @@
 
 class routeClient {
 
-    private const AUTH_URL          = 'https://apiliverpool.alwaysdata.net/authapi.php';
-    private const BACKEND_BASE_URL  = 'https://yeadonaye.alwaysdata.net/Routes/';
+    private const AUTH_URL         = 'https://apiliverpool.alwaysdata.net/authapi.php';
+    private const BACKEND_BASE_URL = 'https://yeadonaye.alwaysdata.net/Routes/';
 
+    // -----------------------------------------------------------------------
     // Méthode centrale cURL
-
+    // -----------------------------------------------------------------------
     public static function request(string $method, string $url, ?array $body = null, ?string $token = null): array {
         $headers = ['Content-Type: application/json'];
 
@@ -29,7 +30,7 @@ class routeClient {
         $response   = curl_exec($ch);
         $httpStatus = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $curlError  = curl_errno($ch) ? curl_error($ch) : null;
-        unset($ch); // ferme la session cURL (équivalent à curl_close())
+        unset($ch);
 
         if ($curlError) {
             return ['status_code' => 500, 'status_message' => $curlError, 'data' => null];
@@ -43,8 +44,11 @@ class routeClient {
         return $decoded;
     }
 
+    // -----------------------------------------------------------------------
     // AUTH
+    // -----------------------------------------------------------------------
 
+    /** Connexion : retourne le token JWT */
     public static function login(string $login, string $password): array {
         return self::request('POST', self::AUTH_URL, [
             'login'    => $login,
@@ -52,10 +56,22 @@ class routeClient {
         ]);
     }
 
-    // MATCHS
+    /**
+     * Vérifie la validité du token auprès de l'API d'authentification.
+     * C'est l'auth API qui détient la passphrase — le frontend ne valide jamais lui-même.
+     * Retourne ['status_code' => 200, 'data' => ['login' => ..., 'role' => ...]] si valide,
+     * ou ['status_code' => 401, ...] si invalide/expiré.
+     */
+    public static function verifyToken(string $token): array {
+        return self::request('GET', self::AUTH_URL, null, $token);
+    }
 
-    /** Liste tous les matchs */
-    public static function getMatchs(?string $token): array { // c'est possible que $token soit null car un visiteur non connexté peut voir la liste des matchs
+    // -----------------------------------------------------------------------
+    // MATCHS
+    // -----------------------------------------------------------------------
+
+    /** Liste tous les matchs (accessible sans token) */
+    public static function getMatchs(?string $token): array {
         return self::request('GET', self::BACKEND_BASE_URL . 'matchapi.php', null, $token);
     }
 
@@ -79,7 +95,9 @@ class routeClient {
         return self::request('DELETE', self::BACKEND_BASE_URL . 'matchapi.php?id=' . $id, null, $token);
     }
 
+    // -----------------------------------------------------------------------
     // JOUEURS
+    // -----------------------------------------------------------------------
 
     /** Liste tous les joueurs */
     public static function getJoueurs(string $token): array {
@@ -106,14 +124,16 @@ class routeClient {
         return self::request('DELETE', self::BACKEND_BASE_URL . 'joueurapi.php?id=' . $id, null, $token);
     }
 
+    // -----------------------------------------------------------------------
     // FEUILLE DE MATCH
+    // -----------------------------------------------------------------------
 
     /** Liste les participations d'un match */
     public static function getFeuilleDeMatch(int $idMatch, string $token): array {
         return self::request('GET', self::BACKEND_BASE_URL . 'feuilledematchapi.php?id=' . $idMatch, null, $token);
     }
 
-    /** Ajoute une participation (feuille de match) */
+    /** Ajoute une participation */
     public static function addFeuilleDeMatch(array $data, string $token): array {
         return self::request('POST', self::BACKEND_BASE_URL . 'feuilledematchapi.php', $data, $token);
     }
@@ -128,7 +148,9 @@ class routeClient {
         return self::request('DELETE', self::BACKEND_BASE_URL . 'feuilledematchapi.php?id=' . $id, null, $token);
     }
 
+    // -----------------------------------------------------------------------
     // STATISTIQUES
+    // -----------------------------------------------------------------------
 
     /** Récupère toutes les statistiques (matchs + joueurs) */
     public static function getStatistiques(string $token): array {

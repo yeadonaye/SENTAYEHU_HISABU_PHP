@@ -1,11 +1,23 @@
 <?php
-// La logique de ce fichier est differente comparé aux autres, parce que nous n'avons une API destinée pour les commentaires, alors nous allons faire des appels directs aux DAOs qui ce trouve dans le backend.
 session_start();
+require_once '../../routeClient.php';
 
 if (!isset($_SESSION['token'])) {
     header('Location: ../../login.php');
     exit;
 }
+
+$token = $_SESSION['token'];
+
+// Vérification du token auprès de l'API d'auth
+$verify = routeClient::verifyToken($token);
+if ($verify['status_code'] === 401) {
+    session_destroy();
+    header('Location: ../../login.php');
+    exit;
+}
+
+$role = $verify['data']['role'] ?? $_SESSION['role'] ?? 'joueur';
 
 // Connexion directe à la BDD du backend
 try {
