@@ -7,10 +7,10 @@ if (!isset($_SESSION['token'])) {
     exit;
 }
 
-$token      = $_SESSION['token'];
-$joueurId   = $_GET['id'] ?? null;
-$error      = '';
-$success    = '';
+$token       = $_SESSION['token'];
+$joueurId    = $_GET['id'] ?? null;
+$error       = '';
+$success     = '';
 $commentaire = [];
 
 // Vérifier que l'id du joueur existe
@@ -19,7 +19,7 @@ if (!$joueurId) {
     exit;
 }
 
-// Charger le joueur (pour afficher son nom)
+// Charger le joueur pour afficher son nom
 $responseJoueur = routeClient::getJoueurById((int)$joueurId, $token);
 $joueurData = [];
 if ($responseJoueur['status_code'] === 200) {
@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $description = $_POST['description'] ?? '';
     $dateInput   = trim($_POST['date_commentaire'] ?? '');
-    $dateForApi  = date('Y-m-d'); // valeur par défaut = aujourd'hui
+    $dateForApi  = null; // On utilisera null si la date est vide
 
     // Conversion jj/mm/aaaa → YYYY-MM-DD
     if (!empty($dateInput)) {
@@ -48,6 +48,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $error = 'Date invalide (format attendu : jj/mm/aaaa)';
         }
+    } else {
+        // Si vide, mettre aujourd'hui
+        $dateForApi = date('Y-m-d');
     }
 
     if (empty($description)) {
@@ -58,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $data = [
             'Id_Joueur'        => (int)$joueurId,
             'Description'      => $description,
-            'Date_Commentaire' => $dateForApi,
+            'Date_Commentaire' => $dateForApi
         ];
 
         // Appel API via routeClient
@@ -66,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($response['status_code'] === 200 || $response['status_code'] === 201) {
             $success = 'Commentaire ajouté avec succès !';
-            $commentaire = $data; // pour garder les valeurs affichées
+            $commentaire = $data; // garder les valeurs affichées
         } else {
             $error = $response['status_message'] ?? 'Erreur inconnue';
             $commentaire = $data;
@@ -98,15 +101,18 @@ $displayDate = $_POST['date_commentaire'] ?? date('d/m/Y');
         <?php if ($error): ?>
             <div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div>
         <?php endif; ?>
+        <?php if ($success): ?>
+            <div class="alert alert-success"><?php echo htmlspecialchars($success); ?></div>
+        <?php endif; ?>
 
         <form method="POST" action="">
             <div class="mb-3">
                 <label class="form-label fw-bold" for="description">Commentaire *</label>
-                <textarea class="form-control" id="description" name="description" rows="4" required><?php echo htmlspecialchars($_POST['description'] ?? ''); ?></textarea>
+                <textarea class="form-control" id="description" name="description" rows="4" required><?php echo htmlspecialchars($_POST['description'] ?? $commentaire['Description'] ?? ''); ?></textarea>
             </div>
             <div class="mb-3">
                 <label class="form-label fw-bold" for="date_commentaire">Date du commentaire</label>
-                <input type="text" class="form-control" id="date_commentaire" name="date_commentaire" placeholder="jj/mm/aaaa" value="<?php echo htmlspecialchars($_POST['date_commentaire'] ?? ''); ?>">
+                <input type="text" class="form-control" id="date_commentaire" name="date_commentaire" placeholder="jj/mm/aaaa" value="<?php echo htmlspecialchars($_POST['date_commentaire'] ?? $commentaire['Date_Commentaire'] ?? $displayDate); ?>">
             </div>
             <div class="d-flex gap-2">
                 <button type="submit" class="btn btn-success"><i class="bi bi-save me-2"></i>Enregistrer</button>
