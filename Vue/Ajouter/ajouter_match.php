@@ -18,6 +18,13 @@ if ($id) {
     $response = routeClient::getMatchById((int)$id, $token);
     if ($response['status_code'] === 200) {
         $match = $response['data'] ?? [];
+        // Formater la date pour le champ input jj/mm/aaaa
+        if (!empty($match['Date_Rencontre']) && $match['Date_Rencontre'] !== '0000-00-00') {
+            $d = DateTime::createFromFormat('Y-m-d', substr($match['Date_Rencontre'],0,10));
+            $match['Date_Rencontre'] = $d ? $d->format('d/m/Y') : '';
+        } else {
+            $match['Date_Rencontre'] = '';
+        }
     } else {
         $error = $response['status_message'] ?? 'Erreur lors du chargement du match';
     }
@@ -25,12 +32,17 @@ if ($id) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    // Conversion date jj/mm/aaaa → YYYY-MM-DD
-    $dateRaw = $_POST['dateRencontre'] ?? '';
+    $dateInput = $_POST['dateRencontre'] ?? '';
     $dateConverted = '';
-    if (!empty($dateRaw)) {
-        $d = DateTime::createFromFormat('d/m/Y', $dateRaw);
-        $dateConverted = $d ? $d->format('Y-m-d') : '';
+
+    // Conversion date jj/mm/aaaa → YYYY-MM-DD pour l'API
+    if (!empty($dateInput)) {
+        $dt = DateTime::createFromFormat('d/m/Y', $dateInput);
+        if ($dt) {
+            $dateConverted = $dt->format('Y-m-d');
+        } else {
+            $error = 'Date invalide, format attendu : jj/mm/aaaa';
+        }
     }
 
     // Conversion heure HH:MM:SS → HH:MM
@@ -41,14 +53,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'Nom_Equipe_Adverse' => $_POST['nomEquipeAdverse'] ?? '',
         'Date_Rencontre'     => $dateConverted,
         'Heure'              => $heureConverted,
-        'Lieu'               => $_POST['lieu']             ?? '',
-        'Resultat'           => $_POST['resultat']         ?? '',
-        'Score_Nous'         => $_POST['scoreNous']        !== '' ? (int)$_POST['scoreNous'] : 0,
-        'Score_Adversaire'   => $_POST['scoreAdverse']     !== '' ? (int)$_POST['scoreAdverse'] : 0,
+        'Lieu'               => $_POST['lieu'] ?? '',
+        'Resultat'           => $_POST['resultat'] ?? '',
+        'Score_Nous'         => $_POST['scoreNous'] !== '' ? (int)$_POST['scoreNous'] : 0,
+        'Score_Adversaire'   => $_POST['scoreAdverse'] !== '' ? (int)$_POST['scoreAdverse'] : 0,
     ];
 
     if (empty($dateConverted)) {
-        $error = 'Date invalide, format attendu : jj/mm/aaaa';
+        $error = $error ?: 'Date invalide, format attendu : jj/mm/aaaa';
     } else {
         if ($id) {
             $response = routeClient::updateMatch((int)$id, $data, $token);
@@ -58,7 +70,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($response['status_code'] === 200 || $response['status_code'] === 201) {
             $success = $id ? 'Match modifié avec succès !' : 'Match ajouté avec succès !';
-            $match   = $data;
+            // Pour garder la date affichée en jj/mm/aaaa dans le formulaire
+            $match = $data;
+            $d = DateTime::createFromFormat('Y-m-d', $data['Date_Rencontre']);
+            $match['Date_Rencontre'] = $d ? $d->format('d/m/Y') : '';
         } else {
             $error = $response['status_message'] ?? 'Erreur inconnue';
             $match = $data;
