@@ -67,8 +67,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'Heure'              => $heureConverted,
         'Lieu'               => $_POST['lieu'] ?? '',
         'Resultat'           => $_POST['resultat'] ?? '',
-        'Score_Nous'         => isset($_POST['scoreNous']) && $_POST['scoreNous'] !== '' ? (int)$_POST['scoreNous'] : 0,
-        'Score_Adversaire'   => isset($_POST['scoreAdverse']) && $_POST['scoreAdverse'] !== '' ? (int)$_POST['scoreAdverse'] : 0,
+        'Score_Nous'         => isset($_POST['scoreNous']) && $_POST['scoreNous'] !== '' ? (int)$_POST['scoreNous'] : null,
+        'Score_Adversaire'   => isset($_POST['scoreAdverse']) && $_POST['scoreAdverse'] !== '' ? (int)$_POST['scoreAdverse'] : null,
     ];
 
     if (empty($dateConverted)) {
