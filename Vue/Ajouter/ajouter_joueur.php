@@ -130,21 +130,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
                 */
                 ?>
-                
-
-                <div class="mb-3">
-                    <label for="numLicence" class="form-label fw-bold">Numéro de Licence *</label>
-                    <input
-                        type="text"
-                        class="form-control"
-                        id="numLicence"
-                        name="numLicence"
-                        value="<?php echo htmlspecialchars($joueur['Num_Licence'] ?? ''); ?>"
-                        required
-                        placeholder="Entrez le numéro de licence"
-                    >
-                </div>
-                
+                                
                 <div class="mb-3">
                     <label for="numLicence" class="form-label fw-bold">Numéro de Licence *</label>
                     <input
