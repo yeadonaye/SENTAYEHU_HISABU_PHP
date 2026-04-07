@@ -1,9 +1,17 @@
 <?php
 session_start();
-require_once 'routeClient.php';
-
 if (!isset($_SESSION['token'])) {
     header('Location: login.php');
+    exit;
+}
+
+$token = $_SESSION['token'];
+$role  = $_SESSION['role'] ?? 'joueur';
+
+$verify = routeClient::verifyToken($token);
+if ($verify['status_code'] === 401) {
+    session_destroy();
+    header('Location: login.php?expired=1');
     exit;
 }
 
