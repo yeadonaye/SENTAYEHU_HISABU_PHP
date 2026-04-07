@@ -251,66 +251,75 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <?php include '../Afficher/footer.php'; ?>
     <script>
-        function parseDateFr(value) {
-            const parts = value.split('/');
-            if (parts.length !== 3) return null;
-            const [jour, mois, annee] = parts.map(Number);
-            if (!jour || !mois || !annee) return null;
-            // Date object months are 0-based
-            const d = new Date(annee, mois - 1, jour);
-            // Validate components to avoid 32/13/etc.
-            if (d.getFullYear() !== annee || d.getMonth() !== mois - 1 || d.getDate() !== jour) return null;
-            return d;
+    // Parse French date format dd/mm/yyyy
+    function parseDateFr(value) {
+        const parts = value.split('/');
+        if (parts.length !== 3) return null;
+        const [jour, mois, annee] = parts.map(Number);
+        if (!jour || !mois || !annee) return null;
+
+        const d = new Date(annee, mois - 1, jour); // months are 0-based
+        if (d.getFullYear() !== annee || d.getMonth() !== mois - 1 || d.getDate() !== jour) return null;
+
+        return d;
+    }
+
+    // Check the match date and enable/disable score/result inputs
+    function checkMatchDate() {
+        const dateInput = document.getElementById('dateRencontre').value;
+        const heureInput = document.getElementById('heure').value;
+        const parsedDate = parseDateFr(dateInput);
+        const scoreNous = document.getElementById('scoreNous');
+        const scoreAdverse = document.getElementById('scoreAdverse');
+        const resultat = document.getElementById('resultat');
+
+        // Disable if date or time not set
+        if (!parsedDate || !heureInput) {
+            scoreNous.disabled = true;
+            scoreAdverse.disabled = true;
+            resultat.disabled = true;
+            return;
         }
 
-        function checkMatchDate() {
-            const dateInput = document.getElementById('dateRencontre').value;
-            const heureInput = document.getElementById('heure').value;           
-            const parsedDate = parseDateFr(dateInput);
-            const scoreNous = document.getElementById('scoreNous');
-            const scoreAdverse = document.getElementById('scoreAdverse');
-            const resultat = document.getElementById('resultat');
-
-            if (!parsedDate || !heureInput) {
-                scoreNous.disabled = true;
-                scoreAdverse.disabled = true;
-                resultat.disabled = true;
-                return;
-            }
-
-            if (Number.isNaN(h) || Number.isNaN(m)) {
-                scoreNous.disabled = true;
-                scoreAdverse.disabled = true;
-                resultat.disabled = true;
-                return;
-            }
-            parsedDate.setHours(h, m, 0, 0);
-            const now = new Date();
-
-            if (parsedDate > now) {
-                scoreNous.disabled = true;
-                scoreAdverse.disabled = true;
-                resultat.disabled = true;
-                scoreNous.title = 'Disponible uniquement après le match';
-                scoreAdverse.title = 'Disponible uniquement après le match';
-                resultat.title = 'Disponible uniquement après le match';
-            } else {
-                scoreNous.disabled = false;
-                scoreAdverse.disabled = false;
-                resultat.disabled = false;
-                scoreNous.title = '';
-                scoreAdverse.title = '';
-                resultat.title = '';
-            }
+        // Split heureInput "HH:MM" into hours and minutes
+        const [h, m] = heureInput.split(':').map(Number);
+        if (Number.isNaN(h) || Number.isNaN(m)) {
+            scoreNous.disabled = true;
+            scoreAdverse.disabled = true;
+            resultat.disabled = true;
+            return;
         }
-        
-        // Vérifier la date au chargement et au changement
-        window.addEventListener('load', () => {
-            checkMatchDate();
-            
-            document.getElementById('dateRencontre').addEventListener('change', checkMatchDate);
-            document.getElementById('heure').addEventListener('change', checkMatchDate);
-        });
-    </script>
+
+        parsedDate.setHours(h, m, 0, 0); // set the correct match time
+
+        const now = new Date();
+
+        if (parsedDate > now) {
+            // Future match – disable fields
+            scoreNous.disabled = true;
+            scoreAdverse.disabled = true;
+            resultat.disabled = true;
+            scoreNous.title = 'Disponible uniquement après le match';
+            scoreAdverse.title = 'Disponible uniquement après le match';
+            resultat.title = 'Disponible uniquement après le match';
+        } else {
+            // Past or ongoing match – enable fields
+            scoreNous.disabled = false;
+            scoreAdverse.disabled = false;
+            resultat.disabled = false;
+            scoreNous.title = '';
+            scoreAdverse.title = '';
+            resultat.title = '';
+        }
+    }
+
+    // Run on page load and when inputs change
+    window.addEventListener('load', () => {
+        checkMatchDate();
+
+        document.getElementById('dateRencontre').addEventListener('change', checkMatchDate);
+        document.getElementById('heure').addEventListener('change', checkMatchDate);
+    });
+</script>
 </body>
 </html>
