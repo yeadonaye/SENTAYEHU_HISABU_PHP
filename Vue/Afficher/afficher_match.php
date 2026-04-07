@@ -14,6 +14,29 @@ $matchs   = $response['data'] ?? [];
 
 // Enregistre un message d'erreur si le status_code n'est pas 200
 $error    = ($response['status_code'] !== 200) ? ($response['status_message'] ?? 'Erreur inconnue') : '';
+
+// --- CHANGEMENT NECESSAIRE : charger les compositions pour chaque match ---
+$compositions = [];
+foreach ($matchs as $match) {
+    $feuilleResponse = routeClient::getFeuilleDeMatch((int)$match['Id_Match'], $token);
+    $participations  = $feuilleResponse['data'] ?? [];
+
+    $titulairesCount  = 0;
+    $remplacantsCount = 0;
+
+    foreach ($participations as $p) {
+        if (!empty($p['Titulaire_ou_pas'])) {
+            $titulairesCount++;
+        } else {
+            $remplacantsCount++;
+        }
+    }
+
+    $compositions[$match['Id_Match']] = [
+        'titulaires'  => $titulairesCount,
+        'remplacants' => $remplacantsCount,
+    ];
+}
 ?>
 
 <!DOCTYPE html>
