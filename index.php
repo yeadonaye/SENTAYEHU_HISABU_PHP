@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once 'routeClient.php';
 if (!isset($_SESSION['token'])) {
     header('Location: login.php');
     exit;
