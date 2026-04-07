@@ -305,7 +305,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         // Vérifier la date au chargement et au changement
-        document.addEventListener('DOMContentLoaded', () => {
+        window.addEventListener('load', () => {
             checkMatchDate();
             
             document.getElementById('dateRencontre').addEventListener('change', checkMatchDate);
