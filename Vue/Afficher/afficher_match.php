@@ -2,10 +2,17 @@
 session_start();
 require_once '../../routeClient.php';
 
-$token = $_SESSION['token'] ?? null; // null si on n'est pas connecté
+// Récupère le token de session si l'utilisateur est connecté, sinon null
+$token = $_SESSION['token'] ?? null;
 
-$response = routeClient::getMatchs($token); // token peut etre null car un visiteur non connecté peut voir la liste des matchs
+// Appel à l'API pour récupérer la liste des matchs
+// Même un visiteur non connecté (token null) peut accéder à cette liste
+$response = routeClient::getMatchs($token);
+
+// Stocke les matchs ou un tableau vide si l'API ne renvoie rien
 $matchs   = $response['data'] ?? [];
+
+// Enregistre un message d'erreur si le status_code n'est pas 200
 $error    = ($response['status_code'] !== 200) ? ($response['status_message'] ?? 'Erreur inconnue') : '';
 ?>
 

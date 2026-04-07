@@ -2,6 +2,7 @@
 session_start();
 require_once '../../routeClient.php';
 
+// Redirection si utilisateur non connecté
 if (!isset($_SESSION['token'])) {
     header('Location: ../../login.php');
     exit;
@@ -9,17 +10,19 @@ if (!isset($_SESSION['token'])) {
 
 $token = $_SESSION['token'];
 
-// Vérification du token auprès de l'API d'auth
+// Vérification du token auprès de l'API d'authentification
 $verify = routeClient::verifyToken($token);
 if ($verify['status_code'] === 401) {
+    // Token invalide : destruction de session et redirection
     session_destroy();
     header('Location: ../../login.php');
     exit;
 }
 
+// Détermination du rôle de l'utilisateur
 $role = $verify['data']['role'] ?? $_SESSION['role'] ?? 'joueur';
 
-// Connexion directe à la BDD du backend
+// Connexion à la base de données avec gestion d'erreurs
 try {
     $pdo = new PDO(
         'mysql:host=mysql-yeadonaye.alwaysdata.net;dbname=yeadonaye_bd_gestion_equipe;charset=utf8',
@@ -31,33 +34,35 @@ try {
     die('Erreur de connexion : ' . $e->getMessage());
 }
 
+// Récupération de l'ID du joueur depuis l'URL
 $joueurId = $_GET['id'] ?? null;
 $error    = '';
 
+// Redirection si aucun ID fourni
 if (!$joueurId) {
     header('Location: /Vue/Afficher/liste_joueurs.php');
     exit;
 }
 
-// Charger le joueur
+// Chargement des informations du joueur pour affichage
 $stmt = $pdo->prepare("SELECT Nom, Prenom FROM Joueur WHERE Id_Joueur = ?");
 $stmt->execute([(int)$joueurId]);
 $joueurData = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// --- Set default display date ---
+// --- Gestion de la date par défaut pour l'affichage du formulaire ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $displayDate = $_POST['date_commentaire'] ?? date('d/m/Y');
 } else {
-    $displayDate = date('d/m/Y'); // today for new comment
+    $displayDate = date('d/m/Y'); // Aujourd'hui si nouveau commentaire
 }
 
-// Soumission du formulaire
+// --- Soumission du formulaire et validation ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $description     = $_POST['description'] ?? '';
-    $dateInput       = trim($_POST['date_commentaire'] ?? '');
-    $dateForDb       = date('Y-m-d'); // default = today
+    $description = $_POST['description'] ?? '';
+    $dateInput   = trim($_POST['date_commentaire'] ?? '');
+    $dateForDb   = date('Y-m-d'); // valeur par défaut : aujourd'hui
 
-    // Conversion jj/mm/aaaa → YYYY-MM-DD
+    // Conversion de la date format jj/mm/aaaa → YYYY-MM-DD pour la BDD
     if (!empty($dateInput)) {
         $parts = explode('/', $dateInput);
         if (count($parts) === 3) {
@@ -72,14 +77,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    // Validation du champ description
     if (empty($description)) {
         $error = $error ?: 'Le commentaire est obligatoire.';
     }
 
+    // Insertion en base si aucune erreur
     if (!$error) {
         try {
             $stmt = $pdo->prepare("INSERT INTO Commentaire (Id_Joueur, Description, Date_Commentaire) VALUES (?, ?, ?)");
             $stmt->execute([(int)$joueurId, $description, $dateForDb]);
+            // Redirection vers la page des commentaires avec message de succès
             header('Location: /Vue/Afficher/afficher_commentaires.php?id=' . $joueurId . '&success=added');
             exit;
         } catch (PDOException $e) {

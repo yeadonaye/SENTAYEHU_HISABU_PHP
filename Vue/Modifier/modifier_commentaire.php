@@ -2,6 +2,7 @@
 session_start();
 require_once '../../routeClient.php';
 
+// Redirection si utilisateur non connecté
 if (!isset($_SESSION['token'])) {
     header('Location: ../../login.php');
     exit;
@@ -9,7 +10,7 @@ if (!isset($_SESSION['token'])) {
 
 $token = $_SESSION['token'];
 
-// Vérification du token auprès de l'API d'auth
+// Vérification du token via l'API
 $verify = routeClient::verifyToken($token);
 if ($verify['status_code'] === 401) {
     session_destroy();
@@ -17,9 +18,10 @@ if ($verify['status_code'] === 401) {
     exit;
 }
 
+// Détermination du rôle utilisateur (API > session > joueur par défaut)
 $role = $verify['data']['role'] ?? $_SESSION['role'] ?? 'joueur';
 
-// Connexion directe à la BDD directe, car pas d'API pour les commentaires
+// --- Connexion directe à la BDD pour gérer les commentaires ---
 try {
     $pdo = new PDO(
         'mysql:host=mysql-yeadonaye.alwaysdata.net;dbname=yeadonaye_bd_gestion_equipe;charset=utf8',
@@ -34,12 +36,13 @@ try {
 $id    = $_GET['id'] ?? null;
 $error = '';
 
+// Redirection si aucun commentaire sélectionné
 if (!$id) {
     header('Location: /Vue/Afficher/liste_joueurs.php');
     exit;
 }
 
-// Charger le commentaire
+// --- Chargement du commentaire existant ---
 $stmt = $pdo->prepare("SELECT * FROM Commentaire WHERE Id_Commentaire = ?");
 $stmt->execute([(int)$id]);
 $comment = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -48,7 +51,7 @@ if (!$comment) {
     $error = 'Commentaire introuvable.';
 }
 
-// Pré-remplir la date pour affichage
+// Pré-remplissage de la date pour affichage dans le formulaire
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $displayDate = $_POST['date_commentaire'] ?? '';
 } else {
@@ -57,13 +60,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $displayDate = $dt ? $dt->format('d/m/Y') : date('d/m/Y');
 }
 
-// Soumission du formulaire
+// --- Soumission du formulaire de modification ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $comment) {
     $description = $_POST['description'] ?? '';
     $dateInput   = trim($_POST['date_commentaire'] ?? '');
-    $dateForDb   = substr($comment['Date_Commentaire'], 0, 10); // default = existing DB value
+    $dateForDb   = substr($comment['Date_Commentaire'], 0, 10); // valeur par défaut = date existante
 
-    // Conversion jj/mm/aaaa → YYYY-MM-DD
+    // Conversion de la date jj/mm/aaaa → YYYY-MM-DD
     if (!empty($dateInput)) {
         $parts = explode('/', $dateInput);
         if (count($parts) === 3) {
@@ -78,10 +81,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $comment) {
         }
     }
 
+    // Vérification que le commentaire n'est pas vide
     if (empty($description)) {
         $error = $error ?: 'Le commentaire est obligatoire.';
     }
 
+    // --- Mise à jour du commentaire dans la BDD si aucune erreur ---
     if (!$error) {
         try {
             $stmt = $pdo->prepare("UPDATE Commentaire SET Description = ?, Date_Commentaire = ? WHERE Id_Commentaire = ?");

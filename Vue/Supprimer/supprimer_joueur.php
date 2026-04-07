@@ -2,6 +2,7 @@
 session_start();
 require_once '../../routeClient.php';
 
+// Redirection si utilisateur non connecté
 if (!isset($_SESSION['token'])) {
     header('Location: ../../login.php');
     exit;
@@ -9,7 +10,7 @@ if (!isset($_SESSION['token'])) {
 
 $token = $_SESSION['token'];
 
-// Vérification du token auprès de l'API d'auth
+// Vérification du token via l'API
 $verify = routeClient::verifyToken($token);
 if ($verify['status_code'] === 401) {
     session_destroy();
@@ -17,13 +18,18 @@ if ($verify['status_code'] === 401) {
     exit;
 }
 
+// Détermination du rôle utilisateur (API > session > joueur par défaut)
 $role = $verify['data']['role'] ?? $_SESSION['role'] ?? 'joueur';
 
+// Récupération de l'ID du joueur à supprimer
 $id = (int)($_GET['id'] ?? 0);
+
+// Suppression du joueur via l'API si ID valide
 if ($id) {
     routeClient::deleteJoueur($id, $_SESSION['token']);
 }
 
+// Redirection vers la liste des joueurs après suppression
 header('Location: ../Afficher/liste_joueurs.php');
 exit;
 ?>

@@ -2,6 +2,7 @@
 session_start();
 require_once '../../routeClient.php';
 
+// Redirection vers login si l'utilisateur n'est pas connecté
 if (!isset($_SESSION['token'])) {
     header('Location: ../../login.php');
     exit;
@@ -9,35 +10,38 @@ if (!isset($_SESSION['token'])) {
 
 $token = $_SESSION['token'];
 
-// Vérification du token auprès de l'API d'auth
+// Vérifie la validité du token via l'API
 $verify = routeClient::verifyToken($token);
 if ($verify['status_code'] === 401) {
+    // Token invalide : destruction de session et redirection
     session_destroy();
     header('Location: ../../login.php');
     exit;
 }
 
+// Détermine le rôle de l'utilisateur : API > session > par défaut 'joueur'
 $role = $verify['data']['role'] ?? $_SESSION['role'] ?? 'joueur';
 
 $token = $_SESSION['token'];
 
+// Récupération des statistiques et informations des joueurs depuis l'API
 $response = routeClient::getStatistiques($token);
 
-// Extraction directe depuis Postman structure
+// Extraction des données en respectant la structure renvoyée par l'API
 $stats   = $response['stats'] ?? [];
 $players = $response['players'] ?? [];
 $error   = $response['error'] ?? ($response['status_message'] ?? 'Erreur inconnue');
 
-// Assign variables for easier display
-$totalJoueurs       = $stats['totalJoueurs'] ?? 0;
-$totalMatchs        = $stats['totalMatchs'] ?? 0;
-$victoires          = $stats['victoires'] ?? 0;
-$defaites           = $stats['defaites'] ?? 0;
-$nuls               = $stats['nuls'] ?? 0;
-$totalButs          = $stats['totalButs'] ?? 0;
-$butsEncaisses      = $stats['butsEncaisses'] ?? 0;
-$tauxVictoire       = $stats['tauxVictoire'] ?? 0;
-$differenceButsDisplay = $stats['differenceButs'] ?? '0'; 
+// Assignation des variables pour un affichage plus simple dans la vue
+$totalJoueurs           = $stats['totalJoueurs'] ?? 0;
+$totalMatchs            = $stats['totalMatchs'] ?? 0;
+$victoires              = $stats['victoires'] ?? 0;
+$defaites               = $stats['defaites'] ?? 0;
+$nuls                   = $stats['nuls'] ?? 0;
+$totalButs              = $stats['totalButs'] ?? 0;
+$butsEncaisses          = $stats['butsEncaisses'] ?? 0;
+$tauxVictoire           = $stats['tauxVictoire'] ?? 0;
+$differenceButsDisplay  = $stats['differenceButs'] ?? '0'; // Affichage de la différence de buts
 ?>
 
 <!DOCTYPE html>

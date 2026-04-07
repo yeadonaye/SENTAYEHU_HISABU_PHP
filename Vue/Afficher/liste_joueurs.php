@@ -2,6 +2,7 @@
 session_start();
 require_once '../../routeClient.php';
 
+// Redirection vers la page de login si l'utilisateur n'est pas connecté
 if (!isset($_SESSION['token'])) {
     header('Location: ../../login.php');
     exit;
@@ -9,22 +10,26 @@ if (!isset($_SESSION['token'])) {
 
 $token = $_SESSION['token'];
 
-// Vérification du token auprès de l'API d'auth
+// Vérification du token auprès de l'API pour s'assurer qu'il est valide
 $verify = routeClient::verifyToken($token);
 if ($verify['status_code'] === 401) {
+    // Si le token est invalide, destruction de la session et redirection vers login
     session_destroy();
     header('Location: ../../login.php');
     exit;
 }
 
+// Détermination du rôle de l'utilisateur : priorise la donnée renvoyée par l'API, sinon celle en session, sinon 'joueur'
 $role = $verify['data']['role'] ?? $_SESSION['role'] ?? 'joueur';
 
 $token = $_SESSION['token'];
 
+// Récupération de la liste des joueurs via l'API
 $response = routeClient::getJoueurs($token);
-$joueurs  = $response['data'] ?? [];
-$error    = ($response['status_code'] !== 200) ? ($response['status_message'] ?? 'Erreur inconnue') : '';
+$joueurs  = $response['data'] ?? []; // Tableau de joueurs ou vide si aucun
+$error    = ($response['status_code'] !== 200) ? ($response['status_message'] ?? 'Erreur inconnue') : ''; // Message d'erreur si la requête a échoué
 ?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>

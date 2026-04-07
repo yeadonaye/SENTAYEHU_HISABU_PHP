@@ -2,6 +2,7 @@
 session_start();
 require_once '../../routeClient.php';
 
+// Redirection si utilisateur non connecté
 if (!isset($_SESSION['token'])) {
     header('Location: ../../login.php');
     exit;
@@ -9,7 +10,7 @@ if (!isset($_SESSION['token'])) {
 
 $token = $_SESSION['token'];
 
-// Vérification du token auprès de l'API d'auth
+// Vérification du token auprès de l'API
 $verify = routeClient::verifyToken($token);
 if ($verify['status_code'] === 401) {
     session_destroy();
@@ -17,20 +18,20 @@ if ($verify['status_code'] === 401) {
     exit;
 }
 
-$role = $verify['data']['role'] ?? $_SESSION['role'] ?? 'joueur';
-
+// Détermination du rôle utilisateur (API > session > joueur par défaut)
+$role    = $verify['data']['role'] ?? $_SESSION['role'] ?? 'joueur';
 $token   = $_SESSION['token'];
 $id      = $_GET['id'] ?? null;
 $error   = '';
 $success = '';
 $match   = [];
 
-// Si modification — charger les données du match via l'API
+// --- Chargement des données du match si modification ---
 if ($id) {
     $response = routeClient::getMatchById((int)$id, $token);
     if ($response['status_code'] === 200) {
         $match = $response['data'] ?? [];
-        // Formater la date pour le champ input jj/mm/aaaa
+        // Formatage de la date pour l'affichage du champ input (jj/mm/aaaa)
         if (!empty($match['Date_Rencontre']) && $match['Date_Rencontre'] !== '0000-00-00') {
             $d = DateTime::createFromFormat('Y-m-d', substr($match['Date_Rencontre'],0,10));
             $match['Date_Rencontre'] = $d ? $d->format('d/m/Y') : '';
@@ -42,12 +43,13 @@ if ($id) {
     }
 }
 
+// --- Soumission du formulaire ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    $dateInput = $_POST['dateRencontre'] ?? '';
+    $dateInput     = $_POST['dateRencontre'] ?? '';
     $dateConverted = '';
 
-    // Conversion date jj/mm/aaaa → YYYY-MM-DD pour l'API
+    // Conversion de la date jj/mm/aaaa → YYYY-MM-DD pour l'API
     if (!empty($dateInput)) {
         $dt = DateTime::createFromFormat('d/m/Y', $dateInput);
         if ($dt) {
@@ -57,14 +59,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Conversion heure HH:MM:SS → HH:MM
-    $heureRaw = $_POST['heure'] ?? '';
-    $heureConverted = substr($heureRaw, 0, 5); // garde seulement HH:MM
+    // Conversion de l'heure HH:MM:SS → HH:MM
+    $heureRaw       = $_POST['heure'] ?? '';
+    $heureConverted = substr($heureRaw, 0, 5);
 
-    // Vérifier si le match est dans le futur côté serveur aussi
+    // Vérification si le match est dans le futur pour ne pas accepter de score/résultat
     $matchDateTime = new DateTime($dateConverted . ' ' . $heureConverted);
-    $isFutur = $matchDateTime > new DateTime();
+    $isFutur       = $matchDateTime > new DateTime();
 
+    // Préparation des données à envoyer à l'API
     $data = [
         'Nom_Equipe_Adverse' => $_POST['nomEquipeAdverse'] ?? '',
         'Date_Rencontre'     => $dateConverted,
@@ -75,18 +78,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'Score_Adversaire'   => $isFutur ? 0 : (isset($_POST['scoreAdverse']) && $_POST['scoreAdverse'] !== '' ? (int)$_POST['scoreAdverse'] : 0),
     ];
 
+    // Vérification de la date avant appel API
     if (empty($dateConverted)) {
         $error = $error ?: 'Date invalide, format attendu : jj/mm/aaaa';
     } else {
+        // Appel API : update si ID existe, sinon ajout
         if ($id) {
             $response = routeClient::updateMatch((int)$id, $data, $token);
         } else {
             $response = routeClient::addMatch($data, $token);
         }
 
+        // Gestion du retour API
         if ($response['status_code'] === 200 || $response['status_code'] === 201) {
             $success = $id ? 'Match modifié avec succès !' : 'Match ajouté avec succès !';
-            // Pour garder la date affichée en jj/mm/aaaa dans le formulaire
+            // Conserver les valeurs saisies pour affichage dans le formulaire
             $match = $data;
             $d = DateTime::createFromFormat('Y-m-d', $data['Date_Rencontre']);
             $match['Date_Rencontre'] = $d ? $d->format('d/m/Y') : '';

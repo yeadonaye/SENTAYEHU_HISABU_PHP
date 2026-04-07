@@ -2,6 +2,7 @@
 session_start();
 require_once '../../routeClient.php';
 
+// Redirection si utilisateur non connecté
 if (!isset($_SESSION['token'])) {
     header('Location: ../../login.php');
     exit;
@@ -9,7 +10,7 @@ if (!isset($_SESSION['token'])) {
 
 $token = $_SESSION['token'];
 
-// Vérification du token auprès de l'API d'auth
+// Vérification du token via l'API
 $verify = routeClient::verifyToken($token);
 if ($verify['status_code'] === 401) {
     session_destroy();
@@ -17,19 +18,20 @@ if ($verify['status_code'] === 401) {
     exit;
 }
 
-$role = $verify['data']['role'] ?? $_SESSION['role'] ?? 'joueur';
-
+// Détermination du rôle utilisateur (API > session > joueur par défaut)
+$role    = $verify['data']['role'] ?? $_SESSION['role'] ?? 'joueur';
 $token   = $_SESSION['token'];
 $matchId = $_GET['id'] ?? null;
 $error   = '';
 $success = '';
 
+// Redirection si aucun match sélectionné
 if (!$matchId) {
     header('Location: /Vue/Afficher/afficher_match.php');
     exit;
 }
 
-// Charger le match
+// --- Chargement des données du match ---
 $matchResponse = routeClient::getMatchById((int)$matchId, $token);
 if ($matchResponse['status_code'] !== 200) {
     $error = 'Match introuvable.';
@@ -38,15 +40,15 @@ if ($matchResponse['status_code'] !== 200) {
     $match = $matchResponse['data'] ?? [];
 }
 
-// Charger les joueurs
+// --- Chargement de tous les joueurs ---
 $joueursResponse = routeClient::getJoueurs($token);
 $joueurs         = $joueursResponse['data'] ?? [];
 
-// Charger la composition existante (si déjà saisie)
+// --- Chargement de la composition existante si elle existe ---
 $feuilleResponse = routeClient::getFeuilleDeMatch((int)$matchId, $token);
 $participations  = $feuilleResponse['data'] ?? [];
 
-// Transformer en tableau indexé par Id_Joueur pour faciliter l'affichage
+// Transformation en tableau indexé par Id_Joueur pour un accès plus simple
 $composition = [];
 foreach ($participations as $p) {
     $composition[$p['Id_Joueur']] = [
@@ -56,15 +58,17 @@ foreach ($participations as $p) {
     ];
 }
 
-$postes = ['Gardien', 'Défenseur', 'Milieu', 'Attaquant'];
-$notes  = [];
+// Définition des postes possibles et initialisation des notes/commentaires
+$postes       = ['Gardien', 'Défenseur', 'Milieu', 'Attaquant'];
+$notes        = [];
 $commentaires = [];
 
-// Soumission du formulaire
+// --- Soumission du formulaire pour enregistrer la feuille de match ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $titulaires  = [];
     $remplacants = [];
 
+    // Préparation des titulaires avec poste et note
     foreach ($_POST['titulaires'] ?? [] as $joueurId) {
         $titulaires[] = [
             'id'    => (int)$joueurId,
@@ -73,6 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ];
     }
 
+    // Préparation des remplaçants avec poste et note
     foreach ($_POST['remplacants'] ?? [] as $joueurId) {
         $remplacants[] = [
             'id'    => (int)$joueurId,
@@ -81,14 +86,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ];
     }
 
+    // Construction des données à envoyer à l'API
     $data = [
         'matchId'     => (int)$matchId,
         'titulaires'  => $titulaires,
         'remplacants' => $remplacants,
     ];
 
+    // Envoi à l'API pour ajout ou mise à jour de la feuille de match
     $response = routeClient::addFeuilleDeMatch($data, $token);
 
+    // Gestion du retour API : succès ou erreur
     if ($response['status_code'] === 200 || $response['status_code'] === 201) {
         $success = 'Feuille de match enregistrée avec succès !';
     } else {

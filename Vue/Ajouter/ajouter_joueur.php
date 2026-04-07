@@ -2,6 +2,7 @@
 session_start();
 require_once '../../routeClient.php';
 
+// Redirection si l'utilisateur n'est pas connecté
 if (!isset($_SESSION['token'])) {
     header('Location: ../../login.php');
     exit;
@@ -9,36 +10,38 @@ if (!isset($_SESSION['token'])) {
 
 $token = $_SESSION['token'];
 
-// Vérification du token auprès de l'API d'auth
+// Vérification du token auprès de l'API pour s'assurer qu'il est valide
 $verify = routeClient::verifyToken($token);
 if ($verify['status_code'] === 401) {
+    // Token invalide : destruction de session et redirection
     session_destroy();
     header('Location: ../../login.php');
     exit;
 }
 
-$role = $verify['data']['role'] ?? $_SESSION['role'] ?? 'joueur';
+// Détermination du rôle de l'utilisateur (API > session > 'joueur' par défaut)
+$role   = $verify['data']['role'] ?? $_SESSION['role'] ?? 'joueur';
+$token  = $_SESSION['token'];
+$id     = $_GET['id'] ?? null;
+$error  = '';
+$success= '';
+$joueur = [];
+$statuts= ['Actif', 'Blessé', 'Suspendu', 'Absent'];
 
-$token   = $_SESSION['token'];
-$id      = $_GET['id'] ?? null;
-$error   = '';
-$success = '';
-$joueur  = [];
-$statuts = ['Actif', 'Blessé', 'Suspendu', 'Absent'];
-
-// Si modification, charger les données du joueur
+// Si modification d'un joueur existant, récupération des données via l'API
 if ($id) {
     $response = routeClient::getJoueurById((int)$id, $token);
     $joueur   = $response['data'] ?? [];
     $error    = ($response['status_code'] !== 200) ? ($response['status_message'] ?? 'Erreur') : '';
 }
 
-// Soumission du formulaire
+// --- Gestion de la soumission du formulaire ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
-    $dateInput = $_POST['dateNaissance'] ?? '';
-    $dateNaissanceApi = null;
+    $dateInput       = $_POST['dateNaissance'] ?? '';
+    $dateNaissanceApi= null;
 
+    // Conversion de la date jj/mm/aaaa → YYYY-MM-DD pour l'API
     if (!empty($dateInput)) {
         $parts = explode('/', $dateInput);
 
@@ -51,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Use converted date
+    // Préparation des données à envoyer à l'API
     $data = [
         'Num_Licence'    => $_POST['numLicence'] ?? '',
         'Nom'            => $_POST['nom'] ?? '',
@@ -62,15 +65,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'Statut'         => $_POST['statut'] ?? '',
     ];
 
+    // Appel à l'API : update si ID existe, sinon ajout
     if ($id) {
         $response = routeClient::updateJoueur((int)$id, $data, $token);
     } else {
         $response = routeClient::addJoueur($data, $token);
     }
 
+    // Gestion du retour de l'API
     if ($response['status_code'] === 200 || $response['status_code'] === 201) {
         $success = $id ? 'Joueur modifié avec succès !' : 'Joueur ajouté avec succès !';
-        $joueur  = $data; // garder les valeurs affichées
+        $joueur  = $data; // garder les valeurs saisies pour affichage
     } else {
         $error = $response['status_message'] ?? 'Erreur inconnue';
     }

@@ -2,6 +2,7 @@
 session_start();
 require_once '../../routeClient.php';
 
+// Redirige vers la page de login si l'utilisateur n'est pas connecté
 if (!isset($_SESSION['token'])) {
     header('Location: ../../login.php');
     exit;
@@ -13,39 +14,42 @@ $token = $_SESSION['token'];
 $verify = routeClient::verifyToken($token);
 if ($verify['status_code'] === 401) {
     session_destroy();
-    header('Location: ../../login.php');
+    header('Location: ../../login.php'); // Redirige si le token est expiré ou invalide
     exit;
 }
 
+// Récupération du rôle : priorité au token, sinon session, sinon 'joueur'
 $role = $verify['data']['role'] ?? $_SESSION['role'] ?? 'joueur';
 
-// Connexion directe à la BDD
+// Connexion directe à la base de données avec gestion des erreurs
 try {
     $pdo = new PDO(
         'mysql:host=mysql-yeadonaye.alwaysdata.net;dbname=yeadonaye_bd_gestion_equipe;charset=utf8',
         'yeadonaye',
         'admin@gestionFoot'
     );
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); // Active le mode exception pour PDO
 } catch (PDOException $e) {
     die('Erreur de connexion : ' . $e->getMessage());
 }
 
+// Récupération de l'ID du joueur passé en GET
 $joueurId = $_GET['id'] ?? null;
 $error    = '';
 $success  = isset($_GET['success']) ? 'Commentaire ajouté avec succès !' : '';
 
+// Redirection si aucun joueur n'est spécifié
 if (!$joueurId) {
     header('Location: /Vue/Afficher/liste_joueurs.php');
     exit;
 }
 
-// Charger le joueur
+// Charger les informations du joueur depuis la table Joueur
 $stmt = $pdo->prepare("SELECT Nom, Prenom FROM Joueur WHERE Id_Joueur = ?");
 $stmt->execute([(int)$joueurId]);
 $joueurData = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// Charger les commentaires
+// Charger tous les commentaires associés à ce joueur, triés par date décroissante
 $stmt = $pdo->prepare("SELECT * FROM Commentaire WHERE Id_Joueur = ? ORDER BY Date_Commentaire DESC");
 $stmt->execute([(int)$joueurId]);
 $commentaires = $stmt->fetchAll(PDO::FETCH_ASSOC);

@@ -2,47 +2,50 @@
 session_start();
 require_once 'routeClient.php';
 
+// Redirige vers la page de login si l'utilisateur n'est pas connecté
 if (!isset($_SESSION['token'])) {
     header('Location: login.php');
     exit;
 }
 
+// Récupère le token et le rôle stockés en session
 $token = $_SESSION['token'];
 $role  = $_SESSION['role'] ?? 'joueur';
 
+// Vérifie que le token est encore valide via routeClient
 $verify = routeClient::verifyToken($token);
 if ($verify['status_code'] === 401) {
     session_destroy();
-    header('Location: login.php?expired=1');
+    header('Location: login.php?expired=1'); // Redirige si token expiré
     exit;
 }
 
-$token = $_SESSION['token'];
-$role  = $_SESSION['role'] ?? 'joueur'; // stocke le rôle au login si ce n'est pas déjà fait
-
-// Stats — disponibles pour coach ET joueur (après fix backend) pour la partie bonuss
+// Récupération des statistiques globales via l'API backend
 $response = routeClient::getStatistiques($token);
 $stats    = (isset($response['stats'])   && is_array($response['stats']))   ? $response['stats']   : [];
 $players  = (isset($response['players']) && is_array($response['players'])) ? $response['players'] : [];
 
+// Calcul du nombre total de joueurs et des blessés
 $playerCount  = $stats['totalJoueurs'] ?? 0;
 $injuredCount = 0;
 foreach ($players as $p) {
-    if (stripos($p['Statut'] ?? '', 'bles') !== false) $injuredCount++;
+    if (stripos($p['Statut'] ?? '', 'bles') !== false) $injuredCount++; // Compte les joueurs dont le statut contient "bles"
 }
 $wins         = $stats['victoires']  ?? 0;
 $totalMatches = $stats['totalMatchs'] ?? 0;
 
-// Matchs — public après fix backend
+// Récupération des matchs via l'API backend
 $matchResponse = routeClient::getMatchs($token);
 $matchs        = (isset($matchResponse['data']) && is_array($matchResponse['data'])) ? $matchResponse['data'] : [];
+
+// Détermination du prochain match : date future la plus proche
 $nextMatch     = null;
 $now           = new DateTime();
 foreach ($matchs as $m) {
     $matchDate = new DateTime($m['Date_Rencontre'] . ' ' . ($m['Heure'] ?? '00:00:00'));
     if ($matchDate > $now) {
         if (!$nextMatch || $matchDate < new DateTime($nextMatch['Date_Rencontre'])) {
-            $nextMatch = $m;
+            $nextMatch = $m; // Stocke le match futur le plus proche
         }
     }
 }
