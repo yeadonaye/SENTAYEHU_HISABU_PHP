@@ -130,22 +130,22 @@ class routeClient {
 
     /** Liste les participations d'un match */
     public static function getFeuilleDeMatch(int $idMatch, string $token): array {
-        return self::request('GET', self::BACKEND_BASE_URL . 'feuilledematchapi.php?id=' . $idMatch, null, $token);
+        return self::request('GET', self::BACKEND_BASE_URL . 'feuilleDeMatchApi.php?matchId=' . $idMatch, null, $token);
     }
 
     /** Ajoute une participation */
     public static function addFeuilleDeMatch(array $data, string $token): array {
-        return self::request('POST', self::BACKEND_BASE_URL . 'feuilledematchapi.php', $data, $token);
+        return self::request('POST', self::BACKEND_BASE_URL . 'feuilleDeMatchApi.php', $data, $token);
     }
 
     /** Met à jour une participation */
     public static function updateFeuilleDeMatch(int $id, array $data, string $token): array {
-        return self::request('PUT', self::BACKEND_BASE_URL . 'feuilledematchapi.php?id=' . $id, $data, $token);
+        return self::request('PUT', self::BACKEND_BASE_URL . 'feuilleDeMatchApi.php?matchId=' . $id, $data, $token);
     }
 
     /** Supprime une participation */
     public static function deleteFeuilleDeMatch(int $id, string $token): array {
-        return self::request('DELETE', self::BACKEND_BASE_URL . 'feuilledematchapi.php?id=' . $id, null, $token);
+        return self::request('DELETE', self::BACKEND_BASE_URL . 'feuilleDeMatchApi.php?matchId=' . $id, null, $token);
     }
 
     // -----------------------------------------------------------------------
