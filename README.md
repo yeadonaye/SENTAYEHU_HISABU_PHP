@@ -1,3 +1,7 @@
+Got it — here is the corrected version with **no coach/player roles** and the **only valid login updated**.
+
+---
+
 # ⚽ Liverpool FC Manager – Frontend
 
 ---
@@ -51,20 +55,18 @@ Développé dans le cadre d’un projet universitaire :
 ## 🔐 AUTHENTIFICATION (JWT)
 
 * Connexion sécurisée via JWT
-* Gestion des rôles :
-
-  * 👨‍🏫 Coach → accès complet (CRUD)
-  * 👤 Joueur → accès lecture seule
+* Authentification simple (aucun rôle utilisateur)
 * Validation des sessions via API
+* Accès aux fonctionnalités selon la validité du token
 
 ---
 
 ## 👥 GESTION DES JOUEURS
 
 * Liste des joueurs
-* Ajout de joueurs (coach uniquement)
+* Ajout de joueurs
 * Modification des informations
-* Suppression des joueurs
+* Suppression de joueurs
 
 📌 Données des joueurs :
 
@@ -78,9 +80,9 @@ Développé dans le cadre d’un projet universitaire :
 ## ⚽ GESTION DES MATCHS
 
 * Voir tous les matchs
-* Créer des matchs (coach uniquement)
+* Créer des matchs
 * Modifier les résultats
-* Supprimer les matchs
+* Supprimer des matchs
 
 📌 Détails d’un match :
 
@@ -189,15 +191,10 @@ Authorization: Bearer <JWT_TOKEN>
 
 ## 🧪 COMPTES DE TEST
 
-### Coach (accès complet)
+### 🔐 Compte admin
 
-* login: coach1
-* password: Liverpool2025
-
-### Joueur (lecture seule)
-
-* login: joueur1
-* password: Liverpool2025
+* login: admin
+* password: $iutinfo
 
 ---
 
@@ -208,14 +205,14 @@ Ce dépôt gère :
 * Interface utilisateur
 * Communication API
 * Stockage du token JWT
-* Affichage basé sur les rôles
-* Visualisation des données
+* Affichage des données
+* Visualisation des statistiques
 
 Il ne fait pas :
 
 * Stockage de base de données
 * Logique métier
-* Vérification d’authentification (backend only)
+* Vérification d’authentification côté client (backend only)
 
 ---
 
@@ -227,8 +224,8 @@ POST /authapi.php
 Content-Type: application/json
 
 {
-"login": "coach1",
-"password": "Liverpool2025"
+"login": "admin",
+"password": "$iutinfo"
 }
 
 ---
